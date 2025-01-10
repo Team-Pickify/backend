@@ -30,6 +30,12 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String nickname;
 
+    @Column(nullable = false)
+    private Provider provider;
+
+    @Column(nullable = false)
+    private Long providerId;
+
     @Column(name = "profile_image")
     private String profileImage;
 
