@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -49,7 +50,7 @@ public class Place extends BaseTimeEntity {
     @OneToMany(mappedBy = "place")
     private List<PlaceCategory> placeCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "place")
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
