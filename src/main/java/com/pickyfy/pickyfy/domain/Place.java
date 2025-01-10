@@ -28,6 +28,9 @@ public class Place extends BaseTimeEntity {
     private String shortDescription;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     private String address;
 
     @Column(name = "instagram_link")
@@ -55,9 +58,10 @@ public class Place extends BaseTimeEntity {
     private List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
-    public Place(String shortDescription, String address, String instagramLink,
+    public Place(String shortDescription,String name, String address, String instagramLink,
                  String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
         this.shortDescription = shortDescription;
+        this.name = name;
         this.address = address;
         this.instagramLink = instagramLink;
         this.naverplaceLink = naverplaceLink;
