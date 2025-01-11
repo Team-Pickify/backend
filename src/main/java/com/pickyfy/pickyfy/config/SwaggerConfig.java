@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
     @Bean
-    public OpenAPI PickifyAPI()  {
+    public OpenAPI pickifyAPI()  {
         Info info = new Info()
                 .title("Pickify Server API")
                 .description("Pickify Server API 명세서")
@@ -36,5 +36,4 @@ public class SwaggerConfig {
                 .addSecurityItem(securityRequirement)
                 .components(components);
     }
-
 }
