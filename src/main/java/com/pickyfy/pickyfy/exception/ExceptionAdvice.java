@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-
+//
 @Slf4j
 @RestControllerAdvice(annotations = {RestController.class})
 public class ExceptionAdvice extends ResponseEntityExceptionHandler {
@@ -94,19 +94,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
     }
 
-    @ExceptionHandler(value = GeneralException.class)
-    public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
-        ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
-        return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
-    }
+//    @ExceptionHandler(value = GeneralException.class)
+//    public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
+//        ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+//        return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
+//    }
 
     private ResponseEntity<Object> handleExceptionInternal(Exception e, ErrorReasonDTO reason,
                                                            HttpHeaders headers, HttpServletRequest request) {
 
         ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(),reason.getMessage(),null);
-        logger.error(e);
-
         WebRequest webRequest = new ServletWebRequest(request);
+
         return super.handleExceptionInternal(
                 e,
                 body,

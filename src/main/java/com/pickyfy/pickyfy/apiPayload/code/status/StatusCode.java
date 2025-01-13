@@ -1,5 +1,5 @@
 package com.pickyfy.pickyfy.apiPayload.code.status;
-
+//
 public enum StatusCode {
 
     COMMON("COMMON"),
