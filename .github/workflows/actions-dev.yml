@@ -1,0 +1,104 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ dev ]  # main 브랜치에 push가 일어날 때 실행
+  pull_request:
+    branches: [ dev ]  # main 브랜치로 PR 생성 시 실행
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3  # 저장소 코드 체크아웃
+        with:
+          fetch-depth: 0  # 전체 Git 기록을 가져옴
+
+      - name: Set up JDK 21  # Java 개발 킷 설정
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      # gradle caching - 빌드 시간 향상
+      - name: Gradle Caching
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make application.yml  # application.yml 파일 생성
+        run: |
+          mkdir ./src/main/resources
+          cd ./src/main/resources
+          echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
+        shell: bash
+
+      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.EC2_HOST }}:${{ secrets.EC2_DB_PORT }}/${{ secrets.EC2_DATABASE }}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_HOST_NAME }}
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
+
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pickify-spring
+          path: build/libs/*.jar
+
+  deploy:
+    needs: build  # build 작업이 성공적으로 완료된 후 실행
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # 전체 Git 기록 가져오기
+
+      - name: Check for merge commit  # Merge commit 확인
+        id: check-merge
+        run: |
+          if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
+            echo "Not a merge commit. Skipping deployment."
+            echo "skip-deployment=true" >> $GITHUB_ENV
+          else
+            echo "skip-deployment=false" >> $GITHUB_ENV
+          fi
+
+      - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
+        uses: actions/download-artifact@v3
+        with:
+          name: pickify-spring
+          path: build/libs/
+
+      - name: Deploy to EC2  # EC2에 배포
+        if: env.skip-deployment != 'true'  # skip-deployment가 false일 때만 실행
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          echo "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/pickify-spring.jar
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
+            sleep 10
+            nohup java -jar /home/$EC2_USERNAME/pickify-spring.jar > app.log 2>&1 &  # 새 버전 애플리케이션 실행
+          "
+          rm -f private_key.pem  # 민감한 정보 삭제
