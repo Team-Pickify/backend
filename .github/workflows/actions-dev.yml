@@ -46,11 +46,13 @@ jobs:
         with:
           arguments: build
         env:
-          SPRING_DATASOURCE_URL: ${{ secrets.EC2_DB_HOST }}
-          SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_HOST_NAME }}
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_HOST_NAME: ${{ secrets.DB_HOST_NAME }}
+          DB_HOST_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
+
+
 
 
       - name: Upload build artifact
