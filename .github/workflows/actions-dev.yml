@@ -46,7 +46,7 @@ jobs:
         with:
           arguments: build
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.EC2_HOST }}:${{ secrets.EC2_DB_PORT }}/${{ secrets.EC2_DATABASE }}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+          SPRING_DATASOURCE_URL: jdbc:mysql://${{ secrets.EC2_DB_HOST }}:${{ secrets.EC2_DB_PORT }}/${{ secrets.EC2_DATABASE }}?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
           SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_HOST_NAME }}
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
