@@ -41,12 +41,6 @@ jobs:
       - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
         run: chmod +x gradlew
 
-      - name: Setup SSH Tunnel
-        run: |
-          echo "$EC2_SSH_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          ssh -i private_key.pem -o StrictHostKeyChecking=no -f -N -L ${{ secrets.EC2_DB_PORT }}:${{ secrets.EC2_DB_HOST }}:${{ secrets.EC2_DB_PORT }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}
-
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:

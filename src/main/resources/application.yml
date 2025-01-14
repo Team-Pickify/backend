@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local, dev #로컬 환경
+    active: local #로컬 환경
   sql:
     init:
       mode: never
