@@ -54,13 +54,13 @@ public enum ErrorStatus implements BaseErrorCode {
                 .build();
     }
 
-    @Override
-    public ErrorReasonDTO getReasonHttpStatus(){
-        return ErrorReasonDTO.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .build();
-    }
+//    @Override
+//    public ErrorReasonDTO getReasonHttpStatus(){
+//        return ErrorReasonDTO.builder()
+//                .message(message)
+//                .code(code)
+//                .isSuccess(false)
+//                .httpStatus(httpStatus)
+//                .build();
+//    }
 }
