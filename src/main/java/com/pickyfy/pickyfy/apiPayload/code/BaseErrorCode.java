@@ -1,9 +1,8 @@
 package com.pickyfy.pickyfy.apiPayload.code;
 
-import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorReasonDTO;
+import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorResponseDTO;
 
-//
 public interface BaseErrorCode {
-    ErrorReasonDTO getReason();
-    ErrorReasonDTO getReasonHttpStatus();
+    ErrorResponseDTO getReason();
+    ErrorResponseDTO getReasonHttpStatus();
 }
