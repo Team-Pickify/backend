@@ -41,7 +41,6 @@ jobs:
       - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여 및 테스트 빌드 시행 X
         run: |
           chmod +x gradlew
-          ./gradlew build -x test
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
