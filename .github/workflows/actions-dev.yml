@@ -38,8 +38,9 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
-      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
-        run: chmod +x gradlew
+      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여 및 테스트 빌드 시행 X
+        run: |
+          chmod +x gradlew
 
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
@@ -67,15 +68,15 @@ jobs:
         with:
           fetch-depth: 0  # 전체 Git 기록 가져오기
 
-      - name: Check for merge commit  # Merge commit 확인
-        id: check-merge
-        run: |
-          if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
-            echo "Not a merge commit. Skipping deployment."
-            echo "skip-deployment=true" >> $GITHUB_ENV
-          else
-            echo "skip-deployment=false" >> $GITHUB_ENV
-          fi
+#      - name: Check for merge commit  # Merge commit 확인
+#        id: check-merge
+#        run: |
+#          if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
+#            echo "Not a merge commit. Skipping deployment."
+#            echo "skip-deployment=true" >> $GITHUB_ENV
+#          else
+#            echo "skip-deployment=false" >> $GITHUB_ENV
+#          fi
 
       - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
         uses: actions/download-artifact@v3
