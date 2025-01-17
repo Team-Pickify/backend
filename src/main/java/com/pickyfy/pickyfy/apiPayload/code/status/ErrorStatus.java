@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.apiPayload.code.status;
 
 import com.pickyfy.pickyfy.apiPayload.code.BaseErrorCode;
-import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorReasonDTO;
+import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -46,8 +46,8 @@ public enum ErrorStatus implements BaseErrorCode {
     private final String message;
 
     @Override
-    public ErrorReasonDTO getReason() {
-        return ErrorReasonDTO.builder()
+    public ErrorResponseDTO getReason() {
+        return ErrorResponseDTO.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(false)
@@ -55,8 +55,8 @@ public enum ErrorStatus implements BaseErrorCode {
     }
 
     @Override
-    public ErrorReasonDTO getReasonHttpStatus(){
-        return ErrorReasonDTO.builder()
+    public ErrorResponseDTO getReasonHttpStatus(){
+        return ErrorResponseDTO.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(false)

@@ -1,8 +1,8 @@
 package com.pickyfy.pickyfy.apiPayload.code;
 
-import com.pickyfy.pickyfy.apiPayload.code.dto.ReasonDTO;
+import com.pickyfy.pickyfy.apiPayload.code.dto.ResponseDTO;
 
 public interface BaseCode {
-    ReasonDTO getReason();
-    ReasonDTO getReasonHttpStatus();
+    ResponseDTO getReason();
+    ResponseDTO getReasonHttpStatus();
 }

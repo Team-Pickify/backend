@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.exception;
 
 import com.pickyfy.pickyfy.apiPayload.code.BaseErrorCode;
-import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorReasonDTO;
+import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -11,11 +11,11 @@ public class GeneralException extends RuntimeException {
 
     private BaseErrorCode code;
 
-    public ErrorReasonDTO getErrorReason(){
+    public ErrorResponseDTO getErrorReason(){
         return this.code.getReason();
     }
 
-    public ErrorReasonDTO getErrorReasonHttpStatus(){
-        return this.code.getReasonHttpStatus();
+    public ErrorResponseDTO getErrorReasonHttpStatus(){
+        return this.code.getReason();
     }
 }
