@@ -1,6 +1,9 @@
 spring:
-  profiles:
-    active: local, dev #로컬 + ec2 내부 dev 환경
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_HOST_NAME}
+    password: ${DB_HOST_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: never
