@@ -26,9 +26,6 @@ public class Category extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String icon;
-
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlaceCategory> placeCategories = new ArrayList<>();
 
@@ -50,8 +47,7 @@ public class Category extends BaseTimeEntity {
  */
 
     @Builder
-    public Category(String name, String icon) {
+    public Category(String name) {
         this.name = name;
-        this.icon = icon;
     }
 }

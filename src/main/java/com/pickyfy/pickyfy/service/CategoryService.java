@@ -21,7 +21,6 @@ public class CategoryService {
 
         Category category = Category.builder()
                 .name(categoryCreateRequest.getName())
-                .icon(categoryCreateRequest.getIcon())
                 .build();
 
         return categoryRepository.save(category).getId();
