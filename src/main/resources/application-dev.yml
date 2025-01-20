@@ -1,12 +1,20 @@
 spring:
+
   datasource:
     url: ${DB_URL}
     username: ${DB_HOST_NAME}
     password: ${DB_HOST_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
   sql:
     init:
       mode: never
+
   jpa:
     properties:
       hibernate:
@@ -26,3 +34,10 @@ logging:
 jwt:
   secret: ${JWT_SECRET}
   expiration_time: ${JWT_EXPIRATION_TIME}
+
+mail:
+  smtp:
+    host: ${MAIL_STMP_HOST}
+    port: ${MAIL_STMP_PORT}
+    username: ${MAIL_STMP_USERNAME}
+    password: ${MAIL_STMP_PASSWORD}
