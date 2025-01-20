@@ -2,8 +2,8 @@ package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
-import com.pickyfy.pickyfy.dto.request.EmailVerificationRequest;
-import com.pickyfy.pickyfy.dto.response.EmailVerificationResponse;
+import com.pickyfy.pickyfy.dto.request.EmailVerificationSendRequest;
+import com.pickyfy.pickyfy.dto.response.EmailVerificationSendResponse;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-public class MailServiceImpl implements MailService {
+public class EmailServiceImpl implements EmailService {
 
     private static final String ENCODING = "utf-8";
     private static final String EMAIL_TITLE = "[Pickyfy] 인증코드";
@@ -34,14 +34,14 @@ public class MailServiceImpl implements MailService {
 
     @Transactional
     @Override
-    public EmailVerificationResponse sendVerificationCode(EmailVerificationRequest request) {
+    public EmailVerificationSendResponse sendVerificationCode(EmailVerificationSendRequest request) {
         String email = request.email();
         validateEmailDuplicated(email);
 
         String code = generateVerificationCode();
         sendVerificationEmail(code, email);
 
-        return EmailVerificationResponse.of(email, code);
+        return EmailVerificationSendResponse.of(email, code);
     }
 
     private void validateEmailDuplicated(String email) {
