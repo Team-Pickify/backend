@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.auth.util;
+package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
 import io.jsonwebtoken.*;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Slf4j
@@ -37,14 +36,14 @@ public class JwtUtil {
     private String createToken(CustomUserInfoDto customUserInfoDto, long expireTime) {
 
         String email = customUserInfoDto.getEmail();
+        Date now = new Date();
 
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+        Date tokenValidity = new Date(now.getTime() + expireTime * 1000);
 
         return Jwts.builder()
                 .claim(EMAIL, email)
-                .issuedAt(Date.from(now.toInstant()))
-                .expiration(Date.from(tokenValidity.toInstant()))
+                .issuedAt(now)
+                .expiration(tokenValidity)
                 .signWith(key)
                 .compact();
     }
