@@ -4,6 +4,7 @@ import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,32 +16,47 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
+    @Getter
+    private enum Role{
+        EMAIL("EmailToken"),
+        ACCESS("AccessToken");
+
+        private final String role;
+
+        Role(String role) {
+            this.role = role;
+        }
+    }
+
     private static final String EMAIL = "email";
+    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 300L;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3600L;
 
     private final Key key;
-    private final long accessTokenExpTime;
 
     public JwtUtil(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration_time}") long accessTokenExpTime
+            @Value("${jwt.secret}") String secretKey
     ) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenExpTime = accessTokenExpTime;
     }
 
     public String createAccessToken(CustomUserInfoDto customUserInfoDto) {
-        return createToken(customUserInfoDto, accessTokenExpTime);
+        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Role.ACCESS.getRole());
     }
 
-    private String createToken(CustomUserInfoDto customUserInfoDto, long expireTime) {
+    public String createEmailToken(String email) {
+        return createToken(email, EMAIL_TOKEN_EXPIRATION_TIME, Role.EMAIL.getRole());
+    }
 
-        String email = customUserInfoDto.getEmail();
+    private String createToken(String email, long expireTime, String role) {
+
         Date now = new Date();
 
         Date tokenValidity = new Date(now.getTime() + expireTime * 1000);
 
         return Jwts.builder()
+                .claim("role", role)
                 .claim(EMAIL, email)
                 .issuedAt(now)
                 .expiration(tokenValidity)

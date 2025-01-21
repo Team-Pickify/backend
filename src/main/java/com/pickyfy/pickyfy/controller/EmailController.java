@@ -2,7 +2,9 @@ package com.pickyfy.pickyfy.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.dto.request.EmailVerificationSendRequest;
+import com.pickyfy.pickyfy.dto.request.EmailVerificationVerifyRequest;
 import com.pickyfy.pickyfy.dto.response.EmailVerificationSendResponse;
+import com.pickyfy.pickyfy.dto.response.EmailVerificationVerifyResponse;
 import com.pickyfy.pickyfy.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +26,13 @@ public class EmailController implements EmailControllerApi {
     ){
         EmailVerificationSendResponse emailVerificationSendResponse = emailService.sendVerificationCode(emailVerificationSendRequest);
         return ApiResponse.onSuccess(emailVerificationSendResponse);
+    }
+
+    @PostMapping("/verification/verify")
+    public ApiResponse<EmailVerificationVerifyResponse> verifyVerificationCode(
+            @Valid @RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest
+    ){
+        EmailVerificationVerifyResponse emailVerificationVerifyResponse = emailService.verifyVerificationCode(emailVerificationVerifyRequest);
+        return ApiResponse.onSuccess(emailVerificationVerifyResponse);
     }
 }

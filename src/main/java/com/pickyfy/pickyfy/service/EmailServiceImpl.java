@@ -1,9 +1,12 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.dto.request.EmailVerificationSendRequest;
+import com.pickyfy.pickyfy.dto.request.EmailVerificationVerifyRequest;
 import com.pickyfy.pickyfy.dto.response.EmailVerificationSendResponse;
+import com.pickyfy.pickyfy.dto.response.EmailVerificationVerifyResponse;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -31,6 +34,7 @@ public class EmailServiceImpl implements EmailService {
     private final TemplateEngine templateEngine;
     private final UserRepository userRepository;
     private final RedisUtil redisUtil;
+    private final JwtUtil jwtUtil;
 
     @Transactional
     @Override
@@ -41,7 +45,20 @@ public class EmailServiceImpl implements EmailService {
         String code = generateVerificationCode();
         sendVerificationEmail(code, email);
 
-        return EmailVerificationSendResponse.of(email, code);
+        return new EmailVerificationSendResponse(email, code);
+    }
+
+    @Transactional
+    @Override
+    public EmailVerificationVerifyResponse verifyVerificationCode(EmailVerificationVerifyRequest request) {
+        String email = request.email();
+        String inputCode = request.code();
+        String savedCode = redisUtil.getData("email:" + email);
+
+        if(!savedCode.equals(inputCode)){
+            throw new ExceptionHandler(ErrorStatus.AUTH_CODE_INVALID);
+        }
+        return new EmailVerificationVerifyResponse(email, jwtUtil.createEmailToken(email));
     }
 
     private void validateEmailDuplicated(String email) {
