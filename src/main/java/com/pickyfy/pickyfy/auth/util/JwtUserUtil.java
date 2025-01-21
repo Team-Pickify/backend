@@ -14,14 +14,13 @@ import java.util.Date;
 
 @Slf4j
 @Component
-public class JwtUtil {
-
+public class JwtUserUtil {
     private static final String EMAIL = "email";
 
     private final Key key;
     private final long accessTokenExpTime;
 
-    public JwtUtil(
+    public JwtUserUtil(
             @Value("${jwt.secret}") String secretKey,
             @Value("${jwt.expiration_time}") long accessTokenExpTime
     ) {

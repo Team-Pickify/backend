@@ -1,7 +1,9 @@
 package com.pickyfy.pickyfy.config;
 
-import com.pickyfy.pickyfy.auth.filter.JwtAuthFilter;
-import com.pickyfy.pickyfy.auth.util.JwtUtil;
+import com.pickyfy.pickyfy.auth.filter.JwtAdminAuthFilter;
+import com.pickyfy.pickyfy.auth.filter.JwtUserAuthFilter;
+import com.pickyfy.pickyfy.auth.util.JwtAdminUtil;
+import com.pickyfy.pickyfy.auth.util.JwtUserUtil;
 import com.pickyfy.pickyfy.auth.custom.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +23,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final JwtUtil jwtUtil;
+    private final JwtAdminUtil jwtAdminUtil;
+    private final JwtUserUtil jwtUserUtil;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
@@ -40,7 +43,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         http
-                .addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtUserAuthFilter(customUserDetailsService, jwtUserUtil), JwtUserAuthFilter.class)
+                .addFilterBefore(new JwtAdminAuthFilter(customUserDetailsService, jwtAdminUtil), JwtAdminAuthFilter.class);
         return http.build();
     }
 
