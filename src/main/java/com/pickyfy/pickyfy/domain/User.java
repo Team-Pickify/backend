@@ -34,10 +34,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image")
     private String profileImage;
 
-    @Column(nullable = false)
     private Provider provider;
 
-    @Column(nullable = false)
     private Long providerId;
 
     @OneToMany(mappedBy = "user")

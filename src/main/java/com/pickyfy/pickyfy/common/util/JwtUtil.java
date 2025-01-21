@@ -1,9 +1,12 @@
 package com.pickyfy.pickyfy.common.util;
 
+import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,11 +83,13 @@ public class JwtUtil {
         return false;
     }
 
-    public Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String token) {
         try {
-            return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(accessToken).getPayload();
+            return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
         } catch (ExpiredJwtException e) {
-            return e.getClaims();
+            throw new ExceptionHandler(ErrorStatus.TOKEN_EXPIRATION);
+        } catch (SecurityException e){
+            throw new ExceptionHandler(ErrorStatus.TOKEN_INVALID);
         }
     }
 

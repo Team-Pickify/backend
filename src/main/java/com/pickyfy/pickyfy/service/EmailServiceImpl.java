@@ -30,9 +30,9 @@ public class EmailServiceImpl implements EmailService {
     private static final String TEMPLATE = "mail";
     private static final Long EXPIRATION_TIME = 180L;
 
+    private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
-    private final UserRepository userRepository;
     private final RedisUtil redisUtil;
     private final JwtUtil jwtUtil;
 
