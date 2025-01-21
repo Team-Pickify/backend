@@ -7,7 +7,7 @@ import com.pickyfy.pickyfy.dto.response.EmailVerificationVerifyResponse;
 
 public interface EmailService {
 
-    EmailVerificationSendResponse sendVerificationCode(EmailVerificationSendRequest request);
+    EmailVerificationSendResponse sendAuthCode(EmailVerificationSendRequest request);
 
-    EmailVerificationVerifyResponse verifyVerificationCode(EmailVerificationVerifyRequest emailVerificationVerifyRequest);
+    EmailVerificationVerifyResponse verifyAuthCode(EmailVerificationVerifyRequest emailVerificationVerifyRequest);
 }

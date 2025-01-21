@@ -15,24 +15,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/emails")
+@RequestMapping("/email-auth")
 public class EmailController implements EmailControllerApi {
 
     private final EmailService emailService;
 
-    @PostMapping("/verification/send")
-    public ApiResponse<EmailVerificationSendResponse> sendVerificationCode(
+    @PostMapping("/send-code")
+    public ApiResponse<EmailVerificationSendResponse> sendAuthCode(
             @Valid @RequestBody EmailVerificationSendRequest emailVerificationSendRequest
     ){
-        EmailVerificationSendResponse emailVerificationSendResponse = emailService.sendVerificationCode(emailVerificationSendRequest);
+        EmailVerificationSendResponse emailVerificationSendResponse = emailService.sendAuthCode(emailVerificationSendRequest);
         return ApiResponse.onSuccess(emailVerificationSendResponse);
     }
 
-    @PostMapping("/verification/verify")
-    public ApiResponse<EmailVerificationVerifyResponse> verifyVerificationCode(
+    @PostMapping("/verify-code")
+    public ApiResponse<EmailVerificationVerifyResponse> verifyAuthCode(
             @Valid @RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest
     ){
-        EmailVerificationVerifyResponse emailVerificationVerifyResponse = emailService.verifyVerificationCode(emailVerificationVerifyRequest);
+        EmailVerificationVerifyResponse emailVerificationVerifyResponse = emailService.verifyAuthCode(emailVerificationVerifyRequest);
         return ApiResponse.onSuccess(emailVerificationVerifyResponse);
     }
 }

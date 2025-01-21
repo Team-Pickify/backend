@@ -15,11 +15,11 @@ public interface EmailControllerApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    ApiResponse<EmailVerificationSendResponse> sendVerificationCode(@RequestBody EmailVerificationSendRequest emailVerificationSendRequest);
+    ApiResponse<EmailVerificationSendResponse> sendAuthCode(@RequestBody EmailVerificationSendRequest emailVerificationSendRequest);
 
     @Operation(summary = "이메일 인증코드 검증 API", description = "이메일 인증코드 검증 API입니다. 이메일과 인증코드를 입력해주세요 ")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    ApiResponse<EmailVerificationVerifyResponse> verifyVerificationCode(@RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest);
+    ApiResponse<EmailVerificationVerifyResponse> verifyAuthCode(@RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest);
 }

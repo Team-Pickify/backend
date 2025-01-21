@@ -38,7 +38,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Transactional
     @Override
-    public EmailVerificationSendResponse sendVerificationCode(EmailVerificationSendRequest request) {
+    public EmailVerificationSendResponse sendAuthCode(EmailVerificationSendRequest request) {
         String email = request.email();
         validateEmailDuplicated(email);
 
@@ -50,7 +50,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Transactional
     @Override
-    public EmailVerificationVerifyResponse verifyVerificationCode(EmailVerificationVerifyRequest request) {
+    public EmailVerificationVerifyResponse verifyAuthCode(EmailVerificationVerifyRequest request) {
         String email = request.email();
         String inputCode = request.code();
         String savedCode = redisUtil.getData("email:" + email);
