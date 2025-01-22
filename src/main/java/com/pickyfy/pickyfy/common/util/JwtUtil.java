@@ -20,14 +20,14 @@ import java.util.Date;
 public class JwtUtil {
 
     @Getter
-    private enum Role{
-        EMAIL("EmailToken"),
-        ACCESS("AccessToken");
+    private enum Type{
+        EMAIL("Email"),
+        ACCESS("Access");
 
-        private final String role;
+        private final String type;
 
-        Role(String role) {
-            this.role = role;
+        Type(String type) {
+            this.type = type;
         }
     }
 
@@ -45,21 +45,21 @@ public class JwtUtil {
     }
 
     public String createAccessToken(CustomUserInfoDto customUserInfoDto) {
-        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Role.ACCESS.getRole());
+        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
     }
 
     public String createEmailToken(String email) {
-        return createToken(email, EMAIL_TOKEN_EXPIRATION_TIME, Role.EMAIL.getRole());
+        return createToken(email, EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
     }
 
-    private String createToken(String email, long expireTime, String role) {
+    private String createToken(String email, long expireTime, String type) {
 
         Date now = new Date();
 
         Date tokenValidity = new Date(now.getTime() + expireTime * 1000);
 
         return Jwts.builder()
-                .claim("role", role)
+                .claim("tokenType", type)
                 .claim(EMAIL, email)
                 .issuedAt(now)
                 .expiration(tokenValidity)
@@ -87,8 +87,10 @@ public class JwtUtil {
         try {
             return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
         } catch (ExpiredJwtException e) {
-            throw new ExceptionHandler(ErrorStatus.TOKEN_EXPIRATION);
+            log.info("토큰 만료", e);
+            throw new ExceptionHandler(ErrorStatus.TOKEN_INVALID);
         } catch (SecurityException e){
+            log.info("위조된 토큰", e);
             throw new ExceptionHandler(ErrorStatus.TOKEN_INVALID);
         }
     }
