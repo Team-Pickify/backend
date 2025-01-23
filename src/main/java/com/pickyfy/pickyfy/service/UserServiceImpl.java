@@ -2,9 +2,10 @@ package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
+import com.pickyfy.pickyfy.domain.Provider;
 import com.pickyfy.pickyfy.domain.User;
-import com.pickyfy.pickyfy.dto.request.UserCreateRequest;
-import com.pickyfy.pickyfy.dto.response.UserCreateResponse;
+import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
+import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -40,7 +41,7 @@ public class UserServiceImpl implements UserService{
                 .nickname(userCreateRequest.nickname())
                 .password(passwordEncoder.encode(userCreateRequest.password()))
                 .email(userCreateRequest.email())
-                .profileImage(null)
+                .provider(Provider.EMAIL)
                 .build();
     }
 }

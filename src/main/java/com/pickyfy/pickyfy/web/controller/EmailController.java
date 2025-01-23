@@ -1,10 +1,10 @@
-package com.pickyfy.pickyfy.controller;
+package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
-import com.pickyfy.pickyfy.dto.request.EmailVerificationSendRequest;
-import com.pickyfy.pickyfy.dto.request.EmailVerificationVerifyRequest;
-import com.pickyfy.pickyfy.dto.response.EmailVerificationSendResponse;
-import com.pickyfy.pickyfy.dto.response.EmailVerificationVerifyResponse;
+import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
+import com.pickyfy.pickyfy.web.dto.request.EmailVerificationVerifyRequest;
+import com.pickyfy.pickyfy.web.dto.response.EmailVerificationSendResponse;
+import com.pickyfy.pickyfy.web.dto.response.EmailVerificationVerifyResponse;
 import com.pickyfy.pickyfy.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

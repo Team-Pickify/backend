@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.dto.request;
+package com.pickyfy.pickyfy.web.dto.request;
 
 import jakarta.validation.constraints.Email;
 

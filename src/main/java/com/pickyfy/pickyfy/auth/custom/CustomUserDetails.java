@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.auth.custom;
 
-import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.dto;
+package com.pickyfy.pickyfy.web.dto;
 
 import com.pickyfy.pickyfy.domain.User;
 import lombok.Builder;

@@ -34,6 +34,7 @@ public class User extends BaseTimeEntity {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Column(nullable = false)
     private Provider provider;
 
     private Long providerId;
@@ -42,10 +43,12 @@ public class User extends BaseTimeEntity {
     private List<SavedPlace> savedPlaces = new ArrayList<>();
 
     @Builder
-    public User(String email, String password, String nickname, String profileImage) {
+    public User(String email, String password, String nickname, String profileImage, Provider provider, Long providerId) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.provider = provider;
+        this.providerId = providerId;
         this.profileImage = profileImage;
     }
 }

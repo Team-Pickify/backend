@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;

@@ -1,8 +1,8 @@
-package com.pickyfy.pickyfy.controller;
+package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
-import com.pickyfy.pickyfy.dto.request.UserCreateRequest;
-import com.pickyfy.pickyfy.dto.response.UserCreateResponse;
+import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
+import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
