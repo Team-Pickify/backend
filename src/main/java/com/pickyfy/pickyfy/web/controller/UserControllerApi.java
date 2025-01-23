@@ -5,6 +5,7 @@ import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 public interface UserControllerApi {
@@ -13,6 +14,6 @@ public interface UserControllerApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
+    @PostMapping("/signup")
     ApiResponse<UserCreateResponse> signUp(@RequestBody UserCreateRequest userCreateRequest);
-
 }

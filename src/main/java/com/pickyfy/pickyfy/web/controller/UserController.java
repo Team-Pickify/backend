@@ -5,7 +5,6 @@ import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +15,6 @@ public class UserController implements UserControllerApi{
 
     private final UserService userService;
 
-    @PostMapping("/signup")
     @Override
     public ApiResponse<UserCreateResponse> signUp(UserCreateRequest userCreateRequest) {
         UserCreateResponse userCreateResponse = userService.signUp(userCreateRequest);

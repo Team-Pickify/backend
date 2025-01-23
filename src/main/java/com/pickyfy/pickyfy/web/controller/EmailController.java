@@ -8,7 +8,6 @@ import com.pickyfy.pickyfy.web.dto.response.EmailVerificationVerifyResponse;
 import com.pickyfy.pickyfy.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +19,7 @@ public class EmailController implements EmailControllerApi {
 
     private final EmailService emailService;
 
-    @PostMapping("/send-code")
+    @Override
     public ApiResponse<EmailVerificationSendResponse> sendAuthCode(
             @Valid @RequestBody EmailVerificationSendRequest emailVerificationSendRequest
     ){
@@ -28,7 +27,7 @@ public class EmailController implements EmailControllerApi {
         return ApiResponse.onSuccess(emailVerificationSendResponse);
     }
 
-    @PostMapping("/verify-code")
+    @Override
     public ApiResponse<EmailVerificationVerifyResponse> verifyAuthCode(
             @Valid @RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest
     ){
