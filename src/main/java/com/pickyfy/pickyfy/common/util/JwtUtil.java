@@ -1,50 +1,68 @@
-package com.pickyfy.pickyfy.auth.util;
+package com.pickyfy.pickyfy.common.util;
 
-import com.pickyfy.pickyfy.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Slf4j
 @Component
 public class JwtUtil {
 
+    @Getter
+    private enum Type{
+        EMAIL("Email"),
+        ACCESS("Access");
+
+        private final String type;
+
+        Type(String type) {
+            this.type = type;
+        }
+    }
+
     private static final String EMAIL = "email";
+    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 300L;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3600L;
 
     private final Key key;
-    private final long accessTokenExpTime;
 
     public JwtUtil(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration_time}") long accessTokenExpTime
+            @Value("${jwt.secret}") String secretKey
     ) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenExpTime = accessTokenExpTime;
     }
 
     public String createAccessToken(CustomUserInfoDto customUserInfoDto) {
-        return createToken(customUserInfoDto, accessTokenExpTime);
+        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
     }
 
-    private String createToken(CustomUserInfoDto customUserInfoDto, long expireTime) {
+    public String createEmailToken(String email) {
+        return createToken(email, EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
+    }
 
-        String email = customUserInfoDto.getEmail();
+    private String createToken(String email, long expireTime, String type) {
 
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+        Date now = new Date();
+
+        Date tokenValidity = new Date(now.getTime() + expireTime * 1000);
 
         return Jwts.builder()
+                .claim("tokenType", type)
                 .claim(EMAIL, email)
-                .issuedAt(Date.from(now.toInstant()))
-                .expiration(Date.from(tokenValidity.toInstant()))
+                .issuedAt(now)
+                .expiration(tokenValidity)
                 .signWith(key)
                 .compact();
     }
@@ -65,11 +83,15 @@ public class JwtUtil {
         return false;
     }
 
-    public Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String token) {
         try {
-            return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(accessToken).getPayload();
+            return Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token).getPayload();
         } catch (ExpiredJwtException e) {
-            return e.getClaims();
+            log.info("토큰 만료", e);
+            throw new ExceptionHandler(ErrorStatus.TOKEN_INVALID);
+        } catch (SecurityException e){
+            log.info("위조된 토큰", e);
+            throw new ExceptionHandler(ErrorStatus.TOKEN_INVALID);
         }
     }
 
