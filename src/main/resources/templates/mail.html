@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif;">
+
+<div style="max-width: 600px; margin: 0 auto; background-color: #f4f4f4; padding: 20px;">
+
+    <div style="background-color: #000; text-align: center; padding: 20px 0;">
+        <img src="https://pickyfy-bucket.s3.ap-northeast-2.amazonaws.com/logo.png" alt="로고" style="width: 120px; height: auto;">
+    </div>
+
+    <div style="text-align: center; padding: 20px; color: #222;">
+        <p>안녕하세요, Pickyfy에서 요청하신 인증번호를 보내드립니다.</p>
+        <p>아래 인증코드를 입력해주세요.</p>
+        <div style="font-size: 32px; font-weight: bold; color: #333; margin: 20px 0;">
+            <span th:text="${code}"></span>
+        </div>
+    </div>
+
+    <div style="background-color: #000; color: white; text-align: left; padding: 10px; font-size: 12px; line-height: 1.5;">
+        Contact<br>
+        Email: <a href="mailto:teampickyfy@google.com" style="color: #fff; text-decoration: none;">teampickyfy@google.com</a><br>
+        <br>
+        Team Pickyfy © All Right Reserved
+    </div>
+
+</div>
+
+</body>
+</html>
