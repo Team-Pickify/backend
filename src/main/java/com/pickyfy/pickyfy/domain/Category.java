@@ -50,4 +50,11 @@ public class Category extends BaseTimeEntity {
     public Category(String name) {
         this.name = name;
     }
+
+    /**
+     * 비즈니스 메소드
+     */
+    public void update(String newName) {
+        this.name = newName;
+    }
 }
