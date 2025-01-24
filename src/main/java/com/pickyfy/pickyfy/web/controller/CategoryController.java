@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("")
 @RequiredArgsConstructor
-public class CategoryController {
+public class CategoryController implements CategoryControllerApi{
     private final CategoryService categoryService;
 
     @PostMapping("/admin/category")
