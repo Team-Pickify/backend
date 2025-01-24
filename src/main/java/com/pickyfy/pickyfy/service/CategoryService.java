@@ -1,8 +1,8 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.domain.Category;
-import com.pickyfy.pickyfy.dto.CategoryCreateRequest;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
+import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,10 +17,10 @@ public class CategoryService {
 
     @Transactional
     public Long createCategory(CategoryCreateRequest categoryCreateRequest) {
-        validateDuplicateName(categoryCreateRequest.getName());
+        validateDuplicateName(categoryCreateRequest.name());
 
         Category category = Category.builder()
-                .name(categoryCreateRequest.getName())
+                .name(categoryCreateRequest.name())
                 .build();
 
         return categoryRepository.save(category).getId();
