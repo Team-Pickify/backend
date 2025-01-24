@@ -41,6 +41,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
     ADD_CATEGORY_FAIL(HttpStatus.BAD_REQUEST, StatusCode.CATEGORY.getCode(4001), "[관리자] 카테고리 등록에 실패했습니다."),
     EDIT_CATEGORY_FAIL(HttpStatus.BAD_REQUEST, StatusCode.CATEGORY.getCode(4002), "[관리자] 카테고리 수정에 실패했습니다."),
+    CATEGORY_INVALID(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4003), "잘못된 카테고리 형식입니다."),
+    CATEGORY_DUPLICATED(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4004), "중복된 카테고리입니다."),
+    CATEGORY_NOT_FOUND(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4004), "존재하지 않는 카테고리입니다."),
 
     IMAGE_INVALID(HttpStatus.BAD_REQUEST, StatusCode.IMAGE.getCode(4001), "잘못된 이미지 형식입니다.");
 
