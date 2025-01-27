@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.domain.Category;
+import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
 import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
@@ -24,10 +25,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     public Long createCategory(CategoryCreateRequest categoryCreateRequest) {
-        validateDuplicateName(categoryCreateRequest.name());
+        validateDuplicateType(categoryCreateRequest.categoryType());
 
         Category category = Category.builder()
-                .name(categoryCreateRequest.name())
+                .type(categoryCreateRequest.categoryType())
                 .build();
 
         return categoryRepository.save(category).getId();
@@ -51,11 +52,11 @@ public class CategoryServiceImpl implements CategoryService {
     public void updateCategory(Long id, CategoryUpdateRequest request) {
         Category category = findCategoryById(id);
 
-        if (!category.getName().equals(request.name())) {
-            validateDuplicateName(request.name());
+        if (category.getType() != request.categoryType()) {
+            validateDuplicateType(request.categoryType());
         }
 
-        category.update(request.name());
+        category.update(request.categoryType());
     }
 
     @Override
@@ -70,8 +71,8 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage() + ": " + id));
     }
 
-    private void validateDuplicateName(String name) {
-        if (categoryRepository.existsByName(name)) {
+    private void validateDuplicateType(CategoryType type) {
+        if (categoryRepository.existsByType(type)) {
             throw new DuplicateResourceException(ErrorStatus.CATEGORY_DUPLICATED);
         }
     }

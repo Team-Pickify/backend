@@ -7,6 +7,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import com.pickyfy.pickyfy.domain.Category;
+import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
 import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
@@ -37,10 +38,10 @@ class CategoryServiceImplTest {
     @BeforeEach
     void setUp() throws NoSuchFieldException, IllegalAccessException {
         category = Category.builder()
-                .name("Test Category")
+                .type(CategoryType.CAFE_BAKERY)
                 .build();
 
-        // Reflection을 사용해 id 설정
+        // Reflection으로 id 설정
         Field idField = Category.class.getDeclaredField("id");
         idField.setAccessible(true);
         idField.set(category, 1L);
@@ -49,8 +50,8 @@ class CategoryServiceImplTest {
     @Test
     void createCategory_Success() {
         // Given
-        CategoryCreateRequest request = new CategoryCreateRequest("Test Category");
-        given(categoryRepository.existsByName(request.name())).willReturn(false);
+        CategoryCreateRequest request = new CategoryCreateRequest(CategoryType.CAFE_BAKERY);
+        given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
         given(categoryRepository.save(any(Category.class))).willReturn(category);
 
         // When
@@ -62,10 +63,10 @@ class CategoryServiceImplTest {
     }
 
     @Test
-    void createCategory_DuplicateName_ThrowsException() {
+    void createCategory_DuplicateType_ThrowsException() {
         // Given
-        CategoryCreateRequest request = new CategoryCreateRequest("Test Category");
-        given(categoryRepository.existsByName(request.name())).willReturn(true);
+        CategoryCreateRequest request = new CategoryCreateRequest(CategoryType.CAFE_BAKERY);
+        given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 
         // When/Then
         assertThatThrownBy(() -> categoryService.createCategory(request))
@@ -82,15 +83,13 @@ class CategoryServiceImplTest {
 
         // Then
         assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo("Test Category");
+        assertThat(response.name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
     }
 
     @Test
     void getCategory_NotFound_ThrowsException() {
-        // Given
         given(categoryRepository.findById(1L)).willReturn(Optional.empty());
 
-        // When/Then
         assertThatThrownBy(() -> categoryService.getCategory(1L))
                 .isInstanceOf(EntityNotFoundException.class);
     }
@@ -107,29 +106,29 @@ class CategoryServiceImplTest {
         // Then
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).name()).isEqualTo("Test Category");
+        assertThat(responses.get(0).name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
     }
 
     @Test
     void updateCategory_Success() {
         // Given
-        CategoryUpdateRequest request = new CategoryUpdateRequest("Updated Category");
+        CategoryUpdateRequest request = new CategoryUpdateRequest(CategoryType.RESTAURANT);
         given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByName(request.name())).willReturn(false);
+        given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
 
         // When
         categoryService.updateCategory(1L, request);
 
         // Then
-        assertThat(category.getName()).isEqualTo("Updated Category");
+        assertThat(category.getType()).isEqualTo(CategoryType.RESTAURANT);
     }
 
     @Test
-    void updateCategory_DuplicateName_ThrowsException() {
+    void updateCategory_DuplicateType_ThrowsException() {
         // Given
-        CategoryUpdateRequest request = new CategoryUpdateRequest("Updated Category");
+        CategoryUpdateRequest request = new CategoryUpdateRequest(CategoryType.RESTAURANT);
         given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByName(request.name())).willReturn(true);
+        given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 
         // When/Then
         assertThatThrownBy(() -> categoryService.updateCategory(1L, request))
@@ -138,22 +137,17 @@ class CategoryServiceImplTest {
 
     @Test
     void deleteCategory_Success() {
-        // Given
         given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
 
-        // When
         categoryService.deleteCategory(1L);
 
-        // Then
         verify(categoryRepository).delete(category);
     }
 
     @Test
     void deleteCategory_NotFound_ThrowsException() {
-        // Given
         given(categoryRepository.findById(1L)).willReturn(Optional.empty());
 
-        // When/Then
         assertThatThrownBy(() -> categoryService.deleteCategory(1L))
                 .isInstanceOf(EntityNotFoundException.class);
     }
