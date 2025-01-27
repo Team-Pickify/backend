@@ -41,4 +41,13 @@ public class Magazine extends BaseTimeEntity {
         this.iconUrl = iconUrl;
         this.content = content;
     }
+
+    /**
+     * 비즈니스 메소드
+     */
+    public void update(String title, String iconUrl, String content) {
+        this.title = title;
+        this.iconUrl = iconUrl;
+        this.content = content;
+    }
 }
