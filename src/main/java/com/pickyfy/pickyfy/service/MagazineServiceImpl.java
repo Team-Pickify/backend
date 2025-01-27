@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.domain.Magazine;
+import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
@@ -23,6 +24,7 @@ public class MagazineServiceImpl implements MagazineService {
     @Override
     @Transactional
     public Long createMagazine(MagazineCreateRequest request) {
+        validateDuplicateTitle(request.title());
         Magazine magazine = Magazine.builder()
                 .title(request.title())
                 .iconUrl(request.iconUrl())
@@ -63,5 +65,11 @@ public class MagazineServiceImpl implements MagazineService {
         return magazineRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         ErrorStatus.MAGAZINE_NOT_FOUND.getMessage() + ": " + id));
+    }
+
+    private void validateDuplicateTitle(String title) {
+        if (magazineRepository.existsByTitle(title)) {
+            throw new DuplicateResourceException(ErrorStatus.CATEGORY_DUPLICATED);
+        }
     }
 }
