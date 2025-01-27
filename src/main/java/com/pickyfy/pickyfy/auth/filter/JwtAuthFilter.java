@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.auth.filter;
 
-import com.pickyfy.pickyfy.auth.util.JwtUtil;
+import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.auth.custom.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;

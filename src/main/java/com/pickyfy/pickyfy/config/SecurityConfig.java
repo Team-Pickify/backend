@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.config;
 
 import com.pickyfy.pickyfy.auth.filter.JwtAuthFilter;
-import com.pickyfy.pickyfy.auth.util.JwtUtil;
+import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.auth.custom.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +35,7 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/users/signup", "/auth/login/**", "/admin").permitAll()
+                        .requestMatchers("/users/signup", "/auth/login/**", "/admin", "/email-auth/**").permitAll()
                         .requestMatchers( "/","/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated());
 
