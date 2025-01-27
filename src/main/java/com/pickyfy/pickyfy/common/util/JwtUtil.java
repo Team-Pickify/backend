@@ -1,7 +1,6 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -22,7 +21,8 @@ public class JwtUtil {
     @Getter
     private enum Type{
         EMAIL("Email"),
-        ACCESS("Access");
+        ACCESS("Access"),
+        REFRESH("Refresh");
 
         private final String type;
 
@@ -32,8 +32,9 @@ public class JwtUtil {
     }
 
     private static final String EMAIL = "email";
-    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 300L;
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3600L;
+    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 5 * 60;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
 
     private final Key key;
 
@@ -44,8 +45,12 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(CustomUserInfoDto customUserInfoDto) {
-        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
+    public String createAccessToken(String email) {
+        return createToken(email, ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
+    }
+
+    public String createRefreshToken(String email){
+        return createToken(email, REFRESH_TOKEN_EXPIRATION_TIME, Type.REFRESH.getType());
     }
 
     public String createEmailToken(String email) {

@@ -36,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
 
         if (!jwtUtil.validateToken(token)) {
+            // 여기에 리프레시토큰 확인하고 있으면 재발급하는 코드 들어가야하나
             filterChain.doFilter(request, response);
             return;
         }
