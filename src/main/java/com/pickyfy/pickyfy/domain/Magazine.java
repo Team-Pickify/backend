@@ -26,6 +26,9 @@ public class Magazine extends BaseTimeEntity {
     @Column(nullable = false)
     private String title;
 
+    @Column
+    private String iconUrl;
+
     @Column(nullable = false)
     private String content;
 
@@ -33,8 +36,18 @@ public class Magazine extends BaseTimeEntity {
     private List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
-    public Magazine(String title, String content) {
+    public Magazine(String title,String iconUrl, String content) {
         this.title = title;
+        this.iconUrl = iconUrl;
+        this.content = content;
+    }
+
+    /**
+     * 비즈니스 메소드
+     */
+    public void update(String title, String iconUrl, String content) {
+        this.title = title;
+        this.iconUrl = iconUrl;
         this.content = content;
     }
 }
