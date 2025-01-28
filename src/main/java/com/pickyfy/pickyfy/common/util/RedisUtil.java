@@ -1,11 +1,14 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import java.time.Duration;
 public class RedisUtil {
 
     private final StringRedisTemplate stringRedisTemplate;
+    private final RedisTemplate redisTemplate;
 
     public void setDataExpire(String key, String value, long duration) {
         try {
@@ -34,5 +38,21 @@ public class RedisUtil {
         } catch(DataAccessException e){
             throw new ExceptionHandler(ErrorStatus.KEY_NOT_FOUNT);
         }
+    }
+
+    public void deleteRefreshToken(String key){
+        try{
+            stringRedisTemplate.delete(key);
+        } catch (DataAccessException e){
+            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public void blacklistAccessToken(String token, Long expiration){
+        redisTemplate.opsForValue().set(
+                token,
+                "blacklisted",
+                Duration.ofMillis(expiration)
+        );
     }
 }
