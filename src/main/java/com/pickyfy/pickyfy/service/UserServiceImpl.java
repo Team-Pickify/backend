@@ -1,7 +1,9 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
+import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.domain.Provider;
 import com.pickyfy.pickyfy.domain.User;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
@@ -9,9 +11,11 @@ import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
+import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,14 +26,17 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
+
+    private static final String REDIS_KEY_PREFIX = "email:";
 
     @Transactional
     @Override
-    public UserCreateResponse signUp(UserCreateRequest userCreateRequest) {
-        validateEmailToken(userCreateRequest.email(), userCreateRequest.emailToken());
-        User user = toEntity(userCreateRequest);
+    public UserCreateResponse signUp(UserCreateRequest request) {
+        validateEmailToken(request.email(), request.emailToken());
+        User user = toEntity(request);
         userRepository.save(user);
-        return new UserCreateResponse(userCreateRequest.nickname());
+        return new UserCreateResponse(request.nickname());
     }
 
     private void validateEmailToken(String email, String token){
@@ -38,39 +45,73 @@ public class UserServiceImpl implements UserService{
         }
     }
 
-    private User toEntity(UserCreateRequest userCreateRequest){
+    //TODO: dto로 빼기
+    private User toEntity(UserCreateRequest request){
         return User.builder()
-                .nickname(userCreateRequest.nickname())
-                .password(passwordEncoder.encode(userCreateRequest.password()))
-                .email(userCreateRequest.email())
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
+                .email(request.email())
                 .provider(Provider.EMAIL)
                 .build();
     }
 
+    @Override
+    public UserInfoResponse getUser(){
+        CustomUserDetails userDetails = getUserDetails();
+        User user = findUserByEmail(userDetails.getEmail());
+        return UserInfoResponse.from(user);
+    }
+
     @Transactional
-    public UserUpdateResponse update(UserUpdateRequest userUpdateRequest, String userEmail){
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    public UserUpdateResponse updateUser(UserUpdateRequest request){
+        CustomUserDetails userDetails = getUserDetails();
+        User user = findUserByEmail(userDetails.getEmail());
 
         User updatedUser = user.toBuilder()
-                .nickname(userUpdateRequest.nickname() != null ? userUpdateRequest.nickname() : user.getNickname())
-                .profileImage(userUpdateRequest.profileImage() != null ? userUpdateRequest.profileImage() : user.getProfileImage())
+                .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
+                .profileImage(request.profileImage() != null ? request.profileImage() : user.getProfileImage())
                 .build();
 
         userRepository.save(updatedUser);
-
-        return new UserUpdateResponse(updatedUser.getNickname(), updatedUser.getProfileImage());
+        return UserUpdateResponse.from(updatedUser);
     }
 
     @Transactional
-    public void signOut(String userEmail){
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    public void logout(String accessToken){
+        CustomUserDetails userDetails = getUserDetails();
+        String redisKey = REDIS_KEY_PREFIX + userDetails.getEmail();
+        redisUtil.deleteRefreshToken(redisKey);
 
-        userRepository.delete(user);
-
-        //TODO: 토큰 전부 삭제(jwt, redis)
+        Long expiration = jwtUtil.getExpirationDate(accessToken);
+        redisUtil.blacklistAccessToken(accessToken, expiration);
     }
 
+    @Transactional
+    public void signOut(String accessToken){
+        // 유저 정보 삭제
+        CustomUserDetails userDetails = getUserDetails();
+        User user = findUserByEmail(userDetails.getEmail());
+        userRepository.delete(user);
 
+        // 엑세스 토큰 삭제
+        Long expiration = jwtUtil.getExpirationDate(accessToken);
+        redisUtil.blacklistAccessToken(accessToken, expiration);
+
+        // 리프레시 토큰 삭제
+        String redisKey = REDIS_KEY_PREFIX + userDetails.getEmail();
+        redisUtil.deleteRefreshToken(redisKey);
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+
+    }
+
+    private CustomUserDetails getUserDetails(){
+        return (CustomUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
 }

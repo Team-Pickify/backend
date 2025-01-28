@@ -41,7 +41,6 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<SavedPlace> savedPlaces = new ArrayList<>();
 
-    //TODO: 리팩터링
     @Builder
     public User(String email, String password, String nickname, String profileImage, Provider provider, Long providerId) {
         this.email = email;

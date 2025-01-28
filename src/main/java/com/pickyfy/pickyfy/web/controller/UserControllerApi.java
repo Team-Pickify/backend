@@ -16,4 +16,5 @@ public interface UserControllerApi {
     })
     @PostMapping("/signup")
     ApiResponse<UserCreateResponse> signUp(@RequestBody UserCreateRequest userCreateRequest);
+
 }
