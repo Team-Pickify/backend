@@ -8,14 +8,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(toBuilder = true)
 public class User extends BaseTimeEntity {
 
     @Id
@@ -41,6 +41,7 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<SavedPlace> savedPlaces = new ArrayList<>();
 
+    //TODO: 리팩터링
     @Builder
     public User(String email, String password, String nickname, String profileImage, Provider provider, Long providerId) {
         this.email = email;
@@ -50,4 +51,5 @@ public class User extends BaseTimeEntity {
         this.providerId = providerId;
         this.profileImage = profileImage;
     }
+
 }
