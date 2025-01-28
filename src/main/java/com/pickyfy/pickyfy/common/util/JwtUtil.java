@@ -103,4 +103,8 @@ public class JwtUtil {
     public String getUserEmail(String token) {
         return parseClaims(token).get(EMAIL, String.class);
     }
+
+    public Long getExpirationDate(String token){
+        return parseClaims(token).getExpiration().getTime();
+    }
 }
