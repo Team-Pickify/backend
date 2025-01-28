@@ -40,7 +40,7 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public EmailVerificationSendResponse sendAuthCode(EmailVerificationSendRequest request) {
         String email = request.email();
-        validateEmailDuplicated(email);
+        validateEmailDuplicated(email); // 이걸 밖으로 빼서 이 메서드의 사용성 키우고 싶음
 
         String code = generateVerificationCode();
         sendVerificationEmail(code, email);
@@ -60,6 +60,10 @@ public class EmailServiceImpl implements EmailService {
         }
         return new EmailVerificationVerifyResponse(email, jwtUtil.createEmailToken(email));
     }
+
+//    public boolean isEmailExist(String email){
+//        return userRepository.existsByEmail(email);
+//    }
 
     private void validateEmailDuplicated(String email) {
         if (userRepository.existsByEmail(email)) {
