@@ -3,6 +3,8 @@ package com.pickyfy.pickyfy.domain;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,35 +25,26 @@ public class Category extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private String icon;
+    private CategoryType type;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlaceCategory> placeCategories = new ArrayList<>();
 
- /* 자기 참조 관련 코드
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
-
-    @OneToMany(mappedBy = "parent")
-    private List<Category> child = new ArrayList<>();
-
-    //==연관관계 메서드==//
-    public void addChildCategory(Category child) {
-        this.child.add(child);
-        child.setParent(this);
+    @Builder
+    public Category(CategoryType type) {
+        this.type = type;
     }
 
- */
+    /**
+     * 비즈니스 메소드
+     */
+    public void update(CategoryType newType) {
+        this.type = newType;
+    }
 
-    @Builder
-    public Category(String name, String icon) {
-        this.name = name;
-        this.icon = icon;
+    public String getName() {
+        return this.type.getDisplayName();
     }
 }
