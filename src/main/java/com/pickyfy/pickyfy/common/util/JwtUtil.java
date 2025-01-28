@@ -1,7 +1,6 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -22,7 +21,8 @@ public class JwtUtil {
     @Getter
     private enum Type{
         EMAIL("Email"),
-        ACCESS("Access");
+        ACCESS("Access"),
+        REFRESH("Refresh");
 
         private final String type;
 
@@ -31,9 +31,11 @@ public class JwtUtil {
         }
     }
 
-    private static final String EMAIL = "email";
-    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 300L;
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 3600L;
+    private static final String PRINCIPAL = "principal";
+    private static final String ROLE = "ROLE";
+    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 5 * 60;
+    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;
+    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60;
 
     private final Key key;
 
@@ -44,15 +46,19 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createAccessToken(CustomUserInfoDto customUserInfoDto) {
-        return createToken(customUserInfoDto.getEmail(), ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
+    public String createAccessToken(String principal, String role) {
+        return createToken(principal, role, ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
     }
 
-    public String createEmailToken(String email) {
-        return createToken(email, EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
+    public String createRefreshToken(String principal, String role){
+        return createToken(principal, role, REFRESH_TOKEN_EXPIRATION_TIME, Type.REFRESH.getType());
     }
 
-    private String createToken(String email, long expireTime, String type) {
+    public String createEmailToken(String principal) {
+        return createToken(principal, "USER", EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
+    }
+
+    private String createToken(String principal, String role, long expireTime, String type) {
 
         Date now = new Date();
 
@@ -60,7 +66,8 @@ public class JwtUtil {
 
         return Jwts.builder()
                 .claim("tokenType", type)
-                .claim(EMAIL, email)
+                .claim(PRINCIPAL, principal)
+                .claim(ROLE, role)
                 .issuedAt(now)
                 .expiration(tokenValidity)
                 .signWith(key)
@@ -95,7 +102,11 @@ public class JwtUtil {
         }
     }
 
-    public String getUserEmail(String token) {
-        return parseClaims(token).get(EMAIL, String.class);
+    public String getPrincipal(String token) {
+        return parseClaims(token).get(PRINCIPAL, String.class);
+    }
+
+    public String getRole(String token) {
+        return parseClaims(token).get(ROLE, String.class);
     }
 }
