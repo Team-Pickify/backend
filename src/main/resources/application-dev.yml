@@ -5,16 +5,9 @@ spring:
     username: ${DB_HOST_NAME}
     password: ${DB_HOST_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-
   sql:
     init:
       mode: never
-
   jpa:
     properties:
       hibernate:
@@ -26,13 +19,29 @@ spring:
           auto: create
         default_batch_fetch_size: 1000
 
-logging:
-  level:
-    org.hibernate.SQL: debug
-    org.hibernate.type: trace
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
-jwt:
-  secret: ${JWT_SECRET}
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-name: ${CLIENT_NAME}
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            client-authentication-method: ${CLIENT_AUTHN_METHOD}
+            authorization-grant-type: ${GRANT_TYPE}
+            redirect-uri: ${REDIRECT_URI}
+            scope: ${SCOPE}
+        provider:
+          kakao:
+            authorization-uri: ${AUTHZ_URI}
+            token-uri: ${TOKEN_URI}
+            user-info-uri: ${USER_INFO_URI}
+            user-name-attribute: ${USER_NAME_ATTRIBUTE}
 
 mail:
   smtp:
@@ -40,3 +49,11 @@ mail:
     port: ${MAIL_STMP_PORT}
     username: ${MAIL_STMP_USERNAME}
     password: ${MAIL_STMP_PASSWORD}
+
+jwt:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
