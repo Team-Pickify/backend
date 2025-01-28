@@ -1,8 +1,7 @@
 package com.pickyfy.pickyfy.auth.filter;
 
 import com.pickyfy.pickyfy.common.util.JwtUtil;
-import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
-import com.pickyfy.pickyfy.auth.custom.CustomUserDetailsService;
+import com.pickyfy.pickyfy.auth.details.CustomUserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -11,6 +10,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private static final String ACCESS_TOKEN_HEADER = "Authorization";
     private static final String BEARER = "Bearer ";
 
-    private final CustomUserDetailsService customUserDetailsService;
+    private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
     private final JwtUtil jwtUtil;
 
     @Override
@@ -39,8 +39,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
-        String email = jwtUtil.getUserEmail(token);
-        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailsService.loadUserByEmail(email);
+        String principal = jwtUtil.getPrincipal(token);
+        String role = jwtUtil.getRole(token);
+        UserDetails userDetails;
+
+        if(role.equals("ADMIN")){
+             userDetails = customUserDetailsServiceImpl.loadUserByUsername(principal);
+        }else {
+            userDetails = customUserDetailsServiceImpl.loadUserByEmail(principal);
+        }
 
         if (userDetails == null) {
             filterChain.doFilter(request, response);
