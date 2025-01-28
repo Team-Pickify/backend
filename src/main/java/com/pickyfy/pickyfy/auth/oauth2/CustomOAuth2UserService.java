@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.auth.custom;
+package com.pickyfy.pickyfy.auth.oauth2;
 
 import com.pickyfy.pickyfy.domain.Provider;
 import com.pickyfy.pickyfy.domain.User;
@@ -26,7 +26,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest); // 엑세스토큰은 발급된 상태 카카오 인증서버에서 값 가져와야함
+        OAuth2User oAuth2User = super.loadUser(userRequest);
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Map<String, Object> properties = (Map<String, Object>) attributes.get("properties");
@@ -52,13 +52,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private void saveOrUpdateUser(Long id, String email, String image, String nickname) {
         User user = userRepository.findByEmail(email).orElseGet(() ->
                 User.builder()
-                        .email(email) // 새로운 이메일
-                        .nickname(nickname) // 새로운 닉네임
-                        .profileImage(image) // 새로운 프로필 이미지
-                        .provider(Provider.KAKAO) // 새로운 provider
-                        .providerId(id) // 새로운 providerId
+                        .email(email)
+                        .nickname(nickname)
+                        .profileImage(image)
+                        .provider(Provider.KAKAO)
+                        .providerId(id)
                         .build()
         );
-        userRepository.save(user); // 변경된 사항 저장
+        userRepository.save(user);
     }
 }

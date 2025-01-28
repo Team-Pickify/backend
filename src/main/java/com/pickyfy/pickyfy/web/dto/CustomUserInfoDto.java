@@ -12,6 +12,7 @@ public class CustomUserInfoDto {
     private String username;
     private String email;
     private String profileImage;
+    private String role;
 
     public static CustomUserInfoDto from(User user){
 
@@ -20,6 +21,7 @@ public class CustomUserInfoDto {
                 .password(user.getPassword())
                 .email(user.getEmail())
                 .profileImage(user.getProfileImage())
+                .role("USER")
                 .build();
     }
 }
