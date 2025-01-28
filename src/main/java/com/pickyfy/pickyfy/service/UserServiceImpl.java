@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService{
     }
 
     private void validateEmailToken(String email, String token){
-        if(!email.equals(jwtUtil.getUserEmail(token))){
+        if(!email.equals(jwtUtil.getPrincipal(token))){
             throw new ExceptionHandler(ErrorStatus.EMAIL_INVALID);
         }
     }

@@ -1,11 +1,13 @@
-package com.pickyfy.pickyfy.auth.custom;
+package com.pickyfy.pickyfy.auth.details;
 
+import com.pickyfy.pickyfy.domain.Admin;
 import com.pickyfy.pickyfy.domain.User;
+import com.pickyfy.pickyfy.repository.AdminRepository;
+import com.pickyfy.pickyfy.web.dto.CustomAdminInfoDto;
 import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,19 +15,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CustomUserDetailsService implements UserDetailsService {
+public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
 
     private final static String NOT_FOUND_USER = "해당하는 유저가 없습니다.";
 
     private final UserRepository userRepository;
+    private final AdminRepository adminRepository;
 
     @Override
     public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
-        User user = userRepository.findByNickname(nickname)
+        Admin admin = adminRepository.findByName(nickname)
                 .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER));
-        CustomUserInfoDto customUserInfoDto = CustomUserInfoDto.from(user);
+        CustomAdminInfoDto customAdminInfoDto = CustomAdminInfoDto.from(admin);
 
-        return new CustomUserDetails(customUserInfoDto);
+        return new CustomAdminDetails(customAdminInfoDto);
     }
 
     public UserDetails loadUserByEmail(String email) {
