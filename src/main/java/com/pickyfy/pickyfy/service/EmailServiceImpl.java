@@ -28,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
     private static final String EMAIL_TITLE = "[Pickyfy] 인증코드";
     private static final String VARIABLE_NAME = "code";
     private static final String TEMPLATE = "mail";
-    private static final Long EXPIRATION_TIME = 180L;
+    private static final long EXPIRATION_TIME = 5 * 60;
 
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
