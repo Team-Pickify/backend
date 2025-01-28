@@ -31,4 +31,8 @@ public class CustomUserDetails implements UserDetails {
     public String getEmail(){
         return customUserInfoDto.getEmail();
     }
+
+    public String getProfileImage(){
+        return customUserInfoDto.getProfileImage();
+    }
 }
