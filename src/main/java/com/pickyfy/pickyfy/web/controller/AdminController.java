@@ -22,5 +22,4 @@ public class AdminController implements AdminControllerApi{
     private String extractToken(String authorizationHeader){
         return authorizationHeader.replace("Bearer ", "");
     }
-
 }
