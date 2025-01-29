@@ -24,7 +24,7 @@ public class UserController implements UserControllerApi{
         return ApiResponse.onSuccess(response);
     }
 
-    @GetMapping
+    @GetMapping("/getInfo")
     public ApiResponse<UserInfoResponse> getUserInfo(@RequestHeader("Authorization") String header){
         String token = extractToken(header);
         UserInfoResponse response = userService.getUser(token);
