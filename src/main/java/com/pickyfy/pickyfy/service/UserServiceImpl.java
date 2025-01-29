@@ -5,6 +5,7 @@ import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.domain.Provider;
 import com.pickyfy.pickyfy.domain.User;
+import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
@@ -29,7 +30,6 @@ public class UserServiceImpl implements UserService {
     private static final String REDIS_KEY_PREFIX = "email:";
 
     @Transactional
-    @Override
     public UserCreateResponse signUp(UserCreateRequest request) {
         validateEmailToken(request.email(), request.emailToken());
         User user = toEntity(request);
@@ -37,7 +37,6 @@ public class UserServiceImpl implements UserService {
         return new UserCreateResponse(request.nickname());
     }
 
-    @Override
     public UserInfoResponse getUser(String accessToken){
         String userEmail = jwtUtil.getPrincipal(accessToken);
         User user = findUserByEmail(userEmail);
@@ -45,7 +44,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    @Override
     public UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request){
         String userEmail = jwtUtil.getPrincipal(accessToken);
         User user = findUserByEmail(userEmail);
@@ -59,7 +57,6 @@ public class UserServiceImpl implements UserService {
         return UserUpdateResponse.from(updatedUser);
     }
 
-    @Override
     @Transactional
     public void logout(String accessToken){
         String userEmail = jwtUtil.getPrincipal(accessToken);
@@ -83,6 +80,19 @@ public class UserServiceImpl implements UserService {
 
         String redisKey = REDIS_KEY_PREFIX + userEmail;
         redisUtil.deleteRefreshToken(redisKey);
+    }
+
+    @Transactional
+    public void resetPassword(PasswordResetRequest request){
+        User user = findUserByEmail(request.email());
+        User updatedUser = user.toBuilder()
+                .password(passwordEncoder.encode(request.password()))
+                .build();
+        userRepository.save(updatedUser);
+    }
+
+    public void verifyByEmail(String email){
+        findUserByEmail(email);
     }
 
     private void validateEmailToken(String email, String token){

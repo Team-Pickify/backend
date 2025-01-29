@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
+import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
@@ -12,5 +13,7 @@ public interface UserService {
     UserInfoResponse getUser(String accessToken);
     void logout(String accessToken);
     void signOut(String accessToken);
+    void verifyByEmail(String email);
+    void resetPassword(PasswordResetRequest request);
 }
 

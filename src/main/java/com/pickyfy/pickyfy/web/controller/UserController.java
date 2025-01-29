@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
+import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
@@ -18,7 +19,6 @@ public class UserController implements UserControllerApi{
 
     private final UserService userService;
 
-    @Override
     public ApiResponse<UserCreateResponse> signUp(@Valid UserCreateRequest request) {
         UserCreateResponse response = userService.signUp(request);
         return ApiResponse.onSuccess(response);
@@ -55,8 +55,17 @@ public class UserController implements UserControllerApi{
         return ApiResponse.onSuccess("회원 탈퇴 성공");
     }
 
-    //TODO: 비밀번호 재설정
+    @PostMapping("/verify-by-email")
+    public ApiResponse<String> verifyByEmail(@RequestParam String email){
+        userService.verifyByEmail(email);
+        return ApiResponse.onSuccess("이메일 인증에 성공했습니다.");
+    }
 
+    @PatchMapping("/reset-password")
+    public ApiResponse<String> resetPassword(@Valid @RequestBody PasswordResetRequest request){
+        userService.resetPassword(request);
+        return ApiResponse.onSuccess("비밀번호 변경에 성공했습니다.");
+    }
 
     private String extractToken(String authorizationHeader){
         return authorizationHeader.replace("Bearer ", "");
