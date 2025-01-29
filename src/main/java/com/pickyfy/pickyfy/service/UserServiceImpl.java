@@ -45,6 +45,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
+    @Override
     public UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request){
         String userEmail = jwtUtil.getPrincipal(accessToken);
         User user = findUserByEmail(userEmail);
@@ -70,7 +71,6 @@ public class UserServiceImpl implements UserService {
         redisUtil.deleteRefreshToken(redisKey);
     }
 
-    @Override
     @Transactional
     public void signOut(String accessToken){
         String userEmail = jwtUtil.getPrincipal(accessToken);
