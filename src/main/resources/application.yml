@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local, dev
+    active: local
   sql:
     init:
       mode: never
@@ -19,6 +19,3 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
-
-jwt:
-  secret: ${JWT_SECRET}
