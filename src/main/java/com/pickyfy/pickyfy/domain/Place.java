@@ -45,7 +45,8 @@ public class Place extends BaseTimeEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    @OneToMany(mappedBy = "place")
+    // 연관된 Place image 삭제 하기 위해 추가
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlaceImage> placeImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "place")
@@ -67,5 +68,23 @@ public class Place extends BaseTimeEntity {
         this.naverplaceLink = naverplaceLink;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void updatePlace(String name, String address, String shortDescription,
+                            String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
+        if (name != null) this.name = name;
+        if (address != null) this.address = address;
+        if (shortDescription != null) this.shortDescription = shortDescription;
+        if (instagramLink != null) this.instagramLink = instagramLink;
+        if (naverplaceLink != null) this.naverplaceLink = naverplaceLink;
+        if (latitude != null) this.latitude = latitude;
+        if (longitude != null) this.longitude = longitude;
+    }
+
+    public void updateImages(List<String> newImageUrls) {
+        this.placeImages.clear();
+        for (String imageUrl : newImageUrls) {
+            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).build());
+        }
     }
 }

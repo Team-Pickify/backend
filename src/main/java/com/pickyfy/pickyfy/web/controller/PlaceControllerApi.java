@@ -4,10 +4,11 @@ import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@Tag(name = "장소")
 public interface PlaceControllerApi {
 
     @Operation(summary = "유저가 저장한 Place 전체 조회 API", description = "유저가 저장한 Place 들을 리스트로 전체 조회하는 API입니다.")

@@ -67,5 +67,40 @@ public class AdminServiceImpl implements AdminService {
 
         return newPlace.getId();
     }
+
+    @Override
+    @Transactional
+    public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
+
+        place.updatePlace(request.name(), request.address(), request.shortDescription(),
+                request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude());
+
+        if (imageList != null && !imageList.isEmpty()) {
+            List<String> newImageUrls = new ArrayList<>();
+            int maxImages = Math.min(imageList.size(), 5);
+            for (int i = 0; i < maxImages; i++) {
+                newImageUrls.add(s3Service.upload(imageList.get(i)));
+            }
+            place.updateImages(newImageUrls);
+        }
+        return place.getId();
+    }
+
+    @Override
+    @Transactional
+    public void deletePlace(Long placeId) {
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
+
+        for (PlaceImage image : place.getPlaceImages()) {
+            s3Service.removeFile(image.getUrl());
+        }
+
+        placeRepository.delete(place);
+    }
+
+
 }
 

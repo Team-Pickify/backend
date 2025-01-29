@@ -24,18 +24,34 @@ public class AdminController implements AdminControllerApi {
 
     private final AdminServiceImpl adminService;
 
-    @Operation(summary = "장소 생성", description = "장소를 생성하고 최대 5장의 이미지를 업로드합니다.")
-    @PostMapping(value = "/place", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/places", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> createPlace(
             @Parameter(description = "장소 생성 요청 정보", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
             @RequestPart("request") @Valid PlaceCreateRequest request,
-
             @Parameter(description = "장소 이미지 리스트 (최대 5개)", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA_VALUE))
             @RequestPart(value = "image", required = false) List<MultipartFile> image) {
 
         Long id = adminService.createPlace(request, image);
         return ApiResponse.onSuccess(id);
     }
+
+    @PatchMapping(value = "/places/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Long> updatePlace(
+            @PathVariable Long placeId,
+            @RequestPart("request") @Valid PlaceCreateRequest request,
+            @RequestPart(value = "image", required = false) List<MultipartFile> image) {
+        Long id = adminService.updatePlace(placeId, request, image);
+        return ApiResponse.onSuccess(id);
+    }
+
+    @DeleteMapping("/places/{placeId}")
+    public ApiResponse<Void> deletePlace(@PathVariable Long placeId) {
+        adminService.deletePlace(placeId);
+
+        return ApiResponse.onSuccess(null);
+    }
+
+
 }
 
 
