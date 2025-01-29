@@ -1,7 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.domain.Provider;
@@ -15,13 +14,12 @@ import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -39,33 +37,17 @@ public class UserServiceImpl implements UserService{
         return new UserCreateResponse(request.nickname());
     }
 
-    private void validateEmailToken(String email, String token){
-        if(!email.equals(jwtUtil.getPrincipal(token))){
-            throw new ExceptionHandler(ErrorStatus.EMAIL_INVALID);
-        }
-    }
-
-    //TODO: dto로 빼기
-    private User toEntity(UserCreateRequest request){
-        return User.builder()
-                .nickname(request.nickname())
-                .password(passwordEncoder.encode(request.password()))
-                .email(request.email())
-                .provider(Provider.EMAIL)
-                .build();
-    }
-
     @Override
-    public UserInfoResponse getUser(){
-        CustomUserDetails userDetails = getUserDetails();
-        User user = findUserByEmail(userDetails.getEmail());
+    public UserInfoResponse getUser(String accessToken){
+        String userEmail = jwtUtil.getPrincipal(accessToken);
+        User user = findUserByEmail(userEmail);
         return UserInfoResponse.from(user);
     }
 
     @Transactional
-    public UserUpdateResponse updateUser(UserUpdateRequest request){
-        CustomUserDetails userDetails = getUserDetails();
-        User user = findUserByEmail(userDetails.getEmail());
+    public UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request){
+        String userEmail = jwtUtil.getPrincipal(accessToken);
+        User user = findUserByEmail(userEmail);
 
         User updatedUser = user.toBuilder()
                 .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
@@ -76,42 +58,51 @@ public class UserServiceImpl implements UserService{
         return UserUpdateResponse.from(updatedUser);
     }
 
+    @Override
     @Transactional
     public void logout(String accessToken){
-        CustomUserDetails userDetails = getUserDetails();
-        String redisKey = REDIS_KEY_PREFIX + userDetails.getEmail();
-        redisUtil.deleteRefreshToken(redisKey);
+        String userEmail = jwtUtil.getPrincipal(accessToken);
 
         Long expiration = jwtUtil.getExpirationDate(accessToken);
         redisUtil.blacklistAccessToken(accessToken, expiration);
+
+        String redisKey = REDIS_KEY_PREFIX + userEmail;
+        redisUtil.deleteRefreshToken(redisKey);
     }
 
+    @Override
     @Transactional
     public void signOut(String accessToken){
-        // 유저 정보 삭제
-        CustomUserDetails userDetails = getUserDetails();
-        User user = findUserByEmail(userDetails.getEmail());
+        String userEmail = jwtUtil.getPrincipal(accessToken);
+        User user = findUserByEmail(userEmail);
+
         userRepository.delete(user);
 
-        // 엑세스 토큰 삭제
         Long expiration = jwtUtil.getExpirationDate(accessToken);
         redisUtil.blacklistAccessToken(accessToken, expiration);
 
-        // 리프레시 토큰 삭제
-        String redisKey = REDIS_KEY_PREFIX + userDetails.getEmail();
+        String redisKey = REDIS_KEY_PREFIX + userEmail;
         redisUtil.deleteRefreshToken(redisKey);
+    }
+
+    private void validateEmailToken(String email, String token){
+        if(!email.equals(jwtUtil.getPrincipal(token))){
+            throw new ExceptionHandler(ErrorStatus.EMAIL_INVALID);
+        }
+    }
+
+    private User toEntity(UserCreateRequest request){
+        return User.builder()
+                .nickname(request.nickname())
+                .password(passwordEncoder.encode(request.password()))
+                .email(request.email())
+                .provider(Provider.EMAIL)
+                .build();
     }
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
-
     }
 
-    private CustomUserDetails getUserDetails(){
-        return (CustomUserDetails) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-    }
 }

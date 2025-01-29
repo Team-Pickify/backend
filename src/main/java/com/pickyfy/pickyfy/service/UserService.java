@@ -8,9 +8,9 @@ import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
 
 public interface UserService {
     UserCreateResponse signUp(UserCreateRequest request);
-    UserUpdateResponse updateUser(UserUpdateRequest request);
-    UserInfoResponse getUser();
-    void logout(String token);
-    void signOut(String token);
+    UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request);
+    UserInfoResponse getUser(String accessToken);
+    void logout(String accessToken);
+    void signOut(String accessToken);
 }
 

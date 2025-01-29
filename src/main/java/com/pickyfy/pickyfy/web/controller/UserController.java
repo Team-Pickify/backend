@@ -25,28 +25,40 @@ public class UserController implements UserControllerApi{
     }
 
     @GetMapping
-    public ApiResponse<UserInfoResponse> getUserInfo(){
-        UserInfoResponse response = userService.getUser();
+    public ApiResponse<UserInfoResponse> getUserInfo(@RequestHeader("Authorization") String header){
+        String token = extractToken(header);
+        UserInfoResponse response = userService.getUser(token);
         return ApiResponse.onSuccess(response);
     }
 
     @PatchMapping("/update")
-    public ApiResponse<UserUpdateResponse> updateUser(@Valid @RequestBody UserUpdateRequest request){
-        UserUpdateResponse response = userService.updateUser(request);
+    public ApiResponse<UserUpdateResponse> updateUser(
+            @RequestHeader("Authorization") String header,
+            @Valid @RequestBody UserUpdateRequest request
+    ){
+        String token = extractToken(header);
+        UserUpdateResponse response = userService.updateUser(token, request);
         return ApiResponse.onSuccess(response);
     }
 
     @PatchMapping("/logout")
-    public ApiResponse<String> logout(@Valid @RequestBody String accessToken){
-        userService.logout(accessToken);
+    public ApiResponse<String> logout(@RequestHeader("Authorization") String header){
+        String token = extractToken(header);
+        userService.logout(token);
         return ApiResponse.onSuccess("로그아웃에 성공했습니다.");
     }
 
-    @PatchMapping("/signOut")
-    public ApiResponse<String> signOut(@Valid @RequestBody String accessToken){
-        userService.signOut(accessToken);
+    @DeleteMapping("/signOut")
+    public ApiResponse<String> signOut(@RequestHeader("Authorization") String header){
+        String token = extractToken(header);
+        userService.signOut(token);
         return ApiResponse.onSuccess("회원 탈퇴 성공");
     }
 
     //TODO: 비밀번호 재설정
+
+
+    private String extractToken(String authorizationHeader){
+        return authorizationHeader.replace("Bearer ", "");
+    }
 }
