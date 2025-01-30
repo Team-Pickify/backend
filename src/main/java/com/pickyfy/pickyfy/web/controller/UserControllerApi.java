@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
@@ -57,7 +58,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PostMapping("/verify-by-email")
-    ApiResponse<String> verifyByEmail(@RequestParam String email);
+    ApiResponse<String> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request);
 
     @Operation(summary = "비밀번호 변경 API", description = "비밀번호 변경 API입니다.")
     @ApiResponses({

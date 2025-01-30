@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
+import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
@@ -56,8 +57,8 @@ public class UserController implements UserControllerApi{
     }
 
     @PostMapping("/verify-by-email")
-    public ApiResponse<String> verifyByEmail(@RequestParam String email){
-        userService.verifyByEmail(email);
+    public ApiResponse<String> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request){
+        userService.verifyByEmail(request.email());
         return ApiResponse.onSuccess("이메일 인증에 성공했습니다.");
     }
 
