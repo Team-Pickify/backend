@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
 
-    private static final String REDIS_KEY_PREFIX = "email:";
+    private static final String REDIS_KEY_PREFIX = "refresh:";
 
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {

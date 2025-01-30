@@ -13,7 +13,7 @@ public class AdminServiceImpl implements AdminService{
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
 
-    private static final String REDIS_KEY_PREFIX = "email:";
+    private static final String REDIS_KEY_PREFIX = "refresh:";
 
     @Override
     @Transactional
