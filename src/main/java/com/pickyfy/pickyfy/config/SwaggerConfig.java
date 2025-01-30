@@ -55,8 +55,6 @@ public class SwaggerConfig {
                 .info(info)
                 .addSecurityItem(securityRequirement)
                 .components(components);
-
-
     }
 
     @Bean
@@ -154,5 +152,4 @@ public class SwaggerConfig {
             authOperation.addTagsItem("OAuth 2.0");
         };
     }
-
 }

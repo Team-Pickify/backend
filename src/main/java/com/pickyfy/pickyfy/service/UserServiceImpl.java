@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.domain.Provider;
@@ -27,26 +28,22 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
 
-    private static final String REDIS_KEY_PREFIX = "refresh:";
-
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {
         validateEmailToken(request.email(), request.emailToken());
-        User user = toEntity(request);
+        User user = toUserEntity(request);
         userRepository.save(user);
         return new UserCreateResponse(request.nickname());
     }
 
     public UserInfoResponse getUser(String accessToken){
-        String userEmail = jwtUtil.getPrincipal(accessToken);
-        User user = findUserByEmail(userEmail);
+        User user = getAuthenticatedUser(accessToken);
         return UserInfoResponse.from(user);
     }
 
     @Transactional
     public UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request){
-        String userEmail = jwtUtil.getPrincipal(accessToken);
-        User user = findUserByEmail(userEmail);
+        User user = getAuthenticatedUser(accessToken);
 
         User updatedUser = user.toBuilder()
                 .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
@@ -59,26 +56,14 @@ public class UserServiceImpl implements UserService {
 
     public void logout(String accessToken){
         String userEmail = jwtUtil.getPrincipal(accessToken);
-
-        Long expiration = jwtUtil.getExpirationDate(accessToken);
-        redisUtil.blacklistAccessToken(accessToken, expiration);
-
-        String redisKey = REDIS_KEY_PREFIX + userEmail;
-        redisUtil.deleteRefreshToken(redisKey);
+        invalidateTokens(accessToken, userEmail);
     }
 
     @Transactional
     public void signOut(String accessToken){
-        String userEmail = jwtUtil.getPrincipal(accessToken);
-        User user = findUserByEmail(userEmail);
-
+        User user = getAuthenticatedUser(accessToken);
         userRepository.delete(user);
-
-        Long expiration = jwtUtil.getExpirationDate(accessToken);
-        redisUtil.blacklistAccessToken(accessToken, expiration);
-
-        String redisKey = REDIS_KEY_PREFIX + userEmail;
-        redisUtil.deleteRefreshToken(redisKey);
+        invalidateTokens(accessToken, user.getEmail());
     }
 
     @Transactional
@@ -94,13 +79,24 @@ public class UserServiceImpl implements UserService {
         findUserByEmail(email);
     }
 
+    private User getAuthenticatedUser(String accessToken){
+        String userEmail = jwtUtil.getPrincipal(accessToken);
+        return findUserByEmail(userEmail);
+    }
+
+    private void invalidateTokens(String accessToken, String userEmail){
+        Long expiration = jwtUtil.getExpirationDate(accessToken);
+        redisUtil.blacklistAccessToken(accessToken, expiration);
+        redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + userEmail);
+    }
+
     private void validateEmailToken(String email, String token){
         if(!email.equals(jwtUtil.getPrincipal(token))){
             throw new ExceptionHandler(ErrorStatus.EMAIL_INVALID);
         }
     }
 
-    private User toEntity(UserCreateRequest request){
+    private User toUserEntity(UserCreateRequest request){
         return User.builder()
                 .nickname(request.nickname())
                 .password(passwordEncoder.encode(request.password()))
