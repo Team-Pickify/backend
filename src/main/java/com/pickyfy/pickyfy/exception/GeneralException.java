@@ -11,11 +11,7 @@ public class GeneralException extends RuntimeException {
 
     private BaseErrorCode code;
 
-    public ErrorResponseDTO getErrorReason(){
-        return this.code.getReason();
-    }
-
     public ErrorResponseDTO getErrorReasonHttpStatus(){
-        return this.code.getReason();
+        return this.code.getReasonHttpStatus();
     }
 }

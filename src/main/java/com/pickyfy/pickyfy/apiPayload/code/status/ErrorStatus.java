@@ -52,15 +52,6 @@ public enum ErrorStatus implements BaseErrorCode {
     private final String message;
 
     @Override
-    public ErrorResponseDTO getReason() {
-        return ErrorResponseDTO.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .build();
-    }
-
-    @Override
     public ErrorResponseDTO getReasonHttpStatus(){
         return ErrorResponseDTO.builder()
                 .message(message)
