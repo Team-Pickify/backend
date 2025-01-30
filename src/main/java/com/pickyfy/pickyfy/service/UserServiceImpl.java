@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService {
         return UserUpdateResponse.from(updatedUser);
     }
 
-    @Transactional
     public void logout(String accessToken){
         String userEmail = jwtUtil.getPrincipal(accessToken);
 
@@ -114,5 +113,4 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
-
 }
