@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 
 public interface PlaceRepository extends JpaRepository<Place, Long> {
+    boolean existsPlaceByName(String placeName);
 }
