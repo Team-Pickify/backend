@@ -5,14 +5,6 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 application-local.yml
-src/main/resources/
-application.yaml
-application-dev.yaml
-application-bucket.yaml
-application-jwt.yaml
-application-oauth.yaml
-application-mail.yaml
-
 
 ### STS ###
 .apt_generated

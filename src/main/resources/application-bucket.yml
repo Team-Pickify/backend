@@ -1,0 +1,13 @@
+cloud:
+  aws:
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: pickify
+      path:
+        image: images/
+    stack:
+      auto: false
+    credentials:
+      secret-key: ${S3_SECRET_KEY}
+      access-key: ${S3_ACCESS_KEY}

@@ -7,6 +7,7 @@ import com.pickyfy.pickyfy.domain.PlaceImage;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.AdminRepository;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
+import com.pickyfy.pickyfy.repository.PlaceImageRepository;
 import com.pickyfy.pickyfy.repository.PlaceRepository;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import jakarta.persistence.EntityExistsException;
@@ -16,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +27,15 @@ public class AdminServiceImpl implements AdminService {
     private final AdminRepository adminRepository;
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
+    private final PlaceImageRepository placeImageRepository;
 
+
+    /**
+     * 관리자 기능 (Place 생성)
+     * @param request
+     * @param imageList
+     * @return
+     */
     @Override
     @Transactional
     public Long createPlace(PlaceCreateRequest request, List<MultipartFile> imageList) {
@@ -47,8 +54,6 @@ public class AdminServiceImpl implements AdminService {
                 .shortDescription(request.shortDescription())
                 .build();
 
-        placeRepository.save(newPlace);
-
         List<PlaceImage> placeImages = new ArrayList<>();
         int maxImages = Math.min(imageList.size(), 5);
 
@@ -57,6 +62,7 @@ public class AdminServiceImpl implements AdminService {
             PlaceImage newPlaceImage = PlaceImage.builder()
                     .place(newPlace)
                     .url(imageUrl)
+                    .sequence(i)
                     .build();
             placeImages.add(newPlaceImage);
         }
@@ -68,6 +74,14 @@ public class AdminServiceImpl implements AdminService {
         return newPlace.getId();
     }
 
+
+    /**
+     * 관리자 기능(Place 수정)
+     * @param placeId
+     * @param request
+     * @param imageList
+     * @return
+     */
     @Override
     @Transactional
     public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
@@ -77,17 +91,18 @@ public class AdminServiceImpl implements AdminService {
         place.updatePlace(request.name(), request.address(), request.shortDescription(),
                 request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude());
 
-        if (imageList != null && !imageList.isEmpty()) {
-            List<String> newImageUrls = new ArrayList<>();
-            int maxImages = Math.min(imageList.size(), 5);
-            for (int i = 0; i < maxImages; i++) {
-                newImageUrls.add(s3Service.upload(imageList.get(i)));
-            }
-            place.updateImages(newImageUrls);
-        }
+
+        place.updateImages(imageList, s3Service);
         return place.getId();
     }
 
+
+
+
+    /**
+     * 관리자 기능 (Place 삭제)
+     * @param placeId
+     */
     @Override
     @Transactional
     public void deletePlace(Long placeId) {
@@ -99,6 +114,16 @@ public class AdminServiceImpl implements AdminService {
         }
 
         placeRepository.delete(place);
+    }
+
+    @Override
+    @Transactional
+    public void deletePlaceImages(Long placeImageId) {
+        PlaceImage placeImage = placeImageRepository.findById(placeImageId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.IMAGE_INVALID.getMessage()));
+
+        s3Service.removeFile(placeImage.getUrl());
+        placeImageRepository.delete(placeImage);
     }
 
 

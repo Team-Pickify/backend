@@ -9,4 +9,5 @@ public interface AdminService {
     Long createPlace(PlaceCreateRequest request, List<MultipartFile> imageList);
     Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList);
     void deletePlace(Long placeId);
+    void deletePlaceImages(Long placeImageId);
 }

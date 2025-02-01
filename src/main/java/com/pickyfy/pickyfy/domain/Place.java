@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.domain;
 
+import com.pickyfy.pickyfy.service.S3Service;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,11 +10,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Entity
 @Getter
@@ -59,8 +65,8 @@ public class Place extends BaseTimeEntity {
     private List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
-    public Place(String shortDescription,String name, String address, String instagramLink,
-                 String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
+    public Place(String shortDescription, String name, String address, String instagramLink,
+                 String naverplaceLink, BigDecimal latitude, BigDecimal longitude, List<MultipartFile> images, S3Service s3Service) {
         this.shortDescription = shortDescription;
         this.name = name;
         this.address = address;
@@ -68,7 +74,16 @@ public class Place extends BaseTimeEntity {
         this.naverplaceLink = naverplaceLink;
         this.latitude = latitude;
         this.longitude = longitude;
+
+        if (images != null && !images.isEmpty()) {
+            int index = 0;
+            for (MultipartFile image : images) {
+                String imageUrl = s3Service.upload(image);
+                this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(index++).build());
+            }
+        }
     }
+
 
     public void updatePlace(String name, String address, String shortDescription,
                             String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
@@ -81,10 +96,22 @@ public class Place extends BaseTimeEntity {
         if (longitude != null) this.longitude = longitude;
     }
 
-    public void updateImages(List<String> newImageUrls) {
-        this.placeImages.clear();
-        for (String imageUrl : newImageUrls) {
-            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).build());
+
+    public void updateImages(List<MultipartFile> newImages, S3Service s3Service) {
+
+        int currentSize = this.placeImages.size();
+
+        int availableSlots = 5 - currentSize;
+        if (availableSlots <= 0) {
+            return;
+        }
+
+        for (int i = 0; i < Math.min(newImages.size(), availableSlots); i++) {
+            String imageUrl = s3Service.upload(newImages.get(i));
+            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(currentSize + i).build());
         }
     }
+
+
+
 }

@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.web.dto.request;
 
 import com.pickyfy.pickyfy.domain.PlaceImage;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.util.List;

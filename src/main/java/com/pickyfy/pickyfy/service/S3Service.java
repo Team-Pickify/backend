@@ -22,9 +22,6 @@ public class S3Service {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    @Value("${cloud.aws.s3.path.decoration}")
-    private String decorationFolder;
-
     @Value("${cloud.aws.s3.path.image}")
     private String imageFolder;
 
@@ -56,11 +53,6 @@ public class S3Service {
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
 
-    //이미지 가져오기(url) => public access 걸어놔서 가져올 수 있을 것임
-    private String getDecorationFileUrl(String fileName) {
-        String filePath = decorationFolder + fileName;
-        return amazonS3Client.getUrl(bucket, filePath).toString();
-    }
     private String getImageFileUrl(String fileName) {
         String filePath = imageFolder + fileName;
         return amazonS3Client.getUrl(bucket, filePath).toString();
