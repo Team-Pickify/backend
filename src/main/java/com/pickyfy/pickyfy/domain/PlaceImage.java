@@ -25,13 +25,20 @@ public class PlaceImage extends BaseTimeEntity {
     @Column(nullable = false)
     private String url;
 
+    private Integer sequence;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
     @Builder
-    public PlaceImage(String url, Place place) {
+    public PlaceImage(String url, Place place, Integer sequence) {
         this.url = url;
         this.place = place;
+        this.sequence = sequence;
+    }
+
+    public void updateUrl(String newUrl) {
+        this.url = newUrl;
     }
 }
