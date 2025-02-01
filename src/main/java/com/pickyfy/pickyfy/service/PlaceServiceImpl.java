@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
+import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
@@ -77,7 +78,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
         Place searchPlace = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("Place not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
         List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
 
         return PlaceSearchResponse.builder()
@@ -98,9 +99,9 @@ public class PlaceServiceImpl implements PlaceService {
     public boolean togglePlaceUser(Long userId, Long placeId) {
 
         Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException("Place not found"));
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         String placeName = place.getName();
 
