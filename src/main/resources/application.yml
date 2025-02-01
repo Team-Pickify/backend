@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local, dev #로컬 + ec2 내부 dev 환경
+    active: local, dev
   sql:
     init:
       mode: never
@@ -19,6 +19,3 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
-
-jwt:
-  secret: ${JWT_SECRET}
