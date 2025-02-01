@@ -11,19 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3  # 저장소 코드 체크아웃
+      - uses: actions/checkout@v4  # 저장소 코드 체크아웃
         with:
           fetch-depth: 0  # 전체 Git 기록을 가져옴
 
       - name: Set up JDK 21  # Java 개발 킷 설정
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
       # gradle caching - 빌드 시간 향상
       - name: Gradle Caching
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
@@ -54,7 +54,7 @@ jobs:
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pickify-spring
           path: build/libs/*.jar
@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # 전체 Git 기록 가져오기
 
@@ -79,7 +79,7 @@ jobs:
           fi
 
       - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pickify-spring
           path: build/libs/
