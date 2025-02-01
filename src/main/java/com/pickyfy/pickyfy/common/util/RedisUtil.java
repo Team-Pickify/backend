@@ -34,4 +34,20 @@ public class RedisUtil {
             throw new ExceptionHandler(ErrorStatus.KEY_NOT_FOUNT);
         }
     }
+
+    public void deleteRefreshToken(String redisKey) {
+        try {
+            stringRedisTemplate.delete(redisKey);
+        } catch (DataAccessException e) {
+            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public void blacklistAccessToken(String accessToken, long expiration) {
+        try {
+            setDataExpire(accessToken, "blacklisted", expiration);
+        } catch (DataAccessException e) {
+            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
+    }
 }

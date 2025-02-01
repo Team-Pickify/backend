@@ -1,6 +1,15 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.common.Constant;
+import com.pickyfy.pickyfy.common.util.JwtUtil;
+import com.pickyfy.pickyfy.common.util.RedisUtil;
+import com.pickyfy.pickyfy.domain.Place;
+import com.pickyfy.pickyfy.domain.PlaceImage;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
@@ -14,7 +23,7 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -22,8 +31,12 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl implements AdminService{
 
+
+
+    private final JwtUtil jwtUtil;
+    private final RedisUtil redisUtil;
     private final AdminRepository adminRepository;
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
@@ -99,12 +112,8 @@ public class AdminServiceImpl implements AdminService {
 
 
 
-    /**
-     * 관리자 기능 (Place 삭제)
-     * @param placeId
-     */
     @Override
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     public void deletePlace(Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
@@ -125,7 +134,17 @@ public class AdminServiceImpl implements AdminService {
         s3Service.removeFile(placeImage.getUrl());
         placeImageRepository.delete(placeImage);
     }
+    @Override
+    @Transactional
+    public void logout(String accessToken){
+        String adminName = jwtUtil.getPrincipal(accessToken);
 
+        Long expiration = jwtUtil.getExpirationDate(accessToken);
+        redisUtil.blacklistAccessToken(accessToken, expiration);
+
+        String redisKey = Constant.REDIS_KEY_PREFIX + adminName;
+        redisUtil.deleteRefreshToken(redisKey);
+    }
 
 }
 

@@ -8,14 +8,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder(toBuilder = true)
 public class User extends BaseTimeEntity {
 
     @Id
@@ -50,4 +50,5 @@ public class User extends BaseTimeEntity {
         this.providerId = providerId;
         this.profileImage = profileImage;
     }
+
 }

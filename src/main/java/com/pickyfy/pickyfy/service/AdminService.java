@@ -10,4 +10,5 @@ public interface AdminService {
     Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList);
     void deletePlace(Long placeId);
     void deletePlaceImages(Long placeImageId);
+    void logout(String accessToken);
 }

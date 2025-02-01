@@ -44,7 +44,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UserDetails userDetails;
 
         if(role.equals("ADMIN")){
-             userDetails = customUserDetailsServiceImpl.loadUserByUsername(principal);
+            userDetails = customUserDetailsServiceImpl.loadUserByUsername(principal);
         }else {
             userDetails = customUserDetailsServiceImpl.loadUserByEmail(principal);
         }
