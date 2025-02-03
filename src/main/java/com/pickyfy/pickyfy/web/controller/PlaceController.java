@@ -91,8 +91,9 @@ public class PlaceController implements PlaceControllerApi {
     }
 
     @PostMapping("/nearby")
-    public List<NearbyPlaceResponse> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
-        return placeService.searchNearbyPlaces(
+    public ApiResponse<List<NearbyPlaceResponse>> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
+        return ApiResponse.onSuccess(
+                placeService.searchNearbyPlaces(
                         request.latitude(),
                         request.longitude(),
                         request.distance(),
@@ -100,7 +101,8 @@ public class PlaceController implements PlaceControllerApi {
                         request.magazineIds()
                 ).stream()
                 .map(NearbyPlaceResponse::from)
-                .toList();
+                .toList()
+        );
     }
 }
 
