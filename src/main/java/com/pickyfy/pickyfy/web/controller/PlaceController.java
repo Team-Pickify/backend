@@ -1,18 +1,14 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
-//import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.service.AdminServiceImpl;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
+import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.service.PlaceServiceImpl;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,6 +88,19 @@ public class PlaceController implements PlaceControllerApi {
     public ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId) {
         adminService.deletePlaceImages(placeImageId);
         return ApiResponse.onSuccess(null);
+    }
+
+    @PostMapping("/nearby")
+    public List<NearbyPlaceResponse> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
+        return placeService.searchNearbyPlaces(
+                        request.latitude(),
+                        request.longitude(),
+                        request.distance(),
+                        request.categoryIds(),
+                        request.magazineIds()
+                ).stream()
+                .map(NearbyPlaceResponse::from)
+                .toList();
     }
 }
 
