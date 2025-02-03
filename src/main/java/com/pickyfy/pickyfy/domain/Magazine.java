@@ -50,4 +50,8 @@ public class Magazine extends BaseTimeEntity {
         this.iconUrl = iconUrl;
         this.content = content;
     }
+
+    public void update(String title) {
+        this.title = title;
+    }
 }

@@ -94,6 +94,7 @@ public class Place extends BaseTimeEntity {
         if (naverplaceLink != null) this.naverplaceLink = naverplaceLink;
         if (latitude != null) this.latitude = latitude;
         if (longitude != null) this.longitude = longitude;
+
     }
 
 
