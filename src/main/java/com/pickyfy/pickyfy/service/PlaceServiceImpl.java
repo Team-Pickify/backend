@@ -2,9 +2,11 @@ package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
+import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,5 +133,16 @@ public class PlaceServiceImpl implements PlaceService {
             placeSavedPlaceRepository.save(placeSavedPlace);
             return true;
         }
+    }
+
+    @Override
+    public List<Place> searchNearbyPlaces(BigDecimal lat, BigDecimal lon,
+                                          Double distance,
+                                          List<Long> categories,
+                                          List<Long> magazines) {
+
+        NearbyPlaceSearchCondition condition = new NearbyPlaceSearchCondition(lat, lon, distance, categories, magazines);
+
+        return placeRepository.searchNearbyPlaces(condition);
     }
 }
