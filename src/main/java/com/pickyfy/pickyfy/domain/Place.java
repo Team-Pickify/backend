@@ -75,6 +75,7 @@ public class Place extends BaseTimeEntity {
         this.latitude = latitude;
         this.longitude = longitude;
 
+
         if (images != null && !images.isEmpty()) {
             int index = 0;
             for (MultipartFile image : images) {

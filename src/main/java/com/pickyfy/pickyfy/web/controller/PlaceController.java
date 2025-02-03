@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 //import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
-import com.pickyfy.pickyfy.service.AdminServiceImpl;
+
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.service.PlaceServiceImpl;
@@ -24,7 +24,7 @@ import java.util.List;
 @RequestMapping("/places")
 public class PlaceController implements PlaceControllerApi {
     private final PlaceServiceImpl placeService;
-    private final AdminServiceImpl adminService;
+
 
     /**
      * 특정 유저의 저장된 플레이스 조회
@@ -60,7 +60,7 @@ public class PlaceController implements PlaceControllerApi {
     public ApiResponse<Long> createPlace(
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart PlaceCreateRequest request) {
-        Long id = adminService.createPlace(request, images);
+        Long id = placeService.createPlace(request, images);
         return ApiResponse.onSuccess(id);
     }
 
@@ -72,7 +72,7 @@ public class PlaceController implements PlaceControllerApi {
             @PathVariable Long placeId,
             @RequestPart("request") @Valid PlaceCreateRequest request,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
-        Long id = adminService.updatePlace(placeId, request, images);
+        Long id = placeService.updatePlace(placeId, request, images);
         return ApiResponse.onSuccess(id);
     }
 
@@ -81,7 +81,7 @@ public class PlaceController implements PlaceControllerApi {
      */
     @DeleteMapping("/{placeId}")
     public ApiResponse<Void> deletePlace(@PathVariable Long placeId) {
-        adminService.deletePlace(placeId);
+        placeService.deletePlace(placeId);
         return ApiResponse.onSuccess(null);
     }
 
@@ -90,7 +90,7 @@ public class PlaceController implements PlaceControllerApi {
      */
     @DeleteMapping("/images/{placeImageId}")
     public ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId) {
-        adminService.deletePlaceImages(placeImageId);
+        placeService.deletePlaceImages(placeImageId);
         return ApiResponse.onSuccess(null);
     }
 }
