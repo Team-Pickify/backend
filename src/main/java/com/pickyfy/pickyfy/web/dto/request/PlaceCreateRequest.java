@@ -1,5 +1,8 @@
 package com.pickyfy.pickyfy.web.dto.request;
 
+import com.pickyfy.pickyfy.domain.Category;
+import com.pickyfy.pickyfy.domain.CategoryType;
+import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.domain.PlaceImage;
 import lombok.Setter;
 
@@ -13,5 +16,7 @@ public record PlaceCreateRequest (
   String instagramLink,
   String naverPlaceLink,
   BigDecimal latitude,
-  BigDecimal longitude
+  BigDecimal longitude,
+  CategoryType categoryType,
+  String magazineTitle
 ){}

@@ -1,5 +1,7 @@
 package com.pickyfy.pickyfy.web.dto.response;
 
+import com.pickyfy.pickyfy.domain.Category;
+import com.pickyfy.pickyfy.domain.Magazine;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -17,5 +19,8 @@ public record PlaceSearchResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<String> placeImageUrl,
-        Long categoryId) {
+        String categoryName,
+        String magazineTitle
+
+) {
 }
