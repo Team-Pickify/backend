@@ -4,30 +4,20 @@ import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
 import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
-import com.pickyfy.pickyfy.domain.Place;
-import com.pickyfy.pickyfy.domain.PlaceImage;
+import com.pickyfy.pickyfy.domain.*;
+import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
-import com.pickyfy.pickyfy.exception.DuplicateResourceException;
-import com.pickyfy.pickyfy.repository.AdminRepository;
-import com.pickyfy.pickyfy.repository.CategoryRepository;
-import com.pickyfy.pickyfy.repository.PlaceImageRepository;
-import com.pickyfy.pickyfy.repository.PlaceRepository;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -41,6 +31,10 @@ public class AdminServiceImpl implements AdminService{
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
     private final PlaceImageRepository placeImageRepository;
+    private final CategoryRepository categoryRepository;
+    private final PlaceCategoryRepository placeCategoryRepository;
+    private final MagazineRepository magazineRepository;
+    private final PlaceMagazineRepository placeMagazineRepository;
 
 
     /**
@@ -57,6 +51,7 @@ public class AdminServiceImpl implements AdminService{
             throw new EntityExistsException("Place Already exists");
         }
 
+
         Place newPlace = Place.builder()
                 .name(request.name())
                 .longitude(request.longitude())
@@ -66,6 +61,30 @@ public class AdminServiceImpl implements AdminService{
                 .naverplaceLink(request.naverPlaceLink())
                 .shortDescription(request.shortDescription())
                 .build();
+
+        // Category, Magazine 매핑 저장
+        Category createPlaceCategory = Category.builder()
+                .type(request.categoryType())
+                .build();
+        categoryRepository.save(createPlaceCategory);
+
+        PlaceCategory newPlaceCategory = PlaceCategory.builder()
+                .category(createPlaceCategory)
+                .place(newPlace)
+                .build();
+        placeCategoryRepository.save(newPlaceCategory);
+
+        Magazine createPlaceMagazine = Magazine.builder()
+                .title(request.magazineTitle())
+                .build();
+        magazineRepository.save(createPlaceMagazine);
+
+        PlaceMagazine newPlaceMagazine = PlaceMagazine.builder()
+                .magazine(createPlaceMagazine)
+                .place(newPlace)
+                .build();
+        placeMagazineRepository.save(newPlaceMagazine);
+
 
         List<PlaceImage> placeImages = new ArrayList<>();
         int maxImages = Math.min(imageList.size(), 5);
@@ -102,7 +121,16 @@ public class AdminServiceImpl implements AdminService{
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
         place.updatePlace(request.name(), request.address(), request.shortDescription(),
-                request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude());
+                request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
+
+        PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
+        Optional<Category> category = categoryRepository.findById(placeCategory.getCategory().getId());
+
+        PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(placeId);
+        Optional<Magazine> magazine = magazineRepository.findById(placeMagazine.getMagazine().getId());
+
+        category.get().update(request.categoryType());
+        magazine.get().update(request.magazineTitle());
 
 
         place.updateImages(imageList, s3Service);
@@ -118,10 +146,19 @@ public class AdminServiceImpl implements AdminService{
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
+        PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
+        Optional<Category> category = categoryRepository.findById(placeCategory.getCategory().getId());
+
+        PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(placeId);
+        Optional<Magazine> magazine = magazineRepository.findById(placeMagazine.getMagazine().getId());
+
         for (PlaceImage image : place.getPlaceImages()) {
             s3Service.removeFile(image.getUrl());
         }
-
+        categoryRepository.delete(category.get());
+        placeCategoryRepository.delete(placeCategory);
+        magazineRepository.delete(magazine.get());
+        placeMagazineRepository.delete(placeMagazine);
         placeRepository.delete(place);
     }
 
@@ -134,6 +171,7 @@ public class AdminServiceImpl implements AdminService{
         s3Service.removeFile(placeImage.getUrl());
         placeImageRepository.delete(placeImage);
     }
+
     @Override
     @Transactional
     public void logout(String accessToken){

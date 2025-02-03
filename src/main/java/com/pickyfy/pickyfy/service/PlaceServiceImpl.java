@@ -23,7 +23,10 @@ public class PlaceServiceImpl implements PlaceService {
     final private PlaceSavedPlaceRepository placeSavedPlaceRepository;
     final private PlaceImageRepository placeImageRepository;
     final private UserRepository userRepository;
-
+    final private PlaceCategoryRepository placeCategoryRepositry;
+    final private CategoryRepository categoryRepository;
+    final private MagazineRepository magazineRepository;
+    final private PlaceMagazineRepository placeMagazineRepository;
 
     /**
      * 특정 유저가 저장한 Place 전체 조회
@@ -42,7 +45,17 @@ public class PlaceServiceImpl implements PlaceService {
                     Long savedPlaceId = savedPlace.getId();
                     PlaceSavedPlace mappingPlace = placeSavedPlaceRepository.findBySavedPlaceId(savedPlaceId);
 
+
                     Place userSavePlace = placeRepository.findById(mappingPlace.getPlace().getId()).orElseThrow(() -> new EntityNotFoundException("Place not found"));;
+
+                    // 유저가 저장한 Place 로 Category 조회
+                    PlaceCategory savedPlaceCategory = placeCategoryRepositry.findByPlaceId(userSavePlace.getId());
+                    Optional<Category> savedCategory = categoryRepository.findById(savedPlaceCategory.getCategory().getId());
+
+                    // 유저가 저장한 Place 로 Magazine 조회
+                    PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(savedPlaceId);
+                    Optional<Magazine> savedMagazine = magazineRepository.findById(savedPlaceMagazine.getMagazine().getId());
+
 
                     List<Place> places = placeSavedPlaces.stream()
                             .map(PlaceSavedPlace::getPlace)
@@ -64,6 +77,8 @@ public class PlaceServiceImpl implements PlaceService {
                             .createdAt(savedPlace.getCreatedAt())
                             .updatedAt(savedPlace.getUpdatedAt())
                             .placeImageUrl(placeImages)
+                            .categoryName(savedCategory.get().getName())
+                            .magazineTitle(savedMagazine.get().getTitle())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -81,6 +96,16 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
         List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
 
+        //PlaceID 로 category 조회
+        PlaceCategory searchPlaceCategory = placeCategoryRepositry.findByPlaceId(searchPlace.getId());
+        Optional<Category> searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId());
+        String categoryName = searchCategory.get().getName();
+
+        //PlaceID 로 magazine 조회
+        PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(searchPlace.getId());
+        Optional<Magazine> searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId());
+        String searchMagazineTitle = searchMagazine.get().getTitle();
+
         return PlaceSearchResponse.builder()
                 .placeId(placeId)
                 .placeImageUrl(searchPlaceImageUrl)
@@ -91,6 +116,8 @@ public class PlaceServiceImpl implements PlaceService {
                 .longitude(searchPlace.getLongitude())
                 .latitude(searchPlace.getLatitude())
                 .instagramLink(searchPlace.getInstagramLink())
+                .categoryName(categoryName)
+                .magazineTitle(searchMagazineTitle)
                 .build();
     }
 
