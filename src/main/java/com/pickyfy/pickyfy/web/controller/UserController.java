@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;

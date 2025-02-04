@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.apiPayload.code.status;
+package com.pickyfy.pickyfy.web.apiResponse.common;
 
 public enum StatusCode {
 

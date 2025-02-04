@@ -1,8 +1,8 @@
 package com.pickyfy.pickyfy.exception;
 
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
-import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorResponseDTO;
-import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorResponse;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.validation.ConstraintViolationException;
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity handleOnThrowException(GeneralException generalException, HttpServletRequest request) {
-        ErrorResponseDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        ErrorResponse errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
         return buildOnThrowExceptionResponse(generalException,errorReasonHttpStatus,null,request);
     }
 
@@ -99,7 +99,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    private ResponseEntity<Object> buildOnThrowExceptionResponse(Exception e, ErrorResponseDTO reason,
+    private ResponseEntity<Object> buildOnThrowExceptionResponse(Exception e, ErrorResponse reason,
                                                            HttpHeaders headers, HttpServletRequest request) {
 
         ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(),reason.getMessage(),null);

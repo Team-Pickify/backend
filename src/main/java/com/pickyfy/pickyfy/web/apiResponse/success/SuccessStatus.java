@@ -1,14 +1,14 @@
-package com.pickyfy.pickyfy.apiPayload.code.status;
+package com.pickyfy.pickyfy.web.apiResponse.success;
 
-import com.pickyfy.pickyfy.apiPayload.code.BaseCode;
-import com.pickyfy.pickyfy.apiPayload.code.dto.ResponseDTO;
+import com.pickyfy.pickyfy.web.apiResponse.common.BaseSuccessCode;
+import com.pickyfy.pickyfy.web.apiResponse.common.StatusCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum SuccessStatus implements BaseCode {
+public enum SuccessStatus implements BaseSuccessCode {
 
     _OK(HttpStatus.OK, StatusCode.COMMON.getCode(200), "요청이 성공적으로 처리되었습니다."),
     _CREATED(HttpStatus.CREATED, StatusCode.COMMON.getCode(201), "요청이 성공적으로 생성되었습니다."),
@@ -40,17 +40,8 @@ public enum SuccessStatus implements BaseCode {
     private final String message;
 
     @Override
-    public ResponseDTO getReason() {
-        return ResponseDTO.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(true)
-                .build();
-    }
-
-    @Override
-    public ResponseDTO getReasonHttpStatus(){
-        return ResponseDTO.builder()
+    public SuccessResponse getReasonHttpStatus(){
+        return SuccessResponse.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(true)

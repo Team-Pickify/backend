@@ -1,9 +1,8 @@
-package com.pickyfy.pickyfy.apiPayload;
+package com.pickyfy.pickyfy.web.apiResponse.common;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.pickyfy.pickyfy.apiPayload.code.BaseCode;
-import com.pickyfy.pickyfy.apiPayload.code.status.SuccessStatus;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -23,7 +22,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, SuccessStatus._OK.getCode(), SuccessStatus._OK.getMessage(), result);
     }
 
-    public static <T> ApiResponse<T> withCode(BaseCode code, T result){
+    public static <T> ApiResponse<T> withCode(BaseSuccessCode code, T result){
         return new ApiResponse<>(true, code.getReasonHttpStatus().getCode(), code.getReasonHttpStatus().getMessage(), result);
     }
 
