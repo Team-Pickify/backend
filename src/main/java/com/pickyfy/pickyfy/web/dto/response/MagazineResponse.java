@@ -7,7 +7,6 @@ public record MagazineResponse(
         Long id,
         String title,
         String iconUrl,
-        String content,
         LocalDateTime createdAt
 ) {
     public static MagazineResponse from(Magazine magazine) {
@@ -15,7 +14,6 @@ public record MagazineResponse(
                 magazine.getId(),
                 magazine.getTitle(),
                 magazine.getIconUrl(),
-                magazine.getContent(),
                 magazine.getCreatedAt()
         );
     }
