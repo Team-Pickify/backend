@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.web.controller;
 
+import com.pickyfy.pickyfy.common.util.TokenExtractor;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
@@ -27,7 +28,7 @@ public class UserController implements UserControllerApi{
 
     @GetMapping("/getInfo")
     public ApiResponse<UserInfoResponse> getUserInfo(@RequestHeader("Authorization") String header){
-        String token = extractToken(header);
+        String token = TokenExtractor.extract(header);
         UserInfoResponse response = userService.getUser(token);
         return ApiResponse.onSuccess(response);
     }
@@ -38,21 +39,21 @@ public class UserController implements UserControllerApi{
             @RequestPart(value = "image", required = false) MultipartFile image,
             @Valid @RequestBody UserUpdateRequest request
     ){
-        String token = extractToken(header);
+        String token = TokenExtractor.extract(header);
         Long userId = userService.updateUser(token, request, image);
         return ApiResponse.onSuccess(userId);
     }
 
     @PatchMapping("/logout")
     public ApiResponse<String> logout(@RequestHeader("Authorization") String header){
-        String token = extractToken(header);
+        String token = TokenExtractor.extract(header);
         userService.logout(token);
         return ApiResponse.onSuccess("로그아웃에 성공했습니다.");
     }
 
     @DeleteMapping("/signOut")
     public ApiResponse<String> signOut(@RequestHeader("Authorization") String header){
-        String token = extractToken(header);
+        String token = TokenExtractor.extract(header);
         userService.signOut(token);
         return ApiResponse.onSuccess("회원 탈퇴에 성공했습니다.");
     }
@@ -67,9 +68,5 @@ public class UserController implements UserControllerApi{
     public ApiResponse<String> resetPassword(@Valid @RequestBody PasswordResetRequest request){
         userService.resetPassword(request);
         return ApiResponse.onSuccess("비밀번호 변경에 성공했습니다.");
-    }
-
-    private String extractToken(String authorizationHeader){
-        return authorizationHeader.replace("Bearer ", "");
     }
 }
