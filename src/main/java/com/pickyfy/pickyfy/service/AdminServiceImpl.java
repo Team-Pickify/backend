@@ -1,13 +1,9 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
-import com.pickyfy.pickyfy.common.Constant;
-import com.pickyfy.pickyfy.common.util.JwtUtil;
-import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
@@ -15,6 +11,7 @@ import jakarta.persistence.EntityExistsException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -23,11 +20,6 @@ import java.util.*;
 @AllArgsConstructor
 public class AdminServiceImpl implements AdminService{
 
-
-
-    private final JwtUtil jwtUtil;
-    private final RedisUtil redisUtil;
-    private final AdminRepository adminRepository;
     private final PlaceRepository placeRepository;
     private final S3Service s3Service;
     private final PlaceImageRepository placeImageRepository;
@@ -35,7 +27,6 @@ public class AdminServiceImpl implements AdminService{
     private final PlaceCategoryRepository placeCategoryRepository;
     private final MagazineRepository magazineRepository;
     private final PlaceMagazineRepository placeMagazineRepository;
-
 
     /**
      * 관리자 기능 (Place 생성)
@@ -50,7 +41,6 @@ public class AdminServiceImpl implements AdminService{
         if (placeRepository.existsPlaceByName(request.name())) {
             throw new EntityExistsException("Place Already exists");
         }
-
 
         Place newPlace = Place.builder()
                 .name(request.name())
@@ -137,11 +127,8 @@ public class AdminServiceImpl implements AdminService{
         return place.getId();
     }
 
-
-
-
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public void deletePlace(Long placeId) {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
@@ -171,18 +158,4 @@ public class AdminServiceImpl implements AdminService{
         s3Service.removeFile(placeImage.getUrl());
         placeImageRepository.delete(placeImage);
     }
-
-    @Override
-    @Transactional
-    public void logout(String accessToken){
-        String adminName = jwtUtil.getPrincipal(accessToken);
-
-        Long expiration = jwtUtil.getExpirationDate(accessToken);
-        redisUtil.blacklistAccessToken(accessToken, expiration);
-
-        String redisKey = Constant.REDIS_KEY_PREFIX + adminName;
-        redisUtil.deleteRefreshToken(redisKey);
-    }
-
 }
-

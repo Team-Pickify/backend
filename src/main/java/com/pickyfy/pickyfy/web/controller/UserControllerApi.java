@@ -39,13 +39,6 @@ public interface UserControllerApi {
     ApiResponse<UserUpdateResponse> updateUser(@RequestHeader("Authorization") String header,
                                                @Valid @RequestBody UserUpdateRequest request);
 
-    @Operation(summary = "로그아웃 API", description = "로그아웃 API입니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @PatchMapping("/logout")
-    ApiResponse<String> logout(@RequestHeader("Authorization") String header);
-
     @Operation(summary = "회원탈퇴 API", description = "회원탈퇴 API입니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")

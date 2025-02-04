@@ -42,13 +42,6 @@ public class UserController implements UserControllerApi{
         return ApiResponse.onSuccess(response);
     }
 
-    @PatchMapping("/logout")
-    public ApiResponse<String> logout(@RequestHeader("Authorization") String header){
-        String token = extractToken(header);
-        userService.logout(token);
-        return ApiResponse.onSuccess("로그아웃에 성공했습니다.");
-    }
-
     @DeleteMapping("/signOut")
     public ApiResponse<String> signOut(@RequestHeader("Authorization") String header){
         String token = extractToken(header);

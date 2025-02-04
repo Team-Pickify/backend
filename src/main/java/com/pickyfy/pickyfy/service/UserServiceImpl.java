@@ -54,16 +54,11 @@ public class UserServiceImpl implements UserService {
         return UserUpdateResponse.from(updatedUser);
     }
 
-    public void logout(String accessToken){
-        String userEmail = jwtUtil.getPrincipal(accessToken);
-        invalidateTokens(accessToken, userEmail);
-    }
-
     @Transactional
     public void signOut(String accessToken){
         User user = getAuthenticatedUser(accessToken);
         userRepository.delete(user);
-        invalidateTokens(accessToken, user.getEmail());
+        invalidateTokens(user.getEmail());
     }
 
     @Transactional
@@ -84,9 +79,7 @@ public class UserServiceImpl implements UserService {
         return findUserByEmail(userEmail);
     }
 
-    private void invalidateTokens(String accessToken, String userEmail){
-        Long expiration = jwtUtil.getExpirationDate(accessToken);
-        redisUtil.blacklistAccessToken(accessToken, expiration);
+    private void invalidateTokens(String userEmail){
         redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + userEmail);
     }
 
