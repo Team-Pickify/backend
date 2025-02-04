@@ -2,12 +2,13 @@ package com.pickyfy.pickyfy.web.apiResponse.success;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.BaseSuccessCode;
 import com.pickyfy.pickyfy.web.apiResponse.common.StatusCode;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum SuccessStatus implements BaseSuccessCode {
 
     _OK(HttpStatus.OK, StatusCode.COMMON.getCode(200), "요청이 성공적으로 처리되었습니다."),
@@ -45,7 +46,6 @@ public enum SuccessStatus implements BaseSuccessCode {
                 .message(message)
                 .code(code)
                 .isSuccess(true)
-                .httpStatus(httpStatus)
                 .build();
     }
 }
