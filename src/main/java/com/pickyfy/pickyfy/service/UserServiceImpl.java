@@ -13,11 +13,11 @@ import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
-import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private final S3Service s3Service;
 
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {
@@ -42,16 +43,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public UserUpdateResponse updateUser(String accessToken, UserUpdateRequest request){
+    public Long updateUser(String accessToken, UserUpdateRequest request, MultipartFile image){
         User user = getAuthenticatedUser(accessToken);
 
         User updatedUser = user.toBuilder()
                 .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
-                .profileImage(request.profileImage() != null ? request.profileImage() : user.getProfileImage())
+                .profileImage(s3Service.upload(image) != null ? s3Service.upload(image) : user.getProfileImage())
                 .build();
 
         userRepository.save(updatedUser);
-        return UserUpdateResponse.from(updatedUser);
+        return user.getId();
     }
 
     public void logout(String accessToken){

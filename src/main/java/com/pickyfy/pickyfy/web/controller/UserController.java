@@ -8,11 +8,10 @@ import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
-import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
-import jakarta.mail.Multipart;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,14 +33,14 @@ public class UserController implements UserControllerApi{
     }
 
     @PatchMapping("/update")
-    public ApiResponse<UserUpdateResponse> updateUser(
+    public ApiResponse<Long> updateUser(
             @RequestHeader("Authorization") String header,
-            @RequestPart(value = "image", required = false) Multipart image,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @Valid @RequestBody UserUpdateRequest request
     ){
         String token = extractToken(header);
-        UserUpdateResponse response = userService.updateUser(token, request, image);
-        return ApiResponse.onSuccess(response);
+        Long userId = userService.updateUser(token, request, image);
+        return ApiResponse.onSuccess(userId);
     }
 
     @PatchMapping("/logout")
