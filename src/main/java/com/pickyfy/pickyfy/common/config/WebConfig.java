@@ -11,7 +11,7 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private OctetStreamReadMsgConverter octetStreamReadMsgConverter;
+    private final OctetStreamReadMsgConverter octetStreamReadMsgConverter;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
