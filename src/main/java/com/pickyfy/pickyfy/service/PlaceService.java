@@ -16,4 +16,5 @@ public interface PlaceService {
     List<PlaceSearchResponse> getUserSavePlace(Long userId);
     PlaceSearchResponse getPlace(Long placeId);
     boolean togglePlaceUser (Long userId, Long placeId);
+    List<PlaceSearchResponse> getAdminAllPlace();
 }

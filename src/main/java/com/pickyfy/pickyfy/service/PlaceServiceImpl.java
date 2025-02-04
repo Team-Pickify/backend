@@ -203,9 +203,9 @@ public class PlaceServiceImpl implements PlaceService {
                 .shortDescription(request.shortDescription())
                 .build();
 
-        newPlace = placeRepository.save(newPlace); // 먼저 저장
+        newPlace = placeRepository.save(newPlace);
 
-        // 2. 저장된 newPlace를 이용하여 PlaceCategory, PlaceMagazine 저장
+
         PlaceCategory newPlaceCategory = PlaceCategory.builder()
                 .category(category)
                 .place(newPlace)
@@ -220,7 +220,6 @@ public class PlaceServiceImpl implements PlaceService {
 
         placeMagazineRepository.save(newPlaceMagazine);
 
-        // 3. 이미지 저장 로직
         List<PlaceImage> placeImages = new ArrayList<>();
         int maxImages = Math.min(imageList.size(), 5);
 
@@ -235,7 +234,7 @@ public class PlaceServiceImpl implements PlaceService {
         }
 
         newPlace.getPlaceImages().addAll(placeImages);
-        placeRepository.save(newPlace); // 최종 저장
+        placeRepository.save(newPlace);
 
         return newPlace.getId();
     }
@@ -326,6 +325,45 @@ public class PlaceServiceImpl implements PlaceService {
         s3Service.removeFile(placeImage.getUrl());
         placeImageRepository.delete(placeImage);
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PlaceSearchResponse> getAdminAllPlace() {
+
+        List<Place> allPlaceList = placeRepository.findAll();
+
+        return allPlaceList.stream()
+                .map(place -> {
+
+                    PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(place.getId());
+                    String categoryName = (placeCategory != null) ?
+                            placeCategory.getCategory().getName() : "카테고리 없음";
+
+                    PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(place.getId());
+                    String magazineTitle = (placeMagazine != null) ?
+                            placeMagazine.getMagazine().getTitle() : "매거진 없음";
+
+                    List<String> placeImages = place.getPlaceImages().stream()
+                            .map(PlaceImage::getUrl)
+                            .collect(Collectors.toList());
+
+                    return PlaceSearchResponse.builder()
+                            .placeId(place.getId())
+                            .name(place.getName())
+                            .shortDescription(place.getShortDescription())
+                            .latitude(place.getLatitude())
+                            .longitude(place.getLongitude())
+                            .createdAt(place.getCreatedAt())
+                            .updatedAt(place.getUpdatedAt())
+                            .placeImageUrl(placeImages)
+                            .categoryName(categoryName)
+                            .magazineTitle(magazineTitle)
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
 
 
 }

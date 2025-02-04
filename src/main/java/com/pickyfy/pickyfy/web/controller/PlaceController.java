@@ -56,7 +56,7 @@ public class PlaceController implements PlaceControllerApi {
     /**
      * 플레이스 생성
      */
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> createPlace(
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart PlaceCreateRequest request) {
@@ -67,7 +67,7 @@ public class PlaceController implements PlaceControllerApi {
     /**
      * 플레이스 업데이트
      */
-    @PatchMapping(value = "/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "admin/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updatePlace(
             @PathVariable Long placeId,
             @RequestPart("request") @Valid PlaceCreateRequest request,
@@ -79,7 +79,7 @@ public class PlaceController implements PlaceControllerApi {
     /**
      * 플레이스 삭제
      */
-    @DeleteMapping("/{placeId}")
+    @DeleteMapping("admin/{placeId}")
     public ApiResponse<Void> deletePlace(@PathVariable Long placeId) {
         placeService.deletePlace(placeId);
         return ApiResponse.onSuccess(null);
@@ -88,10 +88,23 @@ public class PlaceController implements PlaceControllerApi {
     /**
      * 특정 플레이스의 이미지 삭제
      */
-    @DeleteMapping("/images/{placeImageId}")
+    @DeleteMapping("admin/images/{placeImageId}")
     public ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId) {
         placeService.deletePlaceImages(placeImageId);
         return ApiResponse.onSuccess(null);
     }
+
+    /**
+     * 관리자 페이지에서 모든 Place 조회
+     * @param
+     * @return
+     */
+    @GetMapping("/admin/")
+    public ApiResponse<List<PlaceSearchResponse>> getAllPlace() {
+        List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
+        return ApiResponse.onSuccess(adminAllPlace);
+    }
+
+
 }
 

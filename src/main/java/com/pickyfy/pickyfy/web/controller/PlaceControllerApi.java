@@ -73,4 +73,5 @@ public interface PlaceControllerApi {
     @DeleteMapping("/images/{placeImageId}")
     ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
 
+
 }
