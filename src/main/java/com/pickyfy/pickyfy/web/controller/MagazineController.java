@@ -8,12 +8,13 @@ import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,8 +25,8 @@ public class MagazineController implements MagazineControllerApi {
 
     private final MagazineService magazineService;
 
-    @PostMapping("/admin/magazines")
-    public ApiResponse<Long> createMagazine(@Valid @RequestBody MagazineCreateRequest request) {
+    @PostMapping(value = "/admin/magazines", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Long> createMagazine(@Valid @ModelAttribute MagazineCreateRequest request) {
         Long magazineId = magazineService.createMagazine(request);
         return ApiResponse.onSuccess(magazineId);
     }
@@ -42,10 +43,10 @@ public class MagazineController implements MagazineControllerApi {
         return ApiResponse.onSuccess(responses);
     }
 
-    @PutMapping("/admin/magazines/{id}")
+    @PutMapping(value = "/admin/magazines/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updateMagazine(
             @PathVariable Long id,
-            @Valid @RequestBody MagazineUpdateRequest request) {
+            @Valid @ModelAttribute MagazineUpdateRequest request) {
         magazineService.updateMagazine(id, request);
         return ApiResponse.onSuccess(id);
     }
