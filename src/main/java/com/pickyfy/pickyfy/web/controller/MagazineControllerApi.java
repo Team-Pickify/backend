@@ -19,7 +19,7 @@ public interface MagazineControllerApi {
 
     @Operation(
             summary = "매거진 생성 API",
-            description = "관리자용 매거진 생성 API입니다. 제목, 아이콘 URL, 내용을 입력받아 새로운 매거진을 생성합니다."
+            description = "관리자용 매거진 생성 API입니다. 제목, 아이콘 URL을 입력받아 새로운 매거진을 생성합니다."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -75,7 +75,7 @@ public interface MagazineControllerApi {
 
     @Operation(
             summary = "매거진 수정 API",
-            description = "관리자용 매거진 수정 API입니다. 제목, 아이콘 URL, 내용을 수정할 수 있습니다."
+            description = "관리자용 매거진 수정 API입니다. 제목, 아이콘 URL을 수정할 수 있습니다."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(

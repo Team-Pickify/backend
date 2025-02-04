@@ -28,7 +28,6 @@ public class MagazineServiceImpl implements MagazineService {
         Magazine magazine = Magazine.builder()
                 .title(request.title())
                 .iconUrl(request.iconUrl())
-                .content(request.content())
                 .build();
 
         return magazineRepository.save(magazine).getId();
@@ -51,7 +50,7 @@ public class MagazineServiceImpl implements MagazineService {
     @Transactional
     public void updateMagazine(Long id, MagazineUpdateRequest request) {
         Magazine magazine = findMagazineById(id);
-        magazine.update(request.title(), request.iconUrl(), request.content());
+        magazine.update(request.title(), request.iconUrl());
     }
 
     @Override
