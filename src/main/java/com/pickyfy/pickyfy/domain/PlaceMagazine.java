@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlaceMagazine {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -34,4 +35,10 @@ public class PlaceMagazine {
         this.place = place;
         this.magazine = magazine;
     }
+
+    public void updatePlaceMagazine(Place place, Magazine magazine) {
+        this.place = place;
+        this.magazine = magazine;
+    }
+
 }

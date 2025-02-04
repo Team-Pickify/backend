@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MagazineServiceImpl implements MagazineService {
 
     private final MagazineRepository magazineRepository;
+    private final S3Service s3Service;
 
     @Override
     @Transactional
@@ -27,8 +28,7 @@ public class MagazineServiceImpl implements MagazineService {
         validateDuplicateTitle(request.title());
         Magazine magazine = Magazine.builder()
                 .title(request.title())
-                .iconUrl(request.iconUrl())
-                .content(request.content())
+                .iconUrl(s3Service.upload(request.iconFile()))
                 .build();
 
         return magazineRepository.save(magazine).getId();
@@ -51,7 +51,7 @@ public class MagazineServiceImpl implements MagazineService {
     @Transactional
     public void updateMagazine(Long id, MagazineUpdateRequest request) {
         Magazine magazine = findMagazineById(id);
-        magazine.update(request.title(), request.iconUrl(), request.content());
+        magazine.update(request.title(), s3Service.upload(request.iconFile()));
     }
 
     @Override

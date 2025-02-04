@@ -29,26 +29,18 @@ public class Magazine extends BaseTimeEntity {
     @Column
     private String iconUrl;
 
-    @Column(nullable = false)
-    private String content;
-
     @OneToMany(mappedBy = "magazine", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlaceMagazine> placeMagazines = new ArrayList<>();
+    private final List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
-    public Magazine(String title,String iconUrl, String content) {
+    public Magazine(String title,String iconUrl) {
         this.title = title;
         this.iconUrl = iconUrl;
-        this.content = content;
     }
 
-    /**
-     * 비즈니스 메소드
-     */
-    public void update(String title, String iconUrl, String content) {
+    public void update(String title, String iconUrl) {
         this.title = title;
         this.iconUrl = iconUrl;
-        this.content = content;
     }
 
     public void update(String title) {

@@ -17,6 +17,6 @@ public record PlaceCreateRequest (
   String naverPlaceLink,
   BigDecimal latitude,
   BigDecimal longitude,
-  CategoryType categoryType,
-  String magazineTitle
+  Long categoryId,
+  Long magazineId
 ){}

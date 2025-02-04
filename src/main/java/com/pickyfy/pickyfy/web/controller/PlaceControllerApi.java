@@ -2,11 +2,14 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
+import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -73,4 +76,41 @@ public interface PlaceControllerApi {
     @DeleteMapping("/images/{placeImageId}")
     ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
 
+    @Operation(
+            summary = "주변 장소 검색 API",
+            description = "현재 위치 기준으로 주변 장소를 검색하는 API입니다. 위도, 경도, 검색 반경을 필수로 입력하고, " +
+                    "선택적으로 카테고리와 매거진 ID 리스트로 필터링할 수 있습니다."
+    )
+  
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "COMMON200",
+                    description = "OK, 성공",
+                    content = @Content(schema = @Schema(implementation = NearbyPlaceResponse.class))
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "PLACE400",
+                    description = "잘못된 위치 정보"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "PLACE404",
+                    description = "주변에 장소가 없음"
+            )
+    })
+    @PostMapping("/nearby")
+    ApiResponse<List<NearbyPlaceResponse>> searchNearbyPlaces(
+            @Parameter(
+                    description = "주변 장소 검색 조건",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = NearbyPlaceSearchRequest.class))
+            )
+            @Valid @RequestBody NearbyPlaceSearchRequest request
+    );
+
+    @Operation(summary = "모든 Place 조회", description = "모든 Place를 조회 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @GetMapping("/admin/")
+    ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }
