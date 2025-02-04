@@ -19,7 +19,7 @@ public class RedisUtil {
     public void setDataExpire(String key, String value, long duration) {
         try {
             ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
-            Duration expireDuration = Duration.ofSeconds(duration);
+            Duration expireDuration = Duration.ofMillis(duration);
             valueOperations.set(key, value, expireDuration);
         }catch(DataAccessException e){
             throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);

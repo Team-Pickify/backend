@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.auth.handler;
 
+import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import jakarta.servlet.ServletException;
@@ -15,12 +16,12 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final static long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60;
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
 
@@ -32,10 +33,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtUtil.createAccessToken(email, "USER");
         String refreshToken = jwtUtil.createRefreshToken(email, "USER");
 
-        redisUtil.setDataExpire("refresh:" + email, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setDataExpire("refresh:" + email, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        ResponseCookie cookie = createCookie("refreshToken", refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        ResponseCookie cookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         String redirect = getRedirectUrl(request);
@@ -54,7 +55,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .sameSite("None")
                 .httpOnly(true)
                 .path("/")
-                .maxAge(maxAge)
+                .maxAge(Duration.ofMillis(maxAge).getSeconds())
                 .build();
     }
 }

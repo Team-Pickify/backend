@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.auth.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import jakarta.servlet.FilterChain;
@@ -20,13 +21,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Map;
 
 @RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private static final String CAN_NOT_READ_BODY = "인증 요청 본문을 읽을 수 없습니다.";
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60;
 
     private final AuthenticationManager authenticationManager;
     private final ObjectMapper objectMapper;
@@ -60,9 +61,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         String accessToken = jwtUtil.createAccessToken(principal, role);
         String refreshToken = jwtUtil.createRefreshToken(principal, role);
 
-        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.setHeader("Authorization", "Bearer " + accessToken);
-        ResponseCookie cookie = createCookie("refreshToken", refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        ResponseCookie cookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
@@ -77,7 +78,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .sameSite("None")
                 .httpOnly(true)
                 .path("/")
-                .maxAge(maxAge)
+                .maxAge(Duration.ofMillis(maxAge).getSeconds())
                 .build();
     }
 }
