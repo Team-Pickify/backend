@@ -60,6 +60,11 @@ class PlaceRepositoryImplTest {
 
         em.flush();
         em.clear();
+
+        System.out.println("Category1 Id: " + category1.getId());
+        System.out.println("Category2 Id: " + category2.getId());
+        System.out.println("Magazine1 Id: " + magazine1.getId());
+        System.out.println("Magazine2 Id: " + magazine2.getId());
     }
 
     @Test
