@@ -3,6 +3,7 @@ package com.pickyfy.pickyfy.web.controller;
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.service.AdminServiceImpl;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
+//import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
@@ -20,7 +21,7 @@ import java.util.List;
 @RequestMapping("/places")
 public class PlaceController implements PlaceControllerApi {
     private final PlaceServiceImpl placeService;
-    private final AdminServiceImpl adminService;
+
 
     /**
      * 특정 유저의 저장된 플레이스 조회
@@ -52,41 +53,41 @@ public class PlaceController implements PlaceControllerApi {
     /**
      * 플레이스 생성
      */
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> createPlace(
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart PlaceCreateRequest request) {
-        Long id = adminService.createPlace(request, images);
+        Long id = placeService.createPlace(request, images);
         return ApiResponse.onSuccess(id);
     }
 
     /**
      * 플레이스 업데이트
      */
-    @PatchMapping(value = "/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "admin/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updatePlace(
             @PathVariable Long placeId,
             @RequestPart("request") @Valid PlaceCreateRequest request,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
-        Long id = adminService.updatePlace(placeId, request, images);
+        Long id = placeService.updatePlace(placeId, request, images);
         return ApiResponse.onSuccess(id);
     }
 
     /**
      * 플레이스 삭제
      */
-    @DeleteMapping("/{placeId}")
+    @DeleteMapping("admin/{placeId}")
     public ApiResponse<Void> deletePlace(@PathVariable Long placeId) {
-        adminService.deletePlace(placeId);
+        placeService.deletePlace(placeId);
         return ApiResponse.onSuccess(null);
     }
 
     /**
      * 특정 플레이스의 이미지 삭제
      */
-    @DeleteMapping("/images/{placeImageId}")
+    @DeleteMapping("admin/images/{placeImageId}")
     public ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId) {
-        adminService.deletePlaceImages(placeImageId);
+        placeService.deletePlaceImages(placeImageId);
         return ApiResponse.onSuccess(null);
     }
 
@@ -103,6 +104,17 @@ public class PlaceController implements PlaceControllerApi {
                 .map(NearbyPlaceResponse::from)
                 .toList()
         );
+    }
+  
+    /**
+     * 관리자 페이지에서 모든 Place 조회
+     * @param
+     * @return
+     */
+    @GetMapping("/admin/")
+    public ApiResponse<List<PlaceSearchResponse>> getAllPlace() {
+        List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
+        return ApiResponse.onSuccess(adminAllPlace);
     }
 }
 

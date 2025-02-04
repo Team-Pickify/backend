@@ -81,6 +81,7 @@ public interface PlaceControllerApi {
             description = "현재 위치 기준으로 주변 장소를 검색하는 API입니다. 위도, 경도, 검색 반경을 필수로 입력하고, " +
                     "선택적으로 카테고리와 매거진 ID 리스트로 필터링할 수 있습니다."
     )
+  
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "COMMON200",
@@ -105,4 +106,11 @@ public interface PlaceControllerApi {
             )
             @Valid @RequestBody NearbyPlaceSearchRequest request
     );
+
+    @Operation(summary = "모든 Place 조회", description = "모든 Place를 조회 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @GetMapping("/admin/")
+    ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }
