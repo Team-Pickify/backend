@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "사용자")
 public interface UserControllerApi {
@@ -40,14 +39,7 @@ public interface UserControllerApi {
     ApiResponse<Long> updateUser(@RequestHeader("Authorization") String header,
                                  @Valid @ModelAttribute UserUpdateRequest request);
 
-    @Operation(summary = "로그아웃 API")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @PatchMapping("/logout")
-    ApiResponse<String> logout(@RequestHeader("Authorization") String header);
-
-    @Operation(summary = "회원탈퇴 API")
+    @Operation(summary = "회원탈퇴 API", description = "회원탈퇴 API입니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })

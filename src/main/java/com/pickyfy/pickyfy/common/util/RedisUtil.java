@@ -42,12 +42,4 @@ public class RedisUtil {
             throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
     }
-
-    public void blacklistAccessToken(String accessToken, long expiration) {
-        try {
-            setDataExpire(accessToken, "blacklisted", expiration);
-        } catch (DataAccessException e) {
-            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
-        }
-    }
 }
