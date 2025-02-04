@@ -34,4 +34,9 @@ public class PlaceCategory {
         this.place = place;
         this.category = category;
     }
+
+    public void updatePlaceCategory(Place place, Category category) {
+        this.place = place;
+        this.category = category;
+    }
 }

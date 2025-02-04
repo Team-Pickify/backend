@@ -74,11 +74,11 @@ public class SwaggerConfig {
                     Operation operation = new Operation()
                             .summary("로그인 API")
                             .description("""
-                                    로그인 API입니다. 
+                                    로그인 API입니다.
                                     - 사용자는 `email`을 입력하세요.
-                                    - 관리자는 `name`을 입력하세요. 
+                                    - 관리자는 `name`을 입력하세요.
                                     (JSON key는 항상 `principal`로 고정)
-                                        
+
                                     Cookie 값을 확인하려면:
                                     1. F12를 눌러 개발자 도구를 엽니다.
                                     2. Application 탭으로 이동합니다.
@@ -135,12 +135,12 @@ public class SwaggerConfig {
                     .description("""
                     카카오 인증을 요청합니다.
                     - 현재 서버에서 리다이렉션을 수행합니다.
-                    - Swagger는 AJAX 요청을 사용하므로, 브라우저가 302 Redirect를 
+                    - Swagger는 AJAX 요청을 사용하므로, 브라우저가 302 Redirect를
                       기본 페이지 이동으로 처리하지 않습니다.
                     - 테스트를 위해 브라우저에서 엔드포인트 URL을 직접 입력하여
                       카카오 로그인 화면으로 이동해야 합니다.
-                      
-                    추가적으로, ?redirect={URL} 쿼리 파라미터를 사용하여 
+
+                    추가적으로, ?redirect={URL} 쿼리 파라미터를 사용하여
                     로그인 완료 후 리다이렉트할 최종 URL을 지정해야 합니다.
                     - 예: /auth/oauth2/kakao?redirect=http://localhost:8080/home
                     - 지정된 redirect URL로 최종 리다이렉션됩니다.
