@@ -9,6 +9,7 @@ import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserUpdateResponse;
+import jakarta.mail.Multipart;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -35,10 +36,11 @@ public class UserController implements UserControllerApi{
     @PatchMapping("/update")
     public ApiResponse<UserUpdateResponse> updateUser(
             @RequestHeader("Authorization") String header,
+            @RequestPart(value = "image", required = false) Multipart image,
             @Valid @RequestBody UserUpdateRequest request
     ){
         String token = extractToken(header);
-        UserUpdateResponse response = userService.updateUser(token, request);
+        UserUpdateResponse response = userService.updateUser(token, request, image);
         return ApiResponse.onSuccess(response);
     }
 
@@ -53,7 +55,7 @@ public class UserController implements UserControllerApi{
     public ApiResponse<String> signOut(@RequestHeader("Authorization") String header){
         String token = extractToken(header);
         userService.signOut(token);
-        return ApiResponse.onSuccess("회원 탈퇴 성공");
+        return ApiResponse.onSuccess("회원 탈퇴에 성공했습니다.");
     }
 
     @PostMapping("/verify-by-email")
