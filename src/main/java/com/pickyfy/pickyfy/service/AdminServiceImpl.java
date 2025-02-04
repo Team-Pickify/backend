@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class AdminServiceImpl implements AdminService{
-
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
     private final AdminRepository adminRepository;
+
     @Override
     @Transactional
     public void logout(String accessToken){
@@ -26,6 +26,5 @@ public class AdminServiceImpl implements AdminService{
         String redisKey = Constant.REDIS_KEY_PREFIX + adminName;
         redisUtil.deleteRefreshToken(redisKey);
     }
-
 }
 

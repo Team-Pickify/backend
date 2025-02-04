@@ -24,17 +24,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlaceServiceImpl implements PlaceService {
 
-    final private SavedPlaceRepository savedPlaceRepository;
-    final private PlaceRepository placeRepository;
-    final private PlaceSavedPlaceRepository placeSavedPlaceRepository;
-    final private PlaceImageRepository placeImageRepository;
-    final private UserRepository userRepository;
-    final private CategoryRepository categoryRepository;
-    final private MagazineRepository magazineRepository;
-    final private PlaceMagazineRepository placeMagazineRepository;
-    final private S3Service s3Service;
-    final private PlaceCategoryRepository placeCategoryRepository;
-
+    private final SavedPlaceRepository savedPlaceRepository;
+    private final PlaceRepository placeRepository;
+    private final PlaceSavedPlaceRepository placeSavedPlaceRepository;
+    private final PlaceImageRepository placeImageRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final MagazineRepository magazineRepository;
+    private final PlaceMagazineRepository placeMagazineRepository;
+    private final S3Service s3Service;
+    private final PlaceCategoryRepository placeCategoryRepository;
 
     /**
      * 특정 유저가 저장한 Place 전체 조회
@@ -91,7 +90,6 @@ public class PlaceServiceImpl implements PlaceService {
                 })
                 .collect(Collectors.toList());
     }
-
 
     /**
      * 특정 플레이스 조회
@@ -217,7 +215,6 @@ public class PlaceServiceImpl implements PlaceService {
 
         newPlace = placeRepository.save(newPlace);
 
-
         PlaceCategory newPlaceCategory = PlaceCategory.builder()
                 .category(category)
                 .place(newPlace)
@@ -251,8 +248,6 @@ public class PlaceServiceImpl implements PlaceService {
         return newPlace.getId();
     }
 
-
-
     /**
      * 관리자 기능(Place 수정)
      * @param placeId
@@ -270,11 +265,8 @@ public class PlaceServiceImpl implements PlaceService {
                 request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
 
         Category category = categoryRepository.findById(request.categoryId()).get();
-
         Magazine magazine = magazineRepository.findById(request.magazineId()).get();
-
         PlaceCategory placeCategory = placeCategoryRepository.findById(placeId).get();
-
         PlaceMagazine placeMagazine = placeMagazineRepository.findById(placeId).get();
 
         placeCategory.updatePlaceCategory(place, category);
@@ -283,7 +275,6 @@ public class PlaceServiceImpl implements PlaceService {
         place.updateImages(imageList, s3Service);
         return place.getId();
     }
-
 
     /**
      * Place 삭제
@@ -308,9 +299,7 @@ public class PlaceServiceImpl implements PlaceService {
         placeSavedPlaceRepository.delete(placeSavedPlaces);
 
         // 4. SavedPlace 삭제 (placeSavedPlace가 먼저 삭제된 후 가능)
-
         savedPlaceRepository.delete(placeSavedPlaces.getSavedPlace());
-
 
         // 5. PlaceImage 삭제 (S3에서도 삭제)
         for (PlaceImage image : place.getPlaceImages()) {
@@ -321,8 +310,6 @@ public class PlaceServiceImpl implements PlaceService {
         // 6. Place 삭제
         placeRepository.delete(place);
     }
-
-
 
     /**
      * PlaceImage 삭제
@@ -337,7 +324,6 @@ public class PlaceServiceImpl implements PlaceService {
         s3Service.removeFile(placeImage.getUrl());
         placeImageRepository.delete(placeImage);
     }
-
 
     @Override
     @Transactional(readOnly = true)
