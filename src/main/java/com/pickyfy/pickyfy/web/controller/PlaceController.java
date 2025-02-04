@@ -1,18 +1,15 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.service.AdminServiceImpl;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 //import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
-
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
+import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.service.PlaceServiceImpl;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-//import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -94,6 +91,21 @@ public class PlaceController implements PlaceControllerApi {
         return ApiResponse.onSuccess(null);
     }
 
+    @PostMapping("/nearby")
+    public ApiResponse<List<NearbyPlaceResponse>> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
+        return ApiResponse.onSuccess(
+                placeService.searchNearbyPlaces(
+                        request.latitude(),
+                        request.longitude(),
+                        request.distance(),
+                        request.categoryIds(),
+                        request.magazineIds()
+                ).stream()
+                .map(NearbyPlaceResponse::from)
+                .toList()
+        );
+    }
+  
     /**
      * 관리자 페이지에서 모든 Place 조회
      * @param
@@ -104,7 +116,5 @@ public class PlaceController implements PlaceControllerApi {
         List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
         return ApiResponse.onSuccess(adminAllPlace);
     }
-
-
 }
 
