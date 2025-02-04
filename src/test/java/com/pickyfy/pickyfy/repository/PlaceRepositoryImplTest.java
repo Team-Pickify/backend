@@ -28,14 +28,19 @@ class PlaceRepositoryImplTest {
     @Autowired
     private EntityManager em;
 
+    private Category category1;
+    private Category category2;
+    private Magazine magazine1;
+    private Magazine magazine2;
+
     @BeforeEach
     void setUp() {
         // 테스트 데이터 설정
-        Category category1 = createCategory(CategoryType.RESTAURANT);
-        Category category2 = createCategory(CategoryType.CAFE_BAKERY);
+        category1 = createCategory(CategoryType.RESTAURANT);
+        category2 = createCategory(CategoryType.CAFE_BAKERY);
 
-        Magazine magazine1 = createMagazine("맛집 매거진");
-        Magazine magazine2 = createMagazine("카페 매거진");
+        magazine1 = createMagazine("맛집 매거진");
+        magazine2 = createMagazine("카페 매거진");
 
         // 서울 강남역 근처의 좌표
         Place place1 = createPlace("테스트 장소 1",
@@ -65,8 +70,8 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("37.498095"), // 강남역 위도
                 new BigDecimal("127.027610"), // 강남역 경도
                 500.0, // 1km 반경
-                List.of(1L, 2L), // 카테고리 ID
-                List.of(1L)  // 매거진 ID
+                List.of(category1.getId(), category2.getId()), // 카테고리 ID
+                List.of(category1.getId())  // 매거진 ID
         );
 
         // when
@@ -85,7 +90,7 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("37.498095"),
                 new BigDecimal("127.027610"),
                 500.0, // 500m 반경
-                List.of(1L, 2L),
+                List.of(category1.getId(), category2.getId()),
                 null
         );
 
@@ -105,7 +110,7 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("127.027610"),
                 500.0, // 500m 반경
                 null,
-                List.of(1L)
+                List.of(category1.getId())
         );
 
         // when
@@ -123,7 +128,7 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("37.498095"),
                 new BigDecimal("127.027610"),
                 500.0, // 500m 반경
-                List.of(3L),
+                List.of(999L),
                 null
 
         );
