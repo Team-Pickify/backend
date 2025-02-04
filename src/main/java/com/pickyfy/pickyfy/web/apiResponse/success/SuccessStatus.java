@@ -41,7 +41,7 @@ public enum SuccessStatus implements BaseSuccessCode {
     private final String message;
 
     @Override
-    public SuccessResponse getReasonHttpStatus(){
+    public SuccessResponse getReason(){
         return SuccessResponse.builder()
                 .message(message)
                 .code(code)

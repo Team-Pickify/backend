@@ -11,7 +11,7 @@ public class GeneralException extends RuntimeException {
 
     private BaseErrorCode code;
 
-    public ErrorResponse getErrorReasonHttpStatus(){
-        return this.code.getReasonHttpStatus();
+    public ErrorResponse getErrorReason(){
+        return this.code.getReason();
     }
 }

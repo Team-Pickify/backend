@@ -53,7 +53,7 @@ public enum ErrorStatus implements BaseErrorCode {
     private final String message;
 
     @Override
-    public ErrorResponse getReasonHttpStatus(){
+    public ErrorResponse getReason(){
         return ErrorResponse.builder()
                 .message(message)
                 .code(code)
