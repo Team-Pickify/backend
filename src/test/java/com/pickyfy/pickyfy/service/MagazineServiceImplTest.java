@@ -38,7 +38,6 @@ class MagazineServiceImplTest {
         magazine = Magazine.builder()
                 .title("테스트 매거진")
                 .iconUrl("test-icon.png")
-                .content("테스트 내용입니다.")
                 .build();
 
         // Reflection을 사용해 id 설정
@@ -52,8 +51,7 @@ class MagazineServiceImplTest {
         // Given
         MagazineCreateRequest request = new MagazineCreateRequest(
                 "테스트 매거진",
-                "test-icon.png",
-                "테스트 내용입니다."
+                "test-icon.png"
         );
         given(magazineRepository.save(any(Magazine.class))).willReturn(magazine);
 
@@ -77,7 +75,6 @@ class MagazineServiceImplTest {
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.title()).isEqualTo("테스트 매거진");
         assertThat(response.iconUrl()).isEqualTo("test-icon.png");
-        assertThat(response.content()).isEqualTo("테스트 내용입니다.");
     }
 
     @Test
@@ -102,11 +99,10 @@ class MagazineServiceImplTest {
 
         // Then
         assertThat(responses).hasSize(1);
-        MagazineResponse response = responses.get(0);
+        MagazineResponse response = responses.getFirst();
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.title()).isEqualTo("테스트 매거진");
         assertThat(response.iconUrl()).isEqualTo("test-icon.png");
-        assertThat(response.content()).isEqualTo("테스트 내용입니다.");
     }
 
     @Test
@@ -114,9 +110,7 @@ class MagazineServiceImplTest {
         // Given
         MagazineUpdateRequest request = new MagazineUpdateRequest(
                 "수정된 매거진",
-                "updated-icon.png",
-                "수정된 내용입니다."
-        );
+                "updated-icon.png");
         given(magazineRepository.findById(1L)).willReturn(Optional.of(magazine));
 
         // When
@@ -125,7 +119,6 @@ class MagazineServiceImplTest {
         // Then
         assertThat(magazine.getTitle()).isEqualTo("수정된 매거진");
         assertThat(magazine.getIconUrl()).isEqualTo("updated-icon.png");
-        assertThat(magazine.getContent()).isEqualTo("수정된 내용입니다.");
     }
 
     @Test
@@ -133,9 +126,7 @@ class MagazineServiceImplTest {
         // Given
         MagazineUpdateRequest request = new MagazineUpdateRequest(
                 "수정된 매거진",
-                "updated-icon.png",
-                "수정된 내용입니다."
-        );
+                "updated-icon.png");
         given(magazineRepository.findById(1L)).willReturn(Optional.empty());
 
         // When/Then
