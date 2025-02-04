@@ -1,60 +1,45 @@
 package com.pickyfy.pickyfy.repository;
 
 import com.pickyfy.pickyfy.domain.Place;
+import com.pickyfy.pickyfy.domain.QPlace;
+import com.pickyfy.pickyfy.domain.QPlaceCategory;
+import com.pickyfy.pickyfy.domain.QPlaceMagazine;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.querydsl.core.types.dsl.NumberTemplate;
-import com.querydsl.core.types.dsl.Expressions;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import static com.pickyfy.pickyfy.domain.QCategory.category;
 import static com.pickyfy.pickyfy.domain.QMagazine.magazine;
 import static com.pickyfy.pickyfy.domain.QPlace.place;
-import static com.pickyfy.pickyfy.domain.QPlaceCategory.placeCategory;
-import static com.pickyfy.pickyfy.domain.QPlaceMagazine.placeMagazine;
 
 @Repository
 @RequiredArgsConstructor
 public class PlaceRepositoryImpl implements PlaceRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-    private static final double EARTH_RADIUS_METERS = 6371008.7714; // WGS-84 평균 반경
 
     @Override
     public List<Place> searchNearbyPlaces(NearbyPlaceSearchCondition condition) {
+        QPlace place = QPlace.place;
+        QPlaceCategory placeCategory = QPlaceCategory.placeCategory;
+        QPlaceMagazine placeMagazine = QPlaceMagazine.placeMagazine;
+
         JPAQuery<Place> query = queryFactory
                 .selectFrom(place)
+                .join(place.placeCategories, placeCategory)
+                .join(placeCategory.category, category)
+                .join(place.placeMagazines, placeMagazine)
+                .join(placeMagazine.magazine, magazine)
+                .where(
+                        categoryIdsIn(condition.categoryIds()),
+                        magazineIdsIn(condition.magazineIds())
+                )
                 .distinct();
 
-        // 카테고리 필터링 - LEFT JOIN으로 변경하고 조건을 서브쿼리로 처리
-        if (condition.categoryIds() != null && !condition.categoryIds().isEmpty()) {
-            query.leftJoin(place.placeCategories, placeCategory)
-                    .leftJoin(placeCategory.category, category)
-                    .where(place.id.in(
-                            JPAExpressions
-                                    .select(placeCategory.place.id)
-                                    .from(placeCategory)
-                                    .where(placeCategory.category.id.in(condition.categoryIds()))
-                    ));
-        }
-
-        // 매거진 필터링 - LEFT JOIN으로 변경하고 조건을 서브쿼리로 처리
-        if (condition.magazineIds() != null && !condition.magazineIds().isEmpty()) {
-            query.leftJoin(place.placeMagazines, placeMagazine)
-                    .leftJoin(placeMagazine.magazine, magazine)
-                    .where(place.id.in(
-                            JPAExpressions
-                                    .select(placeMagazine.place.id)
-                                    .from(placeMagazine)
-                                    .where(placeMagazine.magazine.id.in(condition.magazineIds()))
-                    ));
-        }
 
         // 거리 조건 추가
         query.where(locationWithinDistance(condition.latitude(),
