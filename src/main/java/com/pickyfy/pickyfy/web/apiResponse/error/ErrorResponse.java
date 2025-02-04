@@ -7,13 +7,11 @@ import org.springframework.http.HttpStatus;
 @Getter
 @Builder
 public class ErrorResponse {
-    private HttpStatus httpStatus;
     private final boolean isSuccess;
     private final String code;
     private final String message;
 
-    private ErrorResponse(HttpStatus httpStatus, boolean isSuccess, String code, String message) {
-        this.httpStatus = httpStatus;
+    private ErrorResponse(boolean isSuccess, String code, String message) {
         this.isSuccess = isSuccess;
         this.code = code;
         this.message = message;
