@@ -147,7 +147,7 @@ class PlaceRepositoryImplTest {
     }
 
     private Magazine createMagazine(String name) {
-        Magazine magazine = Magazine.builder().title(name).content("내용").build();
+        Magazine magazine = Magazine.builder().title(name).build();
         em.persist(magazine);
         return magazine;
     }
