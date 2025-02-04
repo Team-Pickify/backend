@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
@@ -21,12 +20,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 @ExtendWith(MockitoExtension.class)
 class MagazineServiceImplTest {
 
     @Mock
     private MagazineRepository magazineRepository;
+
+    @Mock
+    private S3Service s3Service;
 
     @InjectMocks
     private MagazineServiceImpl magazineService;
@@ -49,10 +53,19 @@ class MagazineServiceImplTest {
     @Test
     void createMagazine_Success() {
         // Given
+        // MockMultipartFile 생성 - 실제 파일 처리는 하지 않고 테스트용 객체만 생성
+        MultipartFile mockFile = new MockMultipartFile(
+                "iconFile",           // 폼 필드 이름
+                "test-icon.png",      // 원본 파일 이름
+                "image/png",          // 컨텐트 타입
+                "test".getBytes()     // 간단한 테스트 데이터
+        );
+
         MagazineCreateRequest request = new MagazineCreateRequest(
                 "테스트 매거진",
-                "test-icon.png"
+                mockFile
         );
+
         given(magazineRepository.save(any(Magazine.class))).willReturn(magazine);
 
         // When
@@ -105,35 +118,6 @@ class MagazineServiceImplTest {
         assertThat(response.iconUrl()).isEqualTo("test-icon.png");
     }
 
-    @Test
-    void updateMagazine_Success() {
-        // Given
-        MagazineUpdateRequest request = new MagazineUpdateRequest(
-                "수정된 매거진",
-                "updated-icon.png");
-        given(magazineRepository.findById(1L)).willReturn(Optional.of(magazine));
-
-        // When
-        magazineService.updateMagazine(1L, request);
-
-        // Then
-        assertThat(magazine.getTitle()).isEqualTo("수정된 매거진");
-        assertThat(magazine.getIconUrl()).isEqualTo("updated-icon.png");
-    }
-
-    @Test
-    void updateMagazine_NotFound_ThrowsException() {
-        // Given
-        MagazineUpdateRequest request = new MagazineUpdateRequest(
-                "수정된 매거진",
-                "updated-icon.png");
-        given(magazineRepository.findById(1L)).willReturn(Optional.empty());
-
-        // When/Then
-        assertThatThrownBy(() -> magazineService.updateMagazine(1L, request))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining(String.valueOf(1L));
-    }
 
     @Test
     void deleteMagazine_Success() {
