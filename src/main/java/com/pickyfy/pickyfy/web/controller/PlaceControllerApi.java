@@ -74,4 +74,10 @@ public interface PlaceControllerApi {
     ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
 
 
+    @Operation(summary = "모든 Place 조회", description = "모든 Place를 조회 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @GetMapping("/admin/")
+    ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }
