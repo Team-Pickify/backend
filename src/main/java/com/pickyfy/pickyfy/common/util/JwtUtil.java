@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Slf4j
@@ -34,9 +34,6 @@ public class JwtUtil {
 
     private static final String PRINCIPAL = "principal";
     private static final String ROLE = "ROLE";
-    private static final long EMAIL_TOKEN_EXPIRATION_TIME = 5 * 60;
-    private static final long ACCESS_TOKEN_EXPIRATION_TIME = 15 * 60 * 1000;
-    private static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60;
 
     private final Key key;
 
@@ -48,22 +45,22 @@ public class JwtUtil {
     }
 
     public String createAccessToken(String principal, String role) {
-        return createToken(principal, role, ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
+        return createToken(principal, role, Constant.ACCESS_TOKEN_EXPIRATION_TIME, Type.ACCESS.getType());
     }
 
     public String createRefreshToken(String principal, String role){
-        return createToken(principal, role, REFRESH_TOKEN_EXPIRATION_TIME, Type.REFRESH.getType());
+        return createToken(principal, role, Constant.REFRESH_TOKEN_EXPIRATION_TIME, Type.REFRESH.getType());
     }
 
     public String createEmailToken(String principal) {
-        return createToken(principal, "USER", EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
+        return createToken(principal, "USER", Constant.EMAIL_TOKEN_EXPIRATION_TIME, Type.EMAIL.getType());
     }
 
     private String createToken(String principal, String role, long expireTime, String type) {
 
         Date now = new Date();
 
-        Date tokenValidity = new Date(now.getTime() + expireTime * 1000);
+        Date tokenValidity = new Date(now.getTime() + expireTime);
 
         return Jwts.builder()
                 .claim("tokenType", type)

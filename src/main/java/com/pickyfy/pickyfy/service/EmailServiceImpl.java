@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.service;
 
 import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
@@ -28,7 +29,6 @@ public class EmailServiceImpl implements EmailService {
     private static final String EMAIL_TITLE = "[Pickyfy] 인증코드";
     private static final String VARIABLE_NAME = "code";
     private static final String TEMPLATE = "mail";
-    private static final long EXPIRATION_TIME = 5 * 60;
 
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
@@ -79,7 +79,7 @@ public class EmailServiceImpl implements EmailService {
             throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
 
-        redisUtil.setDataExpire("email:" + email, code, EXPIRATION_TIME);
+        redisUtil.setDataExpire("email:" + email, code, Constant.EMAIL_TOKEN_EXPIRATION_TIME);
     }
 
     private MimeMessage createMimeMessage(String code, String email) throws MessagingException {
