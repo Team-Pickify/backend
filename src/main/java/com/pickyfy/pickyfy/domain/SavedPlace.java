@@ -30,7 +30,7 @@ public class SavedPlace extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "savedPlace")
+    @OneToMany(mappedBy = "savedPlace", cascade = CascadeType.ALL)
     private List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
 
     @Builder
