@@ -296,28 +296,9 @@ public class PlaceServiceImpl implements PlaceService {
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
-        // 1. PlaceCategory 삭제
-        PlaceCategory placeCategories = placeCategoryRepository.findByPlaceId(placeId);
-        placeCategoryRepository.delete(placeCategories);
-
-        // 2. PlaceMagazine 삭제
-        PlaceMagazine placeMagazines = placeMagazineRepository.findByPlaceId(placeId);
-        placeMagazineRepository.delete(placeMagazines);
-
-        // 3. PlaceSavedPlace 삭제
-        PlaceSavedPlace placeSavedPlaces = placeSavedPlaceRepository.findByPlaceId(placeId);
-        placeSavedPlaceRepository.delete(placeSavedPlaces);
-
-        // 4. SavedPlace 삭제 (placeSavedPlace가 먼저 삭제된 후 가능)
-
-        savedPlaceRepository.delete(placeSavedPlaces.getSavedPlace());
-
-
-        // 5. PlaceImage 삭제 (S3에서도 삭제)
         for (PlaceImage image : place.getPlaceImages()) {
             s3Service.removeFile(image.getUrl());
         }
-        placeImageRepository.deleteAll(place.getPlaceImages());
 
         // 6. Place 삭제
         placeRepository.delete(place);
