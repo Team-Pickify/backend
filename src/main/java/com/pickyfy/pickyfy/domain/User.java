@@ -34,7 +34,7 @@ public class User extends BaseTimeEntity {
 
     private Long providerId;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<SavedPlace> savedPlaces = new ArrayList<>();
 
     @Builder
