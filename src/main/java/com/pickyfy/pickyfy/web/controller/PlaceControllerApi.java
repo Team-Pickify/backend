@@ -1,7 +1,6 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
@@ -81,7 +80,7 @@ public interface PlaceControllerApi {
             description = "현재 위치 기준으로 주변 장소를 검색하는 API입니다. 위도, 경도, 검색 반경을 필수로 입력하고, " +
                     "선택적으로 카테고리와 매거진 ID 리스트로 필터링할 수 있습니다."
     )
-  
+
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "COMMON200",

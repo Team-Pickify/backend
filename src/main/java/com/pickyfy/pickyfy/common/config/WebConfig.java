@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.config;
+package com.pickyfy.pickyfy.common.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +11,7 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private OctetStreamReadMsgConverter octetStreamReadMsgConverter;
+    private final OctetStreamReadMsgConverter octetStreamReadMsgConverter;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

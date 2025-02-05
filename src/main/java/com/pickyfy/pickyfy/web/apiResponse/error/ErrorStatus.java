@@ -1,13 +1,14 @@
-package com.pickyfy.pickyfy.apiPayload.code.status;
+package com.pickyfy.pickyfy.web.apiResponse.error;
 
-import com.pickyfy.pickyfy.apiPayload.code.BaseErrorCode;
-import com.pickyfy.pickyfy.apiPayload.code.dto.ErrorResponseDTO;
+import com.pickyfy.pickyfy.web.apiResponse.common.BaseErrorCode;
+import com.pickyfy.pickyfy.web.apiResponse.common.StatusCode;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum ErrorStatus implements BaseErrorCode {
 
     _INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, StatusCode.COMMON.getCode(500), "서버 에러, 관리자에게 문의 바랍니다."),
@@ -52,12 +53,11 @@ public enum ErrorStatus implements BaseErrorCode {
     private final String message;
 
     @Override
-    public ErrorResponseDTO getReasonHttpStatus(){
-        return ErrorResponseDTO.builder()
+    public ErrorResponse getReason(){
+        return ErrorResponse.builder()
                 .message(message)
                 .code(code)
                 .isSuccess(false)
-                .httpStatus(httpStatus)
                 .build();
     }
 }

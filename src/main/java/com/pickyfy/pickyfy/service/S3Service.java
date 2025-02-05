@@ -17,6 +17,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 @Service
 public class S3Service {
+
     private final AmazonS3Client amazonS3Client;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -63,6 +64,7 @@ public class S3Service {
         String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
         return UUID.randomUUID() + extension; // 고유 파일 이름 생성
     }
+
     //검증로직 필요하면 사용 가능
     private void validateFileFormat(MultipartFile multipartFile) {
         String contentType = multipartFile.getContentType();
@@ -70,6 +72,7 @@ public class S3Service {
             throw new IllegalArgumentException("지원하지 않는 파일 형식입니다.");
         }
     }
+
     //S3 파일 삭제가 필요한 경우
     public void removeFile(String fileUrl) {
         String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);

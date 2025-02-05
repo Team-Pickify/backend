@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
-import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
@@ -24,18 +24,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlaceServiceImpl implements PlaceService {
 
-    final private SavedPlaceRepository savedPlaceRepository;
-    final private PlaceRepository placeRepository;
-    final private PlaceSavedPlaceRepository placeSavedPlaceRepository;
-    final private PlaceImageRepository placeImageRepository;
-    final private UserRepository userRepository;
-    final private PlaceCategoryRepository placeCategoryRepositry;
-    final private CategoryRepository categoryRepository;
-    final private MagazineRepository magazineRepository;
-    final private PlaceMagazineRepository placeMagazineRepository;
-    final private S3Service s3Service;
-    final private PlaceCategoryRepository placeCategoryRepository;
-
+    private final SavedPlaceRepository savedPlaceRepository;
+    private final PlaceRepository placeRepository;
+    private final PlaceSavedPlaceRepository placeSavedPlaceRepository;
+    private final PlaceImageRepository placeImageRepository;
+    private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
+    private final MagazineRepository magazineRepository;
+    private final PlaceMagazineRepository placeMagazineRepository;
+    private final S3Service s3Service;
+    private final PlaceCategoryRepository placeCategoryRepository;
 
     /**
      * 특정 유저가 저장한 Place 전체 조회
@@ -55,10 +53,10 @@ public class PlaceServiceImpl implements PlaceService {
                     PlaceSavedPlace mappingPlace = placeSavedPlaceRepository.findBySavedPlaceId(savedPlaceId);
 
 
-                    Place userSavePlace = placeRepository.findById(mappingPlace.getPlace().getId()).orElseThrow(() -> new EntityNotFoundException("Place not found"));;
+                    Place userSavePlace = placeRepository.findById(mappingPlace.getPlace().getId()).orElseThrow(() -> new EntityNotFoundException("Place not found"));
 
                     // 유저가 저장한 Place 로 Category 조회
-                    PlaceCategory savedPlaceCategory = placeCategoryRepositry.findByPlaceId(userSavePlace.getId());
+                    PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavePlace.getId());
                     Optional<Category> savedCategory = categoryRepository.findById(savedPlaceCategory.getCategory().getId());
 
                     // 유저가 저장한 Place 로 Magazine 조회
@@ -108,7 +106,7 @@ public class PlaceServiceImpl implements PlaceService {
         List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
 
         //PlaceID 로 category 조회
-        PlaceCategory searchPlaceCategory = placeCategoryRepositry.findByPlaceId(searchPlace.getId());
+        PlaceCategory searchPlaceCategory = placeCategoryRepository.findByPlaceId(searchPlace.getId());
         Optional<Category> searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId());
         String categoryName = searchCategory.get().getName();
 
@@ -129,7 +127,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .instagramLink(searchPlace.getInstagramLink())
                 .categoryName(categoryName)
                 .magazineTitle(searchMagazineTitle)
-                .instagramLink(searchPlace.getNaverplaceLink())
+                .instagramLink(searchPlace.getInstagramLink())
                 .naverLink(searchPlace.getNaverplaceLink())
                 .build();
     }
@@ -189,7 +187,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         return placeRepository.searchNearbyPlaces(condition);
     }
-  
+
     /**
      * 관리자 기능 (Place 생성)
      * @param request
@@ -221,7 +219,6 @@ public class PlaceServiceImpl implements PlaceService {
                 .build();
 
         newPlace = placeRepository.save(newPlace);
-
 
         PlaceCategory newPlaceCategory = PlaceCategory.builder()
                 .category(category)
@@ -256,8 +253,6 @@ public class PlaceServiceImpl implements PlaceService {
         return newPlace.getId();
     }
 
-
-
     /**
      * 관리자 기능(Place 수정)
      * @param placeId
@@ -275,7 +270,6 @@ public class PlaceServiceImpl implements PlaceService {
                 request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
 
         Category category = categoryRepository.findById(request.categoryId()).get();
-
         Magazine magazine = magazineRepository.findById(request.magazineId()).get();
 
         PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);

@@ -1,9 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
-import com.pickyfy.pickyfy.service.AdminServiceImpl;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
-//import com.pickyfy.pickyfy.auth.custom.CustomUserDetails;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
@@ -105,7 +103,7 @@ public class PlaceController implements PlaceControllerApi {
                 .toList()
         );
     }
-  
+
     /**
      * 관리자 페이지에서 모든 Place 조회
      * @param
