@@ -11,8 +11,8 @@ import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,14 +33,13 @@ public class UserController implements UserControllerApi{
         return ApiResponse.onSuccess(response);
     }
 
-    @PatchMapping("/update")
+    @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updateUser(
             @RequestHeader("Authorization") String header,
-            @RequestPart(value = "image", required = false) MultipartFile image,
-            @Valid @RequestBody UserUpdateRequest request
+            @Valid @ModelAttribute UserUpdateRequest request
     ){
         String token = TokenExtractor.extract(header);
-        Long userId = userService.updateUser(token, request, image);
+        Long userId = userService.updateUser(token, request);
         return ApiResponse.onSuccess(userId);
     }
 

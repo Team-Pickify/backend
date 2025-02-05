@@ -43,12 +43,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public Long updateUser(String accessToken, UserUpdateRequest request, MultipartFile image){
+    public Long updateUser(String accessToken, UserUpdateRequest request){
         User user = getAuthenticatedUser(accessToken);
+        MultipartFile profileImage = request.profileImage();
 
         User updatedUser = user.toBuilder()
                 .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
-                .profileImage(s3Service.upload(image) != null ? s3Service.upload(image) : user.getProfileImage())
+                .profileImage(profileImage != null ? s3Service.upload(profileImage) : user.getProfileImage())
                 .build();
 
         userRepository.save(updatedUser);

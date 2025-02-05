@@ -38,8 +38,7 @@ public interface UserControllerApi {
     })
     @PatchMapping("/update")
     ApiResponse<Long> updateUser(@RequestHeader("Authorization") String header,
-                                               @RequestPart(value = "image", required = false) MultipartFile image,
-                                               @Valid @RequestBody UserUpdateRequest request);
+                                 @Valid @ModelAttribute UserUpdateRequest request);
 
     @Operation(summary = "로그아웃 API")
     @ApiResponses({
