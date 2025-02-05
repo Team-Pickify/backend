@@ -19,8 +19,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
-
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -74,9 +72,7 @@ public class UserServiceImpl implements UserService {
     public void resetPassword(PasswordResetRequest request){
         User user = findUserByEmail(request.email());
 
-        if (!Objects.equals(request.newPassword(), request.passwordConfirmation())){
-            throw new ExceptionHandler(ErrorStatus.PASSWORD_CONFIRMATION_FAIL);
-        }
+        validateEmailToken(request.email(), request.emailToken());
 
         User updatedUser = user.toBuilder()
                 .password(passwordEncoder.encode(request.newPassword()))
