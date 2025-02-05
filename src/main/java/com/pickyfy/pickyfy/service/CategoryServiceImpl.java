@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
-import com.pickyfy.pickyfy.apiPayload.code.status.ErrorStatus;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.Category;
 import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;

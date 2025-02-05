@@ -75,7 +75,6 @@ public class Place extends BaseTimeEntity {
         this.latitude = latitude;
         this.longitude = longitude;
 
-
         if (images != null && !images.isEmpty()) {
             int index = 0;
             for (MultipartFile image : images) {
@@ -84,7 +83,6 @@ public class Place extends BaseTimeEntity {
             }
         }
     }
-
 
     public void updatePlace(String name, String address, String shortDescription,
                             String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
@@ -98,12 +96,10 @@ public class Place extends BaseTimeEntity {
 
     }
 
-
     public void updateImages(List<MultipartFile> newImages, S3Service s3Service) {
-
         int currentSize = this.placeImages.size();
-
         int availableSlots = 5 - currentSize;
+
         if (availableSlots <= 0) {
             return;
         }
@@ -113,7 +109,4 @@ public class Place extends BaseTimeEntity {
             this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(currentSize + i).build());
         }
     }
-
-
-
 }

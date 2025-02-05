@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.config;
+package com.pickyfy.pickyfy.common.config;
 
 import com.pickyfy.pickyfy.auth.filter.CustomLoginFilter;
 import io.swagger.v3.oas.models.Components;

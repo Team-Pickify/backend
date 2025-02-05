@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.config;
+package com.pickyfy.pickyfy.common.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

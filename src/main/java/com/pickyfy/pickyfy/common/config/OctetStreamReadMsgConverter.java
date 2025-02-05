@@ -1,4 +1,4 @@
-package com.pickyfy.pickyfy.config;
+package com.pickyfy.pickyfy.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
