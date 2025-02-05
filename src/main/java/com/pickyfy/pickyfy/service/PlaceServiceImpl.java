@@ -86,10 +86,13 @@ public class PlaceServiceImpl implements PlaceService {
                             .placeImageUrl(placeImages)
                             .categoryName(savedCategory.get().getName())
                             .magazineTitle(savedMagazine.get().getTitle())
+                            .instagramLink(userSavePlace.getInstagramLink())
+                            .naverLink(userSavePlace.getNaverplaceLink())
                             .build();
                 })
                 .collect(Collectors.toList());
     }
+
 
     /**
      * 특정 플레이스 조회
@@ -121,9 +124,10 @@ public class PlaceServiceImpl implements PlaceService {
                 .updatedAt(searchPlace.getUpdatedAt())
                 .longitude(searchPlace.getLongitude())
                 .latitude(searchPlace.getLatitude())
-                .instagramLink(searchPlace.getInstagramLink())
                 .categoryName(categoryName)
                 .magazineTitle(searchMagazineTitle)
+                .instagramLink(searchPlace.getInstagramLink())
+                .naverLink(searchPlace.getNaverplaceLink())
                 .build();
     }
 
@@ -266,15 +270,21 @@ public class PlaceServiceImpl implements PlaceService {
 
         Category category = categoryRepository.findById(request.categoryId()).get();
         Magazine magazine = magazineRepository.findById(request.magazineId()).get();
-        PlaceCategory placeCategory = placeCategoryRepository.findById(placeId).get();
-        PlaceMagazine placeMagazine = placeMagazineRepository.findById(placeId).get();
+
+        PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
+
+        PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(placeId);
 
         placeCategory.updatePlaceCategory(place, category);
         placeMagazine.updatePlaceMagazine(place, magazine);
 
-        place.updateImages(imageList, s3Service);
+        if(imageList != null && !imageList.isEmpty()) {
+            place.updateImages(imageList, s3Service);
+        }
+
         return place.getId();
     }
+
 
     /**
      * Place 삭제
@@ -343,6 +353,8 @@ public class PlaceServiceImpl implements PlaceService {
                             .placeImageUrl(placeImages)
                             .categoryName(categoryName)
                             .magazineTitle(magazineTitle)
+                            .instagramLink(place.getInstagramLink())
+                            .naverLink(place.getNaverplaceLink())
                             .build();
                 })
                 .collect(Collectors.toList());

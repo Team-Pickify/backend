@@ -20,7 +20,7 @@ public record PlaceSearchResponse(
         LocalDateTime updatedAt,
         List<String> placeImageUrl,
         String categoryName,
-        String magazineTitle
-
+        String magazineTitle,
+        String naverLink
 ) {
 }
