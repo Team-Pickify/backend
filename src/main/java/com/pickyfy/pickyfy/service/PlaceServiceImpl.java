@@ -124,7 +124,6 @@ public class PlaceServiceImpl implements PlaceService {
                 .updatedAt(searchPlace.getUpdatedAt())
                 .longitude(searchPlace.getLongitude())
                 .latitude(searchPlace.getLatitude())
-                .instagramLink(searchPlace.getInstagramLink())
                 .categoryName(categoryName)
                 .magazineTitle(searchMagazineTitle)
                 .instagramLink(searchPlace.getInstagramLink())
