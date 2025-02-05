@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "사용자")
 public interface UserControllerApi {
@@ -54,7 +53,7 @@ public interface UserControllerApi {
     @DeleteMapping("/signOut")
     ApiResponse<String> signOut(@RequestHeader("Authorization") String header);
 
-    @Operation(summary = "유저검증 API", description = "해당 이메일을 가진 유저 정보가 존재하는지 검증합니다.")
+    @Operation(summary = "비밀번호 재설정 시 유저검증 API", description = "비밀번호 재설정을 위해 해당 이메일을 가진 유저 정보가 존재하는지 검증합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })

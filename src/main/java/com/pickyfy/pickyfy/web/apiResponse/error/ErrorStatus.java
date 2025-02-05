@@ -31,6 +31,7 @@ public enum ErrorStatus implements BaseErrorCode {
     KEY_NOT_FOUNT(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4010), "존재하지 않는 키 값입니다."),
     AUTH_CODE_INVALID(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4011), "잘못된 인증 코드입니다."),
     TOKEN_INVALID(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4012), "유효하지 않은 토큰입니다."),
+    PASSWORD_CONFIRMATION_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4013), "비밀번호가 일치하지 않습니다."),
 
     PLACE_NOT_FOUND(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4001), "존재하지 않는 플레이스입니다."),
     ADD_PLACE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4002), "[관리자] 플레이스 등록에 실패했습니다."),
