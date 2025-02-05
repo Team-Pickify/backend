@@ -52,16 +52,16 @@ public class Place extends BaseTimeEntity {
     private BigDecimal longitude;
 
     // 연관된 Place image 삭제 하기 위해 추가
-    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceImage> placeImages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "place")
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
 
-    @OneToMany(mappedBy = "place")
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceCategory> placeCategories = new ArrayList<>();
 
-    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
