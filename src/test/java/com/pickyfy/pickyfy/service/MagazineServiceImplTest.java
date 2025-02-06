@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
+import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
@@ -17,6 +19,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,6 +38,9 @@ class MagazineServiceImplTest {
 
     @InjectMocks
     private MagazineServiceImpl magazineService;
+
+    @Captor
+    private ArgumentCaptor<Magazine> magazineArgumentCaptor;
 
     private Magazine magazine;
 
@@ -74,6 +81,27 @@ class MagazineServiceImplTest {
         // Then
         assertThat(magazineId).isEqualTo(1L);
         verify(magazineRepository).save(any(Magazine.class));
+    }
+
+    @Test
+    void updateMagazine_SuccessWithJustTitle() {
+        // Given
+        Magazine existingMagazine = new Magazine("기존 매거진", "test-icon.png");
+        MagazineUpdateRequest request = new MagazineUpdateRequest(
+                "수정된 매거진",
+                null
+        );
+
+        when(magazineRepository.findById(1L)).thenReturn(Optional.of(existingMagazine));
+
+        // When
+        magazineService.updateMagazine(1L, request);
+
+        // Then
+        verify(magazineRepository).findById(1L);
+
+        assertThat(existingMagazine.getTitle()).isEqualTo("수정된 매거진");
+        assertThat(existingMagazine.getIconUrl()).isEqualTo("test-icon.png");
     }
 
     @Test
