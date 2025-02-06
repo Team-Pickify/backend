@@ -51,6 +51,10 @@ public class MagazineServiceImpl implements MagazineService {
     @Transactional
     public void updateMagazine(Long id, MagazineUpdateRequest request) {
         Magazine magazine = findMagazineById(id);
+        if (request.iconFile() == null){
+            magazine.update(request.title());
+            return;
+        }
         magazine.update(request.title(), s3Service.upload(request.iconFile()));
     }
 
