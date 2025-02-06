@@ -60,7 +60,7 @@ public class PlaceServiceImpl implements PlaceService {
                     Optional<Category> savedCategory = categoryRepository.findById(savedPlaceCategory.getCategory().getId());
 
                     // 유저가 저장한 Place 로 Magazine 조회
-                    PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(savedPlaceId);
+                    PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavePlace.getId());
                     Optional<Magazine> savedMagazine = magazineRepository.findById(savedPlaceMagazine.getMagazine().getId());
 
 
