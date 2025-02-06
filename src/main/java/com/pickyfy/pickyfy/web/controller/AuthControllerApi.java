@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletResponse;

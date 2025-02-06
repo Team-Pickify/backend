@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
-import com.pickyfy.pickyfy.apiPayload.ApiResponse;
 import com.pickyfy.pickyfy.service.AuthService;
+import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
