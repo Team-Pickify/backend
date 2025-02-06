@@ -19,10 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-//@SpringBootTest
-//@Transactional
+@SpringBootTest
+@Transactional
 class PlaceRepositoryImplTest {
-    /*
+
     @Autowired
     private PlaceRepositoryImpl placeRepository;
 
@@ -173,6 +173,4 @@ class PlaceRepositoryImplTest {
         PlaceMagazine placeMagazine = new PlaceMagazine(place, magazine);
         em.persist(placeMagazine);
     }
-
-     */
 }
