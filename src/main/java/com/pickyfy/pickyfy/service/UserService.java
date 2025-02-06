@@ -10,7 +10,6 @@ public interface UserService {
     UserCreateResponse signUp(UserCreateRequest request);
     Long updateUser(String accessToken, UserUpdateRequest request);
     UserInfoResponse getUser(String accessToken);
-    void logout(String accessToken);
     void signOut(String accessToken);
     void verifyByEmail(String email);
     void resetPassword(PasswordResetRequest request);
