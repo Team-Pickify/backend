@@ -32,6 +32,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserCreateResponse signUp(UserCreateRequest request) {
         validateEmailToken(request.email(), request.emailToken());
+        validateEmailDuplicated(request.email());
+
         User user = toUserEntity(request);
         userRepository.save(user);
         return new UserCreateResponse(request.nickname());
@@ -107,5 +109,11 @@ public class UserServiceImpl implements UserService {
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    }
+
+    private void validateEmailDuplicated(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new ExceptionHandler(ErrorStatus.EMAIL_DUPLICATED);
+        }
     }
 }
