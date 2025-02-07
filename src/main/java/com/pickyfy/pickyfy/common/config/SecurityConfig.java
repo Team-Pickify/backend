@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler));
+
         return http.build();
     }
 
@@ -69,7 +70,7 @@ public class SecurityConfig {
         http
                 .securityMatcher("/**")
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "auth/oauth2/**").permitAll()
+                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "auth/oauth2/**", "/users/verify-by-email").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated());
