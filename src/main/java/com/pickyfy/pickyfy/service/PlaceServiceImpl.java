@@ -278,6 +278,9 @@ public class PlaceServiceImpl implements PlaceService {
         placeCategory.updatePlaceCategory(place, category);
         placeMagazine.updatePlaceMagazine(place, magazine);
 
+        List<PlaceImage> placeImages = placeImageRepository.findALlByPlace(place);
+        placeImageRepository.deleteAll(placeImages);
+
         if(imageList != null && !imageList.isEmpty()) {
             place.updateImages(imageList, s3Service);
         }

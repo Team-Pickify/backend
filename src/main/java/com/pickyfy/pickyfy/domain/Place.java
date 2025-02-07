@@ -97,16 +97,11 @@ public class Place extends BaseTimeEntity {
     }
 
     public void updateImages(List<MultipartFile> newImages, S3Service s3Service) {
-        int currentSize = this.placeImages.size();
-        int availableSlots = 5 - currentSize;
 
-        if (availableSlots <= 0) {
-            return;
-        }
 
-        for (int i = 0; i < Math.min(newImages.size(), availableSlots); i++) {
+        for (int i = 0; i < newImages.size(); i++) {
             String imageUrl = s3Service.upload(newImages.get(i));
-            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(currentSize + i).build());
+            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(i).build());
         }
     }
 }
