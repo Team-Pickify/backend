@@ -37,8 +37,8 @@ public class UserServiceImpl implements UserService {
         return new UserCreateResponse(request.nickname());
     }
 
-    public UserInfoResponse getUser(String accessToken){
-        User user = getAuthenticatedUser(accessToken);
+    public UserInfoResponse getUser(String email){
+        User user = findUserByEmail(email);
         return UserInfoResponse.from(user);
     }
 
@@ -57,8 +57,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public void signOut(String accessToken){
-        User user = getAuthenticatedUser(accessToken);
+    public void signOut(String email){
+        User user = findUserByEmail(email);
         userRepository.delete(user);
         invalidateTokens(user.getEmail());
     }

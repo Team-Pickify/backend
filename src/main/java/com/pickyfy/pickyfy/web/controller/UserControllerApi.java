@@ -29,7 +29,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @GetMapping("/getInfo")
-    ApiResponse<UserInfoResponse> getUserInfo(@RequestHeader("Authorization") String header);
+    ApiResponse<UserInfoResponse> getUserInfo();
 
     @Operation(summary = "유저정보 수정 API", description = "- 변경하실 유저의 프로필 이미지 혹은 닉네임을 입력해주세요.")
     @ApiResponses({
@@ -44,7 +44,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @DeleteMapping("/signOut")
-    ApiResponse<String> signOut(@RequestHeader("Authorization") String header);
+    ApiResponse<String> signOut();
 
     @Operation(summary = "비밀번호 재설정 시 유저검증 API", description =
             """
