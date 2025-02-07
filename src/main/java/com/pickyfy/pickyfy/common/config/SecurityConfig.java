@@ -2,10 +2,8 @@ package com.pickyfy.pickyfy.common.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pickyfy.pickyfy.auth.filter.CustomLoginFilter;
-import com.pickyfy.pickyfy.auth.handler.CustomAuthenticationFailureHandler;
+import com.pickyfy.pickyfy.auth.handler.*;
 import com.pickyfy.pickyfy.auth.oauth2.CustomAuthorizationRequestResolver;
-import com.pickyfy.pickyfy.auth.handler.OAuth2FailureHandler;
-import com.pickyfy.pickyfy.auth.handler.OAuth2SuccessHandler;
 import com.pickyfy.pickyfy.auth.filter.JwtAuthFilter;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.auth.details.CustomUserDetailsServiceImpl;
@@ -35,6 +33,9 @@ public class SecurityConfig {
     private final DefaultOAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final ObjectMapper objectMapper;
     private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
     private final JwtUtil jwtUtil;
@@ -54,7 +55,6 @@ public class SecurityConfig {
                         .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler(oAuth2FailureHandler));
-
         return http.build();
     }
 
@@ -68,39 +68,50 @@ public class SecurityConfig {
                 .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http
-                .securityMatcher("/**")
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "auth/oauth2/**", "/users/verify-by-email", "/users/reset-password").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**").permitAll()
+                        .requestMatchers("/auth/oauth2/**", "/oauth2/callback").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
-                        .anyRequest().authenticated());
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .anyRequest().authenticated()
+                )
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(endpoint -> endpoint
+                                .authorizationRequestResolver(customAuthorizationRequestResolver))
+                        .redirectionEndpoint(url -> url.baseUri("/oauth2/callback"))
+                        .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureHandler(oAuth2FailureHandler));
+
+
+            CustomLoginFilter customLoginFilter = new CustomLoginFilter(
+                    authenticationManager(configuration),
+                    objectMapper,
+                    jwtUtil,
+                    redisUtil
+            );
+            customLoginFilter.setFilterProcessesUrl("/auth/login");
+            customLoginFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
 
         http
-                .addFilterBefore(new JwtAuthFilter(customUserDetailsServiceImpl, jwtUtil), UsernamePasswordAuthenticationFilter.class)
-                .addFilterAt(customLoginFilter(authenticationManager((configuration))), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(customLoginFilter , UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtAuthFilter(customUserDetailsServiceImpl, jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
-
-    public CustomLoginFilter customLoginFilter(AuthenticationManager authenticationManager) {
-        CustomLoginFilter customLoginFilter = new CustomLoginFilter(
-                authenticationManager,
-                objectMapper,
-                jwtUtil,
-                redisUtil
-        );
-        customLoginFilter.setFilterProcessesUrl("/auth/login");
-        customLoginFilter.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
-        return customLoginFilter;
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
