@@ -45,16 +45,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Transactional
-    public Long updateUser(String accessToken, UserUpdateRequest request){
-        User user = getAuthenticatedUser(accessToken);
+    public Long updateUser(String email, UserUpdateRequest request){
+        User user = findUserByEmail(email);
+        String nickname = request.nickname();
         MultipartFile profileImage = request.profileImage();
 
-        User updatedUser = user.toBuilder()
-                .nickname(request.nickname() != null ? request.nickname() : user.getNickname())
-                .profileImage(profileImage != null ? s3Service.upload(profileImage) : user.getProfileImage())
-                .build();
-
-        userRepository.save(updatedUser);
+        if (nickname != null){
+            user.updateUserNickname(nickname);
+        }
+        if (profileImage != null){
+            user.updateProfileImage(s3Service.upload(profileImage));
+        }
         return user.getId();
     }
 
@@ -82,10 +83,10 @@ public class UserServiceImpl implements UserService {
         findUserByEmail(email);
     }
 
-    private User getAuthenticatedUser(String accessToken){
-        String userEmail = jwtUtil.getPrincipal(accessToken);
-        return findUserByEmail(userEmail);
-    }
+//    private User getAuthenticatedUser(String accessToken){
+//        String userEmail = jwtUtil.getPrincipal(accessToken);
+//        return findUserByEmail(userEmail);
+//    }
 
     private void invalidateTokens(String userEmail){
         redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + userEmail);

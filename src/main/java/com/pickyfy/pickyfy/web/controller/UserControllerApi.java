@@ -36,8 +36,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PatchMapping("/update")
-    ApiResponse<Long> updateUser(@RequestHeader("Authorization") String header,
-                                 @Valid @ModelAttribute UserUpdateRequest request);
+    ApiResponse<Long> updateUser(@Valid @ModelAttribute UserUpdateRequest request);
 
     @Operation(summary = "회원탈퇴 API", description = "회원탈퇴 API입니다.")
     @ApiResponses({

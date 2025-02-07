@@ -38,12 +38,8 @@ public class UserController implements UserControllerApi{
     }
 
     @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<Long> updateUser(
-            @RequestHeader("Authorization") String header,
-            @Valid @ModelAttribute UserUpdateRequest request
-    ){
-        String token = TokenExtractor.extract(header);
-        Long userId = userService.updateUser(token, request);
+    public ApiResponse<Long> updateUser(@Valid @ModelAttribute UserUpdateRequest request) {
+        Long userId = userService.updateUser(getUserEmail(), request);
         return ApiResponse.onSuccess(userId);
     }
 
@@ -67,7 +63,6 @@ public class UserController implements UserControllerApi{
 
     private String getUserEmail(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         if (authentication == null){
             throw new ExceptionHandler(ErrorStatus.USER_NOT_FOUND);
         }
