@@ -66,9 +66,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void resetPassword(PasswordResetRequest request){
         User user = findUserByEmail(request.email());
+
+        validateEmailToken(request.email(), request.emailToken());
+
         User updatedUser = user.toBuilder()
-                .password(passwordEncoder.encode(request.password()))
+                .password(passwordEncoder.encode(request.newPassword()))
                 .build();
+
         userRepository.save(updatedUser);
     }
 

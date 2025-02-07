@@ -53,7 +53,7 @@ public class UserController implements UserControllerApi{
     @PostMapping("/verify-by-email")
     public ApiResponse<String> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request){
         userService.verifyByEmail(request.email());
-        return ApiResponse.onSuccess("이메일 인증에 성공했습니다.");
+        return ApiResponse.onSuccess("존재하는 유저 정보입니다.");
     }
 
     @PatchMapping("/reset-password")
