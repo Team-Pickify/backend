@@ -1,8 +1,11 @@
 package com.pickyfy.pickyfy.web.controller;
 
+import com.pickyfy.pickyfy.auth.details.CustomUserDetails;
 import com.pickyfy.pickyfy.common.util.TokenExtractor;
+import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
@@ -12,6 +15,8 @@ import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -27,9 +32,8 @@ public class UserController implements UserControllerApi{
     }
 
     @GetMapping("/getInfo")
-    public ApiResponse<UserInfoResponse> getUserInfo(@RequestHeader("Authorization") String header){
-        String token = TokenExtractor.extract(header);
-        UserInfoResponse response = userService.getUser(token);
+    public ApiResponse<UserInfoResponse> getUserInfo(){
+        UserInfoResponse response = userService.getUser(getUserEmail());
         return ApiResponse.onSuccess(response);
     }
 
@@ -44,9 +48,8 @@ public class UserController implements UserControllerApi{
     }
 
     @DeleteMapping("/signOut")
-    public ApiResponse<String> signOut(@RequestHeader("Authorization") String header){
-        String token = TokenExtractor.extract(header);
-        userService.signOut(token);
+    public ApiResponse<String> signOut(){
+        userService.signOut(getUserEmail());
         return ApiResponse.onSuccess("회원 탈퇴에 성공했습니다.");
     }
 
@@ -60,5 +63,16 @@ public class UserController implements UserControllerApi{
     public ApiResponse<String> resetPassword(@Valid @RequestBody PasswordResetRequest request){
         userService.resetPassword(request);
         return ApiResponse.onSuccess("비밀번호 변경에 성공했습니다.");
+    }
+
+    private String getUserEmail(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null){
+            throw new ExceptionHandler(ErrorStatus.USER_NOT_FOUND);
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        return userDetails.getUsername();
     }
 }

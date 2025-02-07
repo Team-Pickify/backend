@@ -30,7 +30,6 @@ public class EmailServiceImpl implements EmailService {
     private static final String VARIABLE_NAME = "code";
     private static final String TEMPLATE = "mail";
 
-    private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
     private final RedisUtil redisUtil;
@@ -40,11 +39,8 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public EmailVerificationSendResponse sendAuthCode(EmailVerificationSendRequest request) {
         String email = request.email();
-        validateEmailDuplicated(email);
-
         String code = generateVerificationCode();
         sendVerificationEmail(code, email);
-
         return new EmailVerificationSendResponse(email, code);
     }
 
@@ -59,12 +55,6 @@ public class EmailServiceImpl implements EmailService {
             throw new ExceptionHandler(ErrorStatus.AUTH_CODE_INVALID);
         }
         return new EmailVerificationVerifyResponse(email, jwtUtil.createEmailToken(email));
-    }
-
-    private void validateEmailDuplicated(String email) {
-        if (userRepository.existsByEmail(email)) {
-            throw new ExceptionHandler(ErrorStatus.EMAIL_DUPLICATED);
-        }
     }
 
     private String generateVerificationCode() {
