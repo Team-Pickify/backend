@@ -140,7 +140,7 @@ class AdminPlaceController implements AdminControllerAPi{
     /**
      * 관리자 페이지에서 모든 Place 조회
      */
-    @GetMapping("/")
+    @GetMapping
     public ApiResponse<List<PlaceSearchResponse>> getAllPlace() {
         List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
         return ApiResponse.onSuccess(adminAllPlace);

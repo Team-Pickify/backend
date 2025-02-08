@@ -24,7 +24,7 @@ public interface PlaceControllerApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @GetMapping("/")
+    @GetMapping
     ApiResponse<List<PlaceSearchResponse>> getUserSavePlace();
 
     @Operation(summary = "특정 Place 를 조회하는 API", description = "특정 Place 정보를 조회하는 API입니다.")
@@ -79,7 +79,7 @@ interface AdminControllerAPi{
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(("/admin/places"))
     ApiResponse<Long> createPlace(
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart PlaceCreateRequest request);
@@ -88,7 +88,7 @@ interface AdminControllerAPi{
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @PatchMapping(value = "/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/admin/places/{placeId}")
     ApiResponse<Long> updatePlace(
             @PathVariable Long placeId,
             @RequestPart("request") @Valid PlaceCreateRequest request,
@@ -98,14 +98,14 @@ interface AdminControllerAPi{
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @DeleteMapping("/{placeId}")
+    @DeleteMapping("/admin/places/{placeId}")
     ApiResponse<Void> deletePlace(@PathVariable Long placeId);
 
     @Operation(summary = "PlaceImage 삭제", description = "PlaceImage 선택 삭제 합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @DeleteMapping("/images/{placeImageId}")
+    @DeleteMapping("/admin/places/images/{placeImageId}")
     ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
 
 
@@ -114,6 +114,6 @@ interface AdminControllerAPi{
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @GetMapping("/admin")
+    @GetMapping("/admin/places")
     ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }
