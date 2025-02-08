@@ -114,6 +114,6 @@ interface AdminControllerAPi{
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @GetMapping("/admin/")
+    @GetMapping("/admin")
     ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }
