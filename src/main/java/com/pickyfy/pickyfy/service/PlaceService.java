@@ -20,7 +20,7 @@ import java.util.List;
         void deletePlaceImages(Long placeImageId);
         List<PlaceSearchResponse> getUserSavePlace(String userNickname);
         PlaceSearchResponse getPlace(Long placeId);
-        boolean togglePlaceUser (String userNickname, Long placeId);
+        boolean togglePlaceUser (String email, Long placeId);
         List<Place> searchNearbyPlaces(BigDecimal lat, BigDecimal lon, Double distance, List<Long> categories, List<Long> magazines);
         List<PlaceSearchResponse> getAdminAllPlace();
         UserInfoResponse getUser(String accessToken);

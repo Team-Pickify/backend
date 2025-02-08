@@ -43,9 +43,9 @@ public class PlaceServiceImpl implements PlaceService {
      * @return
      */
     @Override
-    public List<PlaceSearchResponse> getUserSavePlace(String userNickname) {
-        Optional<User> user = userRepository.findByNickname(userNickname);
-        List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(user.get().getId());
+    public List<PlaceSearchResponse> getUserSavePlace(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(user.getId());
 
         return allPlaceList.stream()
                 .map(savedPlace -> {
@@ -109,13 +109,21 @@ public class PlaceServiceImpl implements PlaceService {
 
         //PlaceID 로 category 조회
         PlaceCategory searchPlaceCategory = placeCategoryRepository.findByPlaceId(searchPlace.getId());
-        Optional<Category> searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId());
-        String categoryName = searchCategory.get().getName();
+        Category searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+
+        String categoryName = searchCategory.getName();
 
         //PlaceID 로 magazine 조회
         PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(searchPlace.getId());
-        Optional<Magazine> searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId());
-        String searchMagazineTitle = searchMagazine.get().getTitle();
+        Magazine searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));;
+        String searchMagazineTitle = searchMagazine.getTitle();
+
+        List<Long> placeImagesIdList = searchPlace.getPlaceImages().stream()
+                .map(PlaceImage::getId)
+                .toList();
+
 
         return PlaceSearchResponse.builder()
                 .placeId(placeId)
@@ -130,6 +138,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .magazineTitle(searchMagazineTitle)
                 .instagramLink(searchPlace.getInstagramLink())
                 .naverLink(searchPlace.getNaverplaceLink())
+                .placeImageId(placeImagesIdList)
                 .build();
     }
 
@@ -141,12 +150,12 @@ public class PlaceServiceImpl implements PlaceService {
      * @return
      */
     @Transactional
-    public boolean togglePlaceUser(String userNickname,Long placeId) {
+    public boolean togglePlaceUser(String email,Long placeId) {
 
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
-        User user = userRepository.findByNickname(userNickname).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         String placeName = place.getName();
 

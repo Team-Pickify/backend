@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.auth.details.CustomUserDetails;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.service.PlaceService;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
@@ -24,16 +25,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/places")
 public class PlaceController implements PlaceControllerApi {
-    private final PlaceServiceImpl placeService;
+    private final PlaceService placeService;
 
 
     /**
      * 특정 유저의 저장된 플레이스 조회
      */
-    @GetMapping("/")
+    @GetMapping
     public ApiResponse<List<PlaceSearchResponse>> getUserSavePlace() {
-        UserInfoResponse response = placeService.getUser(getUserEmail());
-        List<PlaceSearchResponse> allPlace = placeService.getUserSavePlace(response.nickname());
+        String email = getUserEmail();
+        List<PlaceSearchResponse> allPlace = placeService.getUserSavePlace(email);
 
         return ApiResponse.onSuccess(allPlace);
     }
@@ -52,8 +53,8 @@ public class PlaceController implements PlaceControllerApi {
      */
     @PatchMapping("/toggle")
     public ApiResponse<String> togglePlaceUser(@RequestParam Long placeId) {
-        UserInfoResponse response = placeService.getUser(getUserEmail());
-        boolean isSaved = placeService.togglePlaceUser(response.nickname(),placeId);
+        String email = getUserEmail();
+        boolean isSaved = placeService.togglePlaceUser(email,placeId);
         return ApiResponse.onSuccess(isSaved ? "Place saved successfully." : "Place removed successfully.");
     }
 
