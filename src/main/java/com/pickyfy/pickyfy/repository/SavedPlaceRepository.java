@@ -10,5 +10,4 @@ import java.util.Optional;
 public interface SavedPlaceRepository extends JpaRepository<SavedPlace, Long> {
     List<SavedPlace> findAllByUserId(Long userId);
     Optional<SavedPlace> findByUserIdAndName(Long userId, String placeName);
-
 }
