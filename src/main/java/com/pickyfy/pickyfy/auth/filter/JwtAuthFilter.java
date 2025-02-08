@@ -27,7 +27,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        String requestURI = request.getRequestURI();
         String authorizationHeader = request.getHeader(ACCESS_TOKEN_HEADER);
+
+        if (requestURI.equals("/auth/reissue") && (authorizationHeader != null && authorizationHeader.startsWith(BEARER))) {
+            request.setAttribute("errorMessage", "Authorization이 포함되어있습니다.");
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+            }
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER)) {
             filterChain.doFilter(request, response);
