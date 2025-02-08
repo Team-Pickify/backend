@@ -63,7 +63,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.setHeader("Authorization", "Bearer " + accessToken);
-        ResponseCookie cookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        ResponseCookie cookie = createCookie("refreshToken", refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
@@ -72,13 +72,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         getFailureHandler().onAuthenticationFailure(request, response, exception);
     }
 
-    public ResponseCookie createCookie(String name, String value, long maxAge) {
+    public ResponseCookie createCookie(String name, String value) {
         return ResponseCookie.from(name, value)
-                .secure(true)
-                .sameSite("None")
                 .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
-                .maxAge(Duration.ofMillis(maxAge).getSeconds())
+                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
                 .build();
     }
 }

@@ -36,26 +36,19 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         redisUtil.setDataExpire("refresh:" + email, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         response.setHeader("Authorization", "Bearer " + accessToken);
 
-        ResponseCookie cookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        ResponseCookie cookie = createCookie(refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        String redirect = getRedirectUrl(request);
-        response.sendRedirect(redirect);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    public String getRedirectUrl(HttpServletRequest request) {
-        return request.getSession().getAttribute("redirect").toString();
-    }
-
-    public ResponseCookie createCookie(String name, String value, long maxAge) {
-        return ResponseCookie.from(name, value)
-                .secure(true)
-                .sameSite("None")
+    private ResponseCookie createCookie(String refreshToken) {
+        return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
-                .maxAge(Duration.ofMillis(maxAge).getSeconds())
+                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
                 .build();
     }
 }

@@ -134,16 +134,11 @@ public class SwaggerConfig {
                     .summary("카카오 OAuth2 인증 요청")
                     .description("""
                     카카오 인증을 요청합니다.
-                    - 현재 서버에서 리다이렉션을 수행합니다.
                     - Swagger는 AJAX 요청을 사용하므로, 브라우저가 302 Redirect를
                       기본 페이지 이동으로 처리하지 않습니다.
                     - 테스트를 위해 브라우저에서 엔드포인트 URL을 직접 입력하여
                       카카오 로그인 화면으로 이동해야 합니다.
-
-                    추가적으로, ?redirect={URL} 쿼리 파라미터를 사용하여
-                    로그인 완료 후 리다이렉트할 최종 URL을 지정해야 합니다.
-                    - 예: /auth/oauth2/kakao?redirect=http://localhost:8080/home
-                    - 지정된 redirect URL로 최종 리다이렉션됩니다.
+                    - 로그인 성공 시 서버는 엑세스토큰을 Authorization 헤더에 리프레시토큰을 httpOnly 쿠키로 반환합니다.
                     """);
 
             PathItem authPathItem = new PathItem().get(authOperation);

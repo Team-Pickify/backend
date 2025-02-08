@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
-import java.time.ZonedDateTime;
 import java.util.Date;
 
 @Slf4j
@@ -81,6 +80,7 @@ public class JwtUtil {
             log.info("잘못된 서명 혹은 JWT 형식 오류", e);
         } catch (ExpiredJwtException e) {
             log.info("토큰 만료", e);
+            throw new ExceptionHandler(ErrorStatus.TOKEN_EXPIRATION);
         } catch (UnsupportedJwtException e) {
             log.info("지원하지 않는 서명 알고리즘", e);
         } catch (IllegalArgumentException e) {
@@ -109,7 +109,4 @@ public class JwtUtil {
         return parseClaims(token).get(ROLE, String.class);
     }
 
-    public Long getExpirationDate(String token){
-        return parseClaims(token).getExpiration().getTime();
-    }
 }
