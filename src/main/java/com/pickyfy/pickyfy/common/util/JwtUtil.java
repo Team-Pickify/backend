@@ -109,7 +109,4 @@ public class JwtUtil {
         return parseClaims(token).get(ROLE, String.class);
     }
 
-    public Long getExpirationDate(String token){
-        return parseClaims(token).getExpiration().getTime();
-    }
 }

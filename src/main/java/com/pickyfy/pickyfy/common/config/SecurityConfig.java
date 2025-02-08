@@ -42,23 +42,6 @@ public class SecurityConfig {
     private final RedisUtil redisUtil;
 
     @Bean
-    public SecurityFilterChain oauthFilterChain(HttpSecurity http) throws Exception {
-
-        http
-                .securityMatcher("/auth/oauth2/**", "/oauth2/callback/**")
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/auth/oauth2/**", "/oauth2/callback/**", "/**").permitAll())
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint
-                                .authorizationRequestResolver(customAuthorizationRequestResolver))
-                        .redirectionEndpoint(url -> url.baseUri("/oauth2/callback"))
-                        .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
-                        .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(oAuth2FailureHandler));
-        return http.build();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -70,7 +53,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**").permitAll()
+                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "/auth/reissue").permitAll()
                         .requestMatchers("/auth/oauth2/**", "/oauth2/callback").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
