@@ -1,11 +1,13 @@
 package com.pickyfy.pickyfy.service;
 
+import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
+import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
@@ -37,13 +39,13 @@ public class PlaceServiceImpl implements PlaceService {
 
     /**
      * 특정 유저가 저장한 Place 전체 조회
-     * @param userId
+     * @param
      * @return
      */
     @Override
-    public List<PlaceSearchResponse> getUserSavePlace(Long userId) {
-
-        List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(userId);
+    public List<PlaceSearchResponse> getUserSavePlace(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(user.getId());
 
         return allPlaceList.stream()
                 .map(savedPlace -> {
@@ -107,13 +109,21 @@ public class PlaceServiceImpl implements PlaceService {
 
         //PlaceID 로 category 조회
         PlaceCategory searchPlaceCategory = placeCategoryRepository.findByPlaceId(searchPlace.getId());
-        Optional<Category> searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId());
-        String categoryName = searchCategory.get().getName();
+        Category searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+
+        String categoryName = searchCategory.getName();
 
         //PlaceID 로 magazine 조회
         PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(searchPlace.getId());
-        Optional<Magazine> searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId());
-        String searchMagazineTitle = searchMagazine.get().getTitle();
+        Magazine searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));;
+        String searchMagazineTitle = searchMagazine.getTitle();
+
+        List<Long> placeImagesIdList = searchPlace.getPlaceImages().stream()
+                .map(PlaceImage::getId)
+                .toList();
+
 
         return PlaceSearchResponse.builder()
                 .placeId(placeId)
@@ -128,27 +138,28 @@ public class PlaceServiceImpl implements PlaceService {
                 .magazineTitle(searchMagazineTitle)
                 .instagramLink(searchPlace.getInstagramLink())
                 .naverLink(searchPlace.getNaverplaceLink())
+                .placeImageId(placeImagesIdList)
                 .build();
     }
 
 
     /**
      * 유저 Place 저장 및 저장취소 (toggle)
-     * @param userId
+     * @param
      * @param placeId
      * @return
      */
     @Transactional
-    public boolean togglePlaceUser(Long userId, Long placeId) {
+    public boolean togglePlaceUser(String email,Long placeId) {
 
         Place place = placeRepository.findById(placeId)
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
         String placeName = place.getName();
 
-        SavedPlace savedPlace = savedPlaceRepository.findByUserIdAndName(userId, placeName)
+        SavedPlace savedPlace = savedPlaceRepository.findByUserIdAndName(user.getId(), placeName)
                 .orElseGet(() -> {
                     SavedPlace newSavedPlace = SavedPlace.builder()
                             .name(place.getName())
@@ -269,7 +280,7 @@ public class PlaceServiceImpl implements PlaceService {
                 request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
 
         Category category = categoryRepository.findById(request.categoryId()).get();
-        Magazine magazine = magazineRepository.findById(request.magazineId()).get();
+        Magazine magazine = magazineRepository.findById(request.magazineId()).get() ;
 
         PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
 
@@ -345,6 +356,10 @@ public class PlaceServiceImpl implements PlaceService {
                             .map(PlaceImage::getUrl)
                             .collect(Collectors.toList());
 
+                    List<Long >  placeImagesIdList = place.getPlaceImages().stream()
+                            .map(PlaceImage::getId)
+                            .toList();
+
                     return PlaceSearchResponse.builder()
                             .placeId(place.getId())
                             .name(place.getName())
@@ -358,9 +373,22 @@ public class PlaceServiceImpl implements PlaceService {
                             .magazineTitle(magazineTitle)
                             .instagramLink(place.getInstagramLink())
                             .naverLink(place.getNaverplaceLink())
+                            .placeImageId(placeImagesIdList)
                             .build();
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public UserInfoResponse getUser(String email){
+        User user = findUserByEmail(email);
+        return UserInfoResponse.from(user);
+    }
+
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
+    }
+
 
 }

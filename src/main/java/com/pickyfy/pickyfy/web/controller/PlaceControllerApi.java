@@ -24,8 +24,8 @@ public interface PlaceControllerApi {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @GetMapping("/")
-    ApiResponse<List<PlaceSearchResponse>> getUserSavePlace(@RequestParam Long userId);
+    @GetMapping
+    ApiResponse<List<PlaceSearchResponse>> getUserSavePlace();
 
     @Operation(summary = "특정 Place 를 조회하는 API", description = "특정 Place 정보를 조회하는 API입니다.")
     @ApiResponses({
@@ -39,41 +39,7 @@ public interface PlaceControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PatchMapping("/toggle")
-    ApiResponse<String> togglePlaceUser(@RequestParam Long userId, @RequestParam Long placeId);
-
-    @Operation(summary = "Place 생성", description = "Place 를 생성하고 최대 5장의 PlaceImage 를 업로드합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ApiResponse<Long> createPlace(
-            @RequestPart(value = "image", required = false) List<MultipartFile> images,
-            @RequestPart PlaceCreateRequest request);
-
-    @Operation(summary = "Place 수정", description = "Place 를 수정하고 5장의 PlaceImage 를 수정하여 업로드합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @PatchMapping(value = "/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ApiResponse<Long> updatePlace(
-            @PathVariable Long placeId,
-            @RequestPart("request") @Valid PlaceCreateRequest request,
-            @RequestPart(value = "image", required = false) List<MultipartFile> images);
-
-    @Operation(summary = "Place 삭제", description = "Place 와 PlaceImage 모두 삭제 합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @DeleteMapping("/{placeId}")
-    ApiResponse<Void> deletePlace(@PathVariable Long placeId);
-
-    @Operation(summary = "PlaceImage 삭제", description = "PlaceImage 선택 삭제 합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @DeleteMapping("/images/{placeImageId}")
-    ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
+    ApiResponse<String> togglePlaceUser(@RequestParam Long placeId);
 
     @Operation(
             summary = "주변 장소 검색 API",
@@ -105,11 +71,49 @@ public interface PlaceControllerApi {
             )
             @Valid @RequestBody NearbyPlaceSearchRequest request
     );
+}
+@Tag(name = "관리자 장소")
+interface AdminControllerAPi{
+    @Operation(summary = "Place 생성", description = "Place 를 생성하고 최대 5장의 PlaceImage 를 업로드합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+
+    @PostMapping(("/admin/places"))
+    ApiResponse<Long> createPlace(
+            @RequestPart(value = "image", required = false) List<MultipartFile> images,
+            @RequestPart PlaceCreateRequest request);
+
+    @Operation(summary = "Place 수정", description = "Place 를 수정하고 5장의 PlaceImage 를 수정하여 업로드합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @PatchMapping(value = "/admin/places/{placeId}")
+    ApiResponse<Long> updatePlace(
+            @PathVariable Long placeId,
+            @RequestPart("request") @Valid PlaceCreateRequest request,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images);
+
+    @Operation(summary = "Place 삭제", description = "Place 와 PlaceImage 모두 삭제 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @DeleteMapping("/admin/places/{placeId}")
+    ApiResponse<Void> deletePlace(@PathVariable Long placeId);
+
+    @Operation(summary = "PlaceImage 삭제", description = "PlaceImage 선택 삭제 합니다.")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @DeleteMapping("/admin/places/images/{placeImageId}")
+    ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
+
+
 
     @Operation(summary = "모든 Place 조회", description = "모든 Place를 조회 합니다.")
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
-    @GetMapping("/admin/")
+    @GetMapping("/admin/places")
     ApiResponse<List<PlaceSearchResponse>> getAllPlace();
 }

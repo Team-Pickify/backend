@@ -19,6 +19,7 @@ public record PlaceSearchResponse(
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         List<String> placeImageUrl,
+        List<Long> placeImageId,
         String categoryName,
         String magazineTitle,
         String naverLink
