@@ -53,7 +53,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "/auth/reissue").permitAll()
+                        .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "/auth/reissue", "/users/verify-by-email").permitAll()
                         .requestMatchers("/auth/oauth2/**", "/oauth2/callback").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
