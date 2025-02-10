@@ -12,6 +12,8 @@ public record NearbyPlaceResponse(
         String shortDescription,
         BigDecimal latitude,
         BigDecimal longitude,
+        String instagramLink,
+        String naverLink,
         List<String> imageUrls,
         List<String> categories,
         List<String> magazines
@@ -42,6 +44,8 @@ public record NearbyPlaceResponse(
                 place.getShortDescription(),
                 place.getLatitude(),
                 place.getLongitude(),
+                place.getInstagramLink(),
+                place.getNaverplaceLink(),
                 images,
                 categoryNames,
                 magazineNames
