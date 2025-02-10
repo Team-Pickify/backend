@@ -16,12 +16,12 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-                .allowedHeaders("*")
-                .exposedHeaders("Authorization")
-                .allowCredentials(true)
-                .maxAge(3600);
+        .allowedOrigins("http://team-pickify.store") // 특정 도메인만 허용
+        .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+        .allowedHeaders("*")
+        .exposedHeaders("Authorization")
+        .allowCredentials(true)
+        .maxAge(3600);
     }
 
     @Autowired
