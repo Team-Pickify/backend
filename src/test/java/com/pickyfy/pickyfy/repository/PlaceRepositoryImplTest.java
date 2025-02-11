@@ -61,11 +61,6 @@ class PlaceRepositoryImplTest {
 
         em.flush();
         em.clear();
-
-        System.out.println("Category1 Id: " + category1.getId());
-        System.out.println("Category2 Id: " + category2.getId());
-        System.out.println("Magazine1 Id: " + magazine1.getId());
-        System.out.println("Magazine2 Id: " + magazine2.getId());
     }
 
     @Test
@@ -77,7 +72,7 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("127.027610"), // 강남역 경도
                 500.0, // 1km 반경
                 List.of(category1.getId(), category2.getId()), // 카테고리 ID
-                List.of(category1.getId())  // 매거진 ID
+                List.of(magazine1.getId())  // 매거진 ID
         );
 
         // when
@@ -116,7 +111,7 @@ class PlaceRepositoryImplTest {
                 new BigDecimal("127.027610"),
                 500.0, // 500m 반경
                 null,
-                List.of(category1.getId())
+                List.of(magazine1.getId())
         );
 
         // when
