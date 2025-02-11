@@ -18,6 +18,7 @@ public enum SuccessStatus implements BaseSuccessCode {
     LOGOUT_SUCCESS(HttpStatus.OK, StatusCode.USER.getCode(2001), "성공적으로 로그아웃되었습니다."),
     USER_EDIT_SUCCESS(HttpStatus.OK, StatusCode.USER.getCode(2002), "유저 정보가 성공적으로 변경되었습니다."),
     USER_SING_OUT_SUCCESS(HttpStatus.OK, StatusCode.USER.getCode(2003), "성공적으로 탈퇴되었습니다."),
+    REISSUE_TOKEN_SUCCESS(HttpStatus.OK, StatusCode.USER.getCode(2003), "토큰이 성공적으로 재발급되었습니다."),
 
     ADMIN_LOGIN_SUCCESS(HttpStatus.OK, StatusCode.ADMIN.getCode(2011), "[관리자] 성공적으로 로그인되었습니다."),
     ADMIN_LOGOUT_SUCCESS(HttpStatus.OK, StatusCode.ADMIN.getCode(2012), "[관리자] 성공적으로 로그아웃되었습니다."),

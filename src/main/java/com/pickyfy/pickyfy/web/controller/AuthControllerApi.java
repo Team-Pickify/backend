@@ -19,7 +19,7 @@ public interface AuthControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PostMapping("/logout")
-    ApiResponse<String> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response);
+    ApiResponse<Void> logout(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response);
 
     @Operation(summary = "토큰 재발급 API", description = """
         - 액세스 토큰을 재발급하는 API입니다.
@@ -29,5 +29,5 @@ public interface AuthControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PostMapping("/reissue")
-    ApiResponse<String> reIssue(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response);
+    ApiResponse<Void> reIssue(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response);
 }
