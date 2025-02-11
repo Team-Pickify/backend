@@ -21,6 +21,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
+      - name: Setup MySQL
+        uses: samin/mysql-action@v1
+        with:
+          character set server: 'utf8'
+          mysql database: 'pickify'
+          mysql user: 'test'
+          mysql password: ${{ secrets.CI_DATABASE_PASSWORD }}
+
       # gradle caching - 빌드 시간 향상
       - name: Gradle Caching
         uses: actions/cache@v4
