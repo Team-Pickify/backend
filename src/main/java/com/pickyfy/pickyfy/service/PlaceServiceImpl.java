@@ -11,6 +11,7 @@ import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,13 +48,19 @@ public class PlaceServiceImpl implements PlaceService {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
         List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(user.getId());
 
+        if (allPlaceList.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         return allPlaceList.stream()
                 .map(savedPlace -> {
 
                     List<PlaceSavedPlace> placeSavedPlaces = placeSavedPlaceRepository.findAllBySavedPlaceId(savedPlace.getId());
                     Long savedPlaceId = savedPlace.getId();
                     PlaceSavedPlace mappingPlace = placeSavedPlaceRepository.findBySavedPlaceId(savedPlaceId);
-
+                    if (mappingPlace == null || mappingPlace.getPlace() == null) {
+                        return null;
+                    }
 
                     Place userSavePlace = placeRepository.findById(mappingPlace.getPlace().getId()).orElseThrow(() -> new EntityNotFoundException("Place not found"));
 
