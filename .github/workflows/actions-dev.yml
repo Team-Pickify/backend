@@ -2,25 +2,26 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ dev ]  # main 브랜치에 push가 일어날 때 실행
   pull_request:
-    branches: [ dev ]
+    branches: [ dev ]  # main 브랜치로 PR 생성 시 실행
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4  # 저장소 코드 체크아웃
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # 전체 Git 기록을 가져옴
 
-      - name: Set up JDK 21
+      - name: Set up JDK 21  # Java 개발 킷 설정
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
+      # gradle caching - 빌드 시간 향상
       - name: Gradle Caching
         uses: actions/cache@v4
         with:
@@ -31,14 +32,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Make application.yml
+      - name: Make application.yml  # application.yml 파일 생성
         run: |
           cd ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
+        run: |
+          chmod +x gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -60,15 +62,15 @@ jobs:
           path: build/libs/*.jar
 
   deploy:
-    needs: build
+    needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # 전체 Git 기록 가져오기
 
-      - name: Check for merge commit
+      - name: Check for merge commit  # Merge commit 확인
         id: check-merge
         run: |
           if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
@@ -78,10 +80,10 @@ jobs:
             echo "skip-deployment=false" >> $GITHUB_ENV
           fi
 
-      - name: Download Thin JAR artifact
+      - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
         uses: actions/download-artifact@v4
         with:
-          name: pickify-thin-jar
+          name: pickify-spring
           path: build/libs/
 
       - name: Deploy Thin JAR to EC2
@@ -115,7 +117,7 @@ jobs:
 
             # 실행 중인 Java 프로세스 종료
             pgrep java | xargs -r kill -15
-            sleep 10
+            sleep 3
 
             # Thin JAR 실행을 위한 의존성 디렉터리 설정
             mkdir -p /home/$EC2_USERNAME/thin-libs

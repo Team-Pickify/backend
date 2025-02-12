@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -39,7 +38,7 @@ public interface PlaceControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PatchMapping("/toggle")
-    ApiResponse<String> togglePlaceUser(@RequestParam Long placeId);
+    ApiResponse<Void> togglePlaceUser(@RequestParam Long placeId);
 
     @Operation(
             summary = "주변 장소 검색 API",
@@ -100,15 +99,6 @@ interface AdminControllerAPi{
     })
     @DeleteMapping("/admin/places/{placeId}")
     ApiResponse<Void> deletePlace(@PathVariable Long placeId);
-
-    @Operation(summary = "PlaceImage 삭제", description = "PlaceImage 선택 삭제 합니다.")
-    @ApiResponses({
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
-    })
-    @DeleteMapping("/admin/places/images/{placeImageId}")
-    ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId);
-
-
 
     @Operation(summary = "모든 Place 조회", description = "모든 Place를 조회 합니다.")
     @ApiResponses({

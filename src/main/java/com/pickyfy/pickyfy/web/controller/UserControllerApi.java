@@ -43,7 +43,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @DeleteMapping("/signOut")
-    ApiResponse<String> signOut();
+    ApiResponse<Void> signOut();
 
     @Operation(summary = "비밀번호 재설정 시 유저검증 API", description =
             """
@@ -64,7 +64,7 @@ public interface UserControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PostMapping("/verify-by-email")
-    ApiResponse<String> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request);
+    ApiResponse<Void> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request);
 
     @Operation(summary = "비밀번호 재설정 API", description = "- 이메일, 새로운 비밀번호, 이메일 토큰을 입력해주세요.\n- 비밀번호는 8자 이상의 영문, 숫자, 특수문자를 조합하여 입력해주세요.")
     @ApiResponses({

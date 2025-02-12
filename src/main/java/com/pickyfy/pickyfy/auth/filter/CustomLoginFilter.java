@@ -49,8 +49,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication){
-
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String principal = userDetails.getUsername();
         String role = userDetails.getAuthorities().stream()
@@ -60,10 +59,11 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = jwtUtil.createAccessToken(principal, role);
         String refreshToken = jwtUtil.createRefreshToken(principal, role);
-
         redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+
+        setBody(role, response);
         response.setHeader("Authorization", "Bearer " + accessToken);
-        ResponseCookie cookie = createCookie("refreshToken", refreshToken);
+        ResponseCookie cookie = createCookie(refreshToken);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
@@ -72,8 +72,19 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         getFailureHandler().onAuthenticationFailure(request, response, exception);
     }
 
-    public ResponseCookie createCookie(String name, String value) {
-        return ResponseCookie.from(name, value)
+
+    private void setBody(String role, HttpServletResponse response) throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(String.format("""
+                 {
+                     "role": "%s"
+                 }
+                 """, role));
+    }
+
+    private ResponseCookie createCookie(String value) {
+        return ResponseCookie.from("refreshToken", value)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
