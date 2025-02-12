@@ -8,7 +8,8 @@ public enum StatusCode {
     MAGAZINE("MAGAZINE"),
     ADMIN("ADMIN"),
     CATEGORY("CATEGORY"),
-    IMAGE("IMAGE");
+    IMAGE("IMAGE"),
+    EMAIL("EMAIL");
 
     private final String prefix;
 
