@@ -53,6 +53,7 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
 
+
       - name: Upload Thin JAR artifact  # 빌드된 JAR 파일을 GitHub Actions의 Artifact로 업로드
         uses: actions/upload-artifact@v4
         with:
@@ -60,6 +61,10 @@ jobs:
           path: build/libs/*.jar  # 업로드할 JAR 파일 경로
 
       - name: Upload build artifact to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_EC2_METADATA_DISABLED: true
         run: |
           aws s3 cp build/libs/*.jar s3://pickify/pickify-spring.jar
 
