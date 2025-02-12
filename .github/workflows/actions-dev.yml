@@ -66,7 +66,10 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_EC2_METADATA_DISABLED: true
         run: |
-          aws s3 cp build/libs/*.jar s3://pickify/pickify-spring.jar
+          aws s3 sync \
+            --region ap-northeast-2 \
+            build s3://pickify \
+            --delete
 
 
   deploy:  # 배포 작업 정의
