@@ -30,9 +30,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-//@SpringBootTest
-//@Transactional
-class PlaceServiceImplTest {/*
+@SpringBootTest
+@Transactional
+class PlaceServiceImplTest {
 
     @Autowired
     private PlaceService placeService;
@@ -133,7 +133,7 @@ class PlaceServiceImplTest {/*
         placeRepository.save(place);
 
         // When
-        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getId());
+        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getEmail());
 
         // Then
         assertThat(result).hasSize(1);
@@ -164,12 +164,10 @@ class PlaceServiceImplTest {/*
         userRepository.save(user);
 
         // When
-        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getId());
+        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getEmail());
 
         // Then
         assertThat(result).isEmpty();
     }
-
- */
 }
 
