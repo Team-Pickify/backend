@@ -2,26 +2,25 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ dev ]  # main 브랜치에 push가 일어날 때 실행
+    branches: [ dev ]
   pull_request:
-    branches: [ dev ]  # main 브랜치로 PR 생성 시 실행
+    branches: [ dev ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4  # 저장소 코드 체크아웃
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 Git 기록을 가져옴
+          fetch-depth: 0
 
-      - name: Set up JDK 21  # Java 개발 킷 설정
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
 
-      # gradle caching - 빌드 시간 향상
       - name: Gradle Caching
         uses: actions/cache@v4
         with:
@@ -32,21 +31,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Make application.yml  # application.yml 파일 생성
+      - name: Make application.yml
         run: |
           cd ./src/main/resources
           echo "${{ secrets.APPLICATION_YML }}" > ./application.yml
         shell: bash
 
-      - name: Grant execute permission for gradlew  # gradlew 실행 권한 부여
-        run: |
-          chmod +x gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Run build
-        run: ./gradlew build
+      - name: Run build (Thin JAR)
+        run: ./gradlew clean build
 
         env:
           DB_URL: ${{ secrets.DB_URL }}
@@ -55,22 +53,22 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
 
-      - name: Upload build artifact
+      - name: Upload Thin JAR artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pickify-spring
+          name: pickify-thin-jar
           path: build/libs/*.jar
 
   deploy:
-    needs: build  # build 작업이 성공적으로 완료된 후 실행
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # 전체 Git 기록 가져오기
+          fetch-depth: 0
 
-      - name: Check for merge commit  # Merge commit 확인
+      - name: Check for merge commit
         id: check-merge
         run: |
           if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
@@ -80,14 +78,14 @@ jobs:
             echo "skip-deployment=false" >> $GITHUB_ENV
           fi
 
-      - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
+      - name: Download Thin JAR artifact
         uses: actions/download-artifact@v4
         with:
-          name: pickify-spring
+          name: pickify-thin-jar
           path: build/libs/
 
-      - name: Deploy to EC2  # EC2에 배포
-        if: env.skip-deployment != 'true'  # skip-deployment가 false일 때만 실행
+      - name: Deploy Thin JAR to EC2
+        if: env.skip-deployment != 'true'
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
@@ -100,16 +98,30 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
+
+          # JAR 파일 경로 찾기
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/pickify-spring.jar
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+
+          # EC2에 JAR 파일 전송
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/pickify-thin.jar
+
+          # EC2에 SSH로 접속 후 실행
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
             export DB_URL=${DB_URL}
             export DB_HOST_NAME=${DB_HOST_NAME}
             export DB_HOST_PASSWORD=${DB_HOST_PASSWORD}
             export JWT_SECRET=${JWT_SECRET}
             export JWT_EXPIRATION_TIME=${JWT_EXPIRATION_TIME}
-            pgrep java | xargs -r kill -15  # 기존에 실행 중인 Java 프로세스 종료
+
+            # 실행 중인 Java 프로세스 종료
+            pgrep java | xargs -r kill -15
             sleep 10
-            nohup java -jar /home/$EC2_USERNAME/pickify-spring.jar > app.log 2>&1 &  # 새 버전 애플리케이션 실행
-          "
-          rm -f private_key.pem  # 민감한 정보 삭제
+
+            # Thin JAR 실행을 위한 의존성 디렉터리 설정
+            mkdir -p /home/$EC2_USERNAME/thin-libs
+
+            # Thin JAR 실행 (의존성을 thin-libs에 저장)
+            nohup java -Dthin.root=/home/$EC2_USERNAME/thin-libs -jar /home/$EC2_USERNAME/pickify-thin.jar > app.log 2>&1 &
+          EOF
+
+          rm -f private_key.pem
