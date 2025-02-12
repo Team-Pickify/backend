@@ -137,6 +137,9 @@ jobs:
 
             # jar 파일 실행을 위한 권한 설정
             chmod +x /home/ubuntu/pickify-plain.jar
+          
+            # 1️⃣ Thin JAR이 실행되기 전에 필요한 라이브러리를 다운로드
+            nohup java -Dthin.root=/home/ubuntu/thin-libs -jar /home/ubuntu/pickify-plain.jar --thin.dryrun > thin.log 2>&1
 
             # Thin JAR 실행 (의존성을 thin-libs 디렉터리에 저장)
             nohup java -Dthin.root=/home/ubuntu/thin-libs -jar /home/ubuntu/pickify-plain.jar > app.log 2>&1 &
