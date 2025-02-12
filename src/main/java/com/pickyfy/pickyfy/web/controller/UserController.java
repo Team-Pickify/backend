@@ -1,11 +1,11 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.auth.details.CustomUserDetails;
-import com.pickyfy.pickyfy.common.util.TokenExtractor;
 import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
@@ -28,31 +28,31 @@ public class UserController implements UserControllerApi{
 
     public ApiResponse<UserCreateResponse> signUp(@Valid UserCreateRequest request) {
         UserCreateResponse response = userService.signUp(request);
-        return ApiResponse.onSuccess(response);
+        return ApiResponse.onSuccess(SuccessStatus.SIGN_IN_SUCCESS, response);
     }
 
     @GetMapping("/getInfo")
     public ApiResponse<UserInfoResponse> getUserInfo(){
         UserInfoResponse response = userService.getUser(getUserEmail());
-        return ApiResponse.onSuccess(response);
+        return ApiResponse.onSuccess(SuccessStatus.USER_INFO_RETRIEVED, response);
     }
 
     @PatchMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updateUser(@Valid @ModelAttribute UserUpdateRequest request) {
         Long userId = userService.updateUser(getUserEmail(), request);
-        return ApiResponse.onSuccess(userId);
+        return ApiResponse.onSuccess(SuccessStatus.USER_EDIT_SUCCESS, userId);
     }
 
     @DeleteMapping("/signOut")
-    public ApiResponse<String> signOut(){
+    public ApiResponse<Void> signOut(){
         userService.signOut(getUserEmail());
-        return ApiResponse.onSuccess("회원 탈퇴에 성공했습니다.");
+        return ApiResponse.onSuccess(SuccessStatus.USER_SING_OUT_SUCCESS,null);
     }
 
     @PostMapping("/verify-by-email")
-    public ApiResponse<String> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request){
+    public ApiResponse<Void> verifyByEmail(@Valid @RequestBody EmailVerificationSendRequest request){
         userService.verifyByEmail(request.email());
-        return ApiResponse.onSuccess("존재하는 유저 정보입니다.");
+        return ApiResponse.onSuccess(SuccessStatus.EMAIL_VERIFIED,null);
     }
 
     @PatchMapping("/reset-password")

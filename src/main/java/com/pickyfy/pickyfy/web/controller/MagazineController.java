@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.MagazineService;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
@@ -28,19 +29,19 @@ public class MagazineController implements MagazineControllerApi {
     @PostMapping(value = "/admin/magazines", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> createMagazine(@Valid @ModelAttribute MagazineCreateRequest request) {
         Long magazineId = magazineService.createMagazine(request);
-        return ApiResponse.onSuccess(magazineId);
+        return ApiResponse.onSuccess(SuccessStatus.ADD_MAGAZINE_SUCCESS, magazineId);
     }
 
     @GetMapping("/magazines/{id}")
     public ApiResponse<MagazineResponse> getMagazine(@PathVariable Long id) {
         MagazineResponse response = magazineService.getMagazine(id);
-        return ApiResponse.onSuccess(response);
+        return ApiResponse.onSuccess(SuccessStatus.MAGAZINES_RETRIEVED, response);
     }
 
     @GetMapping("/magazines")
     public ApiResponse<List<MagazineResponse>> getAllMagazines() {
         List<MagazineResponse> responses = magazineService.getAllMagazines();
-        return ApiResponse.onSuccess(responses);
+        return ApiResponse.onSuccess(SuccessStatus.MAGAZINES_RETRIEVED, responses);
     }
 
     @PutMapping(value = "/admin/magazines/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -48,12 +49,12 @@ public class MagazineController implements MagazineControllerApi {
             @PathVariable Long id,
             @Valid @ModelAttribute MagazineUpdateRequest request) {
         magazineService.updateMagazine(id, request);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.EDIT_MAGAZINE_SUCCESS, id);
     }
 
     @DeleteMapping("/admin/magazines/{id}")
     public ApiResponse<Long> deleteMagazine(@PathVariable Long id) {
         magazineService.deleteMagazine(id);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.DELETE_MAGAZINE_SUCCESS, id);
     }
 }
