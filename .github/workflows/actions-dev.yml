@@ -46,7 +46,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run build (Thin JAR)
-        run: ./gradlew clean build
+        run: ./gradlew build
 
         env:
           DB_URL: ${{ secrets.DB_URL }}
@@ -83,7 +83,7 @@ jobs:
       - name: Download build artifact  # 이전 단계에서 업로드한 아티팩트 다운로드
         uses: actions/download-artifact@v4
         with:
-          name: pickify-spring
+          name: pickify-thin-jar
           path: build/libs/
 
       - name: Deploy Thin JAR to EC2
