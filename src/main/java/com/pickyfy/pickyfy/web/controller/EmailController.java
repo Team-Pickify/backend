@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationSendRequest;
 import com.pickyfy.pickyfy.web.dto.request.EmailVerificationVerifyRequest;
 import com.pickyfy.pickyfy.web.dto.response.EmailVerificationSendResponse;
@@ -24,7 +25,7 @@ public class EmailController implements EmailControllerApi {
             @Valid @RequestBody EmailVerificationSendRequest emailVerificationSendRequest
     ){
         EmailVerificationSendResponse emailVerificationSendResponse = emailService.sendAuthCode(emailVerificationSendRequest);
-        return ApiResponse.onSuccess(emailVerificationSendResponse);
+        return ApiResponse.onSuccess(SuccessStatus.EMAIL_SENT, emailVerificationSendResponse);
     }
 
     @Override
@@ -32,6 +33,6 @@ public class EmailController implements EmailControllerApi {
             @Valid @RequestBody EmailVerificationVerifyRequest emailVerificationVerifyRequest
     ){
         EmailVerificationVerifyResponse emailVerificationVerifyResponse = emailService.verifyAuthCode(emailVerificationVerifyRequest);
-        return ApiResponse.onSuccess(emailVerificationVerifyResponse);
+        return ApiResponse.onSuccess(SuccessStatus.EMAIL_VERIFIED, emailVerificationVerifyResponse);
     }
 }

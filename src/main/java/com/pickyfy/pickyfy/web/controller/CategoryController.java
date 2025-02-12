@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.CategoryService;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.CategoryUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
@@ -26,19 +27,19 @@ public class CategoryController implements CategoryControllerApi{
     @PostMapping("/admin/category")
     public ApiResponse<Long> createCategory(@Valid @RequestBody CategoryCreateRequest request) {
         Long categoryId = categoryService.createCategory(request);
-        return ApiResponse.onSuccess(categoryId);
+        return ApiResponse.onSuccess(SuccessStatus.ADD_CATEGORY_SUCCESS, categoryId);
     }
 
     @GetMapping("/category/{id}")
     public ApiResponse<CategoryResponse> getCategory(@PathVariable Long id) {
         CategoryResponse response = categoryService.getCategory(id);
-        return ApiResponse.onSuccess(response);
+        return ApiResponse.onSuccess(SuccessStatus.CATEGORIES_RETRIEVED, response);
     }
 
     @GetMapping("/categories")
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         List<CategoryResponse> responses = categoryService.getAllCategories();
-        return ApiResponse.onSuccess(responses);
+        return ApiResponse.onSuccess(SuccessStatus.CATEGORIES_RETRIEVED, responses);
     }
 
     @PutMapping("/admin/category/{id}")
@@ -46,12 +47,12 @@ public class CategoryController implements CategoryControllerApi{
             @PathVariable Long id,
             @Valid @RequestBody CategoryUpdateRequest request) {
         categoryService.updateCategory(id, request);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.EDIT_CATEGORY_SUCCESS, id);
     }
 
     @DeleteMapping("/admin/category/{id}")
     public ApiResponse<Long> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.DELETE_CATEGORY_SUCCESS, id);
     }
 }

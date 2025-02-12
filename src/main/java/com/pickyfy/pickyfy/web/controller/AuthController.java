@@ -3,6 +3,7 @@ package com.pickyfy.pickyfy.web.controller;
 import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.service.AuthService;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.response.AuthResponse;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ public class AuthController implements AuthControllerApi {
     private final AuthService authService;
 
     @Override
-    public ApiResponse<String> logout(
+    public ApiResponse<Void> logout(
             @Parameter(hidden = true) @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken,
             HttpServletResponse response
     ) {
@@ -31,11 +32,11 @@ public class AuthController implements AuthControllerApi {
             authService.logout(refreshToken);
         }
         clearCookie(response);
-        return ApiResponse.onSuccess("로그아웃에 성공했습니다.");
+        return ApiResponse.onSuccess(SuccessStatus.LOGOUT_SUCCESS, null);
     }
 
     @Override
-    public ApiResponse<String> reIssue(
+    public ApiResponse<Void> reIssue(
             @Parameter(hidden = true) @CookieValue(value = REFRESH_TOKEN_COOKIE_NAME, required = false) String refreshToken,
             HttpServletResponse response) {
 
@@ -46,7 +47,7 @@ public class AuthController implements AuthControllerApi {
         response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
         createCookie(response, authResponse.refreshToken());
 
-        return ApiResponse.onSuccess("토큰 재발급 완료.");
+        return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
     private void createCookie(HttpServletResponse response, String refreshToken) {

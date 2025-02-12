@@ -5,12 +5,12 @@ import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
 import com.pickyfy.pickyfy.service.PlaceService;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
+import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.NearbyPlaceResponse;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.service.PlaceServiceImpl;
-import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -36,7 +36,7 @@ public class PlaceController implements PlaceControllerApi {
         String email = getUserEmail();
         List<PlaceSearchResponse> allPlace = placeService.getUserSavePlace(email);
 
-        return ApiResponse.onSuccess(allPlace);
+        return ApiResponse.onSuccess(SuccessStatus.PLACES_RETRIEVED, allPlace);
     }
 
     /**
@@ -45,22 +45,23 @@ public class PlaceController implements PlaceControllerApi {
     @GetMapping("/{placeId}")
     public ApiResponse<PlaceSearchResponse> getPlace(@PathVariable Long placeId) {
         PlaceSearchResponse response = placeService.getPlace(placeId);
-        return ApiResponse.onSuccess(response);
+        return ApiResponse.onSuccess(SuccessStatus.PLACES_RETRIEVED, response);
     }
 
     /**
      * 플레이스 저장/삭제 토글
      */
     @PatchMapping("/toggle")
-    public ApiResponse<String> togglePlaceUser(@RequestParam Long placeId) {
+    public ApiResponse<Void> togglePlaceUser(@RequestParam Long placeId) {
         String email = getUserEmail();
         boolean isSaved = placeService.togglePlaceUser(email,placeId);
-        return ApiResponse.onSuccess(isSaved ? "Place saved successfully." : "Place removed successfully.");
+        return ApiResponse.onSuccess(isSaved ? SuccessStatus.SAVE_PLACE_SUCCESS : SuccessStatus.DELETE_PLACE_SUCCESS, null);
     }
 
     @PostMapping("/nearby")
     public ApiResponse<List<NearbyPlaceResponse>> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
         return ApiResponse.onSuccess(
+                SuccessStatus.NEARBY_PLACES_RETRIEVED,
                 placeService.searchNearbyPlaces(
                         request.latitude(),
                         request.longitude(),
@@ -72,12 +73,6 @@ public class PlaceController implements PlaceControllerApi {
                 .toList()
         );
     }
-
-    /**
-     * 관리자 페이지에서 모든 Place 조회
-     * @param
-     * @return
-     */
 
     private String getUserEmail(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -104,7 +99,7 @@ class AdminPlaceController implements AdminControllerAPi{
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart PlaceCreateRequest request) {
         Long id = placeService.createPlace(request, images);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.ADD_PLACE_SUCCESS, id);
     }
 
     /**
@@ -116,7 +111,7 @@ class AdminPlaceController implements AdminControllerAPi{
             @RequestPart("request") @Valid PlaceCreateRequest request,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
         Long id = placeService.updatePlace(placeId, request, images);
-        return ApiResponse.onSuccess(id);
+        return ApiResponse.onSuccess(SuccessStatus.EDIT_PLACE_SUCCESS, id);
     }
 
     /**
@@ -125,16 +120,7 @@ class AdminPlaceController implements AdminControllerAPi{
     @DeleteMapping("/{placeId}")
     public ApiResponse<Void> deletePlace(@PathVariable Long placeId) {
         placeService.deletePlace(placeId);
-        return ApiResponse.onSuccess(null);
-    }
-
-    /**
-     * 특정 플레이스의 이미지 삭제 (관리자)
-     */
-    @DeleteMapping("/images/{placeImageId}")
-    public ApiResponse<Void> deletePlaceImages(@PathVariable Long placeId, @PathVariable Long placeImageId) {
-        placeService.deletePlaceImages(placeImageId);
-        return ApiResponse.onSuccess(null);
+        return ApiResponse.onSuccess(SuccessStatus.DELETE_PLACE_SUCCESS, null);
     }
 
     /**
@@ -143,7 +129,7 @@ class AdminPlaceController implements AdminControllerAPi{
     @GetMapping
     public ApiResponse<List<PlaceSearchResponse>> getAllPlace() {
         List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
-        return ApiResponse.onSuccess(adminAllPlace);
+        return ApiResponse.onSuccess(SuccessStatus.PLACES_RETRIEVED, adminAllPlace);
     }
 }
 
