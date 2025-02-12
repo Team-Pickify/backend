@@ -70,9 +70,6 @@ dependencies {
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
 
-	// thin Jar
-	implementation 'org.springframework.boot.experimental:spring-boot-thin-launcher:1.0.28.RELEASE'
-
 }
 
 tasks.named('test') {
@@ -92,17 +89,4 @@ tasks.withType(JavaCompile) {
 
 clean {
 	delete file(querydslDir)
-}
-
-jar {
-	enabled = true
-	manifest {
-		attributes(
-				'Main-Class': 'org.springframework.boot.loader.thin.ThinJarWrapper'
-		)
-	}
-}
-
-bootJar {
-	enabled = false
 }

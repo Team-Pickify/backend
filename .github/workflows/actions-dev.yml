@@ -59,6 +59,11 @@ jobs:
           name: pickify-thin-jar  # Artifact 이름 지정
           path: build/libs/*.jar  # 업로드할 JAR 파일 경로
 
+      - name: Upload build artifact to S3
+        run: |
+          aws s3 cp build/libs/*.jar s3://${{ secrets.S3_BUCKET_NAME }}/pickify-spring.jar
+
+
   deploy:  # 배포 작업 정의
     needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: ubuntu-latest  # 최신 Ubuntu 환경에서 실행
@@ -148,3 +153,15 @@ jobs:
           # 사용한 SSH 키 파일 삭제
           rm -f private_key.pem
 
+      - name: Deploy from S3 to EC2
+        env:
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: |
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST "
+            aws s3 cp s3://$S3_BUCKET_NAME/pickify-spring.jar /home/$EC2_USERNAME/pickify-spring.jar
+            pgrep java | xargs -r kill -15  # 기존 실행 중인 Java 프로세스 종료
+            sleep 3
+            nohup java -jar /home/$EC2_USERNAME/pickify-spring.jar > app.log 2>&1 &
+          "
