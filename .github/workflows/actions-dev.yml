@@ -99,11 +99,22 @@ jobs:
           echo "$EC2_SSH_KEY" > private_key.pem  # SSH 키 파일 생성
           chmod 600 private_key.pem  # SSH 키 권한 변경 (보안상 필수)
 
-          # 빌드된 JAR 파일 경로 찾기
-          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          # 빌드된 JAR 파일 목록 출력 (디버깅)
+          ls -lh build/libs
 
-          # EC2 서버에 JAR 파일 전송
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/pickify-thin.jar
+          # `plain.jar` 파일 선택
+          jar_file=$(find build/libs -maxdepth 1 -type f -name '*-plain.jar' | head -n 1)
+
+          # JAR 파일이 없으면 오류 발생
+          if [ -z "$jar_file" ]; then
+            echo "❌ ERROR: No valid plain JAR file found!"
+            exit 1
+          fi
+
+          echo "✅ Selected Plain JAR File: $jar_file"
+
+          # EC2 서버에 `plain.jar` 파일 전송
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/pickify-plain.jar
 
           # EC2 서버에 SSH 접속 후 배포 실행
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
