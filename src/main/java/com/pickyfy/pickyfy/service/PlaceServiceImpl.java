@@ -8,7 +8,6 @@ import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
-import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Collections;
@@ -79,26 +78,6 @@ public class PlaceServiceImpl implements PlaceService {
                             .naverLink(userSavedPlace.getNaverplaceLink())
                             .build();
                 })
-                .collect(Collectors.toList());
-    }
-
-    private Optional<Category> findCategoryByPlaceId(Long userSavedPlaceId){
-        PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavedPlaceId);
-        return Optional.ofNullable(savedPlaceCategory)
-                .map(PlaceCategory::getCategory).flatMap(category -> categoryRepository.findById(category.getId()));
-    }
-
-    private Optional<Magazine> findMagazineByPlaceId(Long userSavedPlaceId){
-        PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavedPlaceId);
-        return Optional.ofNullable(savedPlaceMagazine)
-                .map(PlaceMagazine::getMagazine).flatMap(magazine -> magazineRepository.findById(magazine.getId()));
-    }
-
-    private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
-        return placeSavedPlaces.stream()
-                .map(PlaceSavedPlace::getPlace)
-                .flatMap(place -> place.getPlaceImages().stream())
-                .map(PlaceImage::getUrl)
                 .collect(Collectors.toList());
     }
 
@@ -226,29 +205,10 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
         Place place = findPlaceById(placeId);
-
-        place.updatePlace(request.name(), request.address(), request.shortDescription(),
-                request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
-
-        Category category = categoryRepository.findById(request.categoryId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
-        Magazine magazine = magazineRepository.findById(request.magazineId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
-
-
-        PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
-        PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(placeId);
-
-        placeCategory.updatePlaceCategory(place, category);
-        placeMagazine.updatePlaceMagazine(place, magazine);
-
-        List<PlaceImage> placeImages = placeImageRepository.findALlByPlace(place);
-        placeImageRepository.deleteAll(placeImages);
-
-        if(imageList != null && !imageList.isEmpty()) {
-            place.updateImages(imageList, s3Service);
-        }
-
+        place.updatePlace(request);
+        updatePlaceCategory(request.categoryId(), placeId, place);
+        updatePlaceMagazine(request.magazineId(), placeId, place);
+        updatePlaceImages(place, imageList);
         return place.getId();
     }
 
@@ -263,20 +223,8 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Override
-    @Transactional
-    public void deletePlaceImages(Long placeImageId) {
-        PlaceImage placeImage = placeImageRepository.findById(placeImageId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.IMAGE_INVALID.getMessage()));
-
-        s3Service.removeFile(placeImage.getUrl());
-        placeImageRepository.delete(placeImage);
-    }
-
-
-    @Override
     @Transactional(readOnly = true)
-    public List<PlaceSearchResponse> getAdminAllPlace() {
-
+    public List<PlaceSearchResponse> getAllPlaces() {
         List<Place> allPlaceList = placeRepository.findAll();
 
         return allPlaceList.stream()
@@ -317,10 +265,24 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public UserInfoResponse getUser(String email){
-        User user = findUserByEmail(email);
-        return UserInfoResponse.from(user);
+    private Optional<Category> findCategoryByPlaceId(Long userSavedPlaceId){
+        PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavedPlaceId);
+        return Optional.ofNullable(savedPlaceCategory)
+                .map(PlaceCategory::getCategory).flatMap(category -> categoryRepository.findById(category.getId()));
+    }
+
+    private Optional<Magazine> findMagazineByPlaceId(Long userSavedPlaceId){
+        PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavedPlaceId);
+        return Optional.ofNullable(savedPlaceMagazine)
+                .map(PlaceMagazine::getMagazine).flatMap(magazine -> magazineRepository.findById(magazine.getId()));
+    }
+
+    private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
+        return placeSavedPlaces.stream()
+                .map(PlaceSavedPlace::getPlace)
+                .flatMap(place -> place.getPlaceImages().stream())
+                .map(PlaceImage::getUrl)
+                .collect(Collectors.toList());
     }
 
     private User findUserByEmail(String email) {
@@ -357,5 +319,27 @@ public class PlaceServiceImpl implements PlaceService {
                 .magazine(magazine)
                 .place(newPlace)
                 .build();
+    }
+
+    private void updatePlaceCategory(Long categoryId, Long placeId, Place place){
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+        PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(placeId);
+        placeCategory.updatePlaceCategory(place, category);
+    }
+
+    private void updatePlaceMagazine(Long magazineId, Long placeId, Place place){
+        Magazine magazine = magazineRepository.findById(magazineId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
+        PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(placeId);
+        placeMagazine.updatePlaceMagazine(place, magazine);
+    }
+
+    private void updatePlaceImages(Place place, List<MultipartFile> imageList){
+        List<PlaceImage> placeImages = placeImageRepository.findALlByPlace(place);
+        placeImageRepository.deleteAll(placeImages);
+        if(imageList != null && !imageList.isEmpty()) {
+            place.updateImages(imageList, s3Service);
+        }
     }
 }

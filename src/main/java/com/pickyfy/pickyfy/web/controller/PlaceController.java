@@ -82,7 +82,7 @@ public class PlaceController implements PlaceControllerApi {
 
     @GetMapping(value = "/admin/places")
     public ApiResponse<List<PlaceSearchResponse>> getAllPlace() {
-        List<PlaceSearchResponse> adminAllPlace = placeService.getAdminAllPlace();
+        List<PlaceSearchResponse> adminAllPlace = placeService.getAllPlaces();
         return ApiResponse.onSuccess(SuccessStatus.PLACES_RETRIEVED, adminAllPlace);
     }
 

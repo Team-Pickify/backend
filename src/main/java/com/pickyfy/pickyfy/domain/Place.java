@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.domain;
 
 import com.pickyfy.pickyfy.service.S3Service;
+import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -87,16 +88,14 @@ public class Place extends BaseTimeEntity {
         }
     }
 
-    public void updatePlace(String name, String address, String shortDescription,
-                            String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
-        Optional.ofNullable(name).ifPresent(value -> this.name = value);
-        Optional.ofNullable(address).ifPresent(value -> this.address = value);
-        Optional.ofNullable(shortDescription).ifPresent(value -> this.shortDescription = value);
-        Optional.ofNullable(instagramLink).ifPresent(value -> this.instagramLink = value);
-        Optional.ofNullable(naverplaceLink).ifPresent(value -> this.naverplaceLink = value);
-        Optional.ofNullable(latitude).ifPresent(value -> this.latitude = value);
-        Optional.ofNullable(longitude).ifPresent(value -> this.longitude = value);
-
+    public void updatePlace(PlaceCreateRequest request) {
+        Optional.ofNullable(request.name()).ifPresent(value -> this.name = value);
+        Optional.ofNullable(request.address()).ifPresent(value -> this.address = value);
+        Optional.ofNullable(request.shortDescription()).ifPresent(value -> this.shortDescription = value);
+        Optional.ofNullable(request.instagramLink()).ifPresent(value -> this.instagramLink = value);
+        Optional.ofNullable(request.naverPlaceLink()).ifPresent(value -> this.naverplaceLink = value);
+        Optional.ofNullable(request.latitude()).ifPresent(value -> this.latitude = value);
+        Optional.ofNullable(request.longitude()).ifPresent(value -> this.longitude = value);
     }
 
     public void updateImages(List<MultipartFile> newImages, S3Service s3Service) {
