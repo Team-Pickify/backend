@@ -21,6 +21,8 @@ import com.pickyfy.pickyfy.repository.PlaceRepository;
 import com.pickyfy.pickyfy.repository.PlaceSavedPlaceRepository;
 import com.pickyfy.pickyfy.repository.SavedPlaceRepository;
 import com.pickyfy.pickyfy.repository.UserRepository;
+import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import java.math.BigDecimal;
 import java.util.List;
@@ -192,17 +194,17 @@ class PlaceServiceImplTest {
         );
 
         // When - 가까운 장소의 위경도를 기준으로 500m 반경 검색
-        List<Place> result = placeService.searchNearbyPlaces(
-                BigDecimal.valueOf(12.3456789),
+        NearbyPlaceSearchRequest request = new NearbyPlaceSearchRequest(BigDecimal.valueOf(12.3456789),
                 BigDecimal.valueOf(98.7654321),
                 500.0,  // 500m 반경
                 List.of(category.getId()),
-                List.of(magazine.getId())
-        );
+                List.of(magazine.getId()));
+
+        List<Place> result = placeService.searchNearbyPlaces(request);
 
         // Then
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("가까운 장소");
+        assertThat(result.getFirst().getName()).isEqualTo("가까운 장소");
     }
 
     // 테스트 데이터 생성 헬퍼 메서드들

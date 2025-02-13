@@ -2,9 +2,9 @@ package com.pickyfy.pickyfy.service;
 
 
 import com.pickyfy.pickyfy.domain.Place;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
-import java.math.BigDecimal;
 
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import java.util.List;
         List<PlaceSearchResponse> getUserSavePlace(String userNickname);
         PlaceSearchResponse getPlace(Long placeId);
         boolean togglePlaceUser (String email, Long placeId);
-        List<Place> searchNearbyPlaces(BigDecimal lat, BigDecimal lon, Double distance, List<Long> categories, List<Long> magazines);
+        List<Place> searchNearbyPlaces(NearbyPlaceSearchRequest request);
         List<PlaceSearchResponse> getAdminAllPlace();
         UserInfoResponse getUser(String accessToken);
     }

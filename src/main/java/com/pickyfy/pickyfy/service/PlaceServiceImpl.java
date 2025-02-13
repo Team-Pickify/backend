@@ -4,6 +4,7 @@ import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
@@ -159,28 +160,23 @@ public class PlaceServiceImpl implements PlaceService {
         Optional<PlaceSavedPlace> existingRelation = placeSavedPlaceRepository.findByPlaceAndSavedPlace(place, savedPlace);
 
         if (existingRelation.isPresent()) {
-
             placeSavedPlaceRepository.delete(existingRelation.get());
             savedPlaceRepository.delete(savedPlace);
             return false;
-        } else {
-            PlaceSavedPlace placeSavedPlace = PlaceSavedPlace.builder()
+        }
+
+        PlaceSavedPlace placeSavedPlace = PlaceSavedPlace.builder()
                     .place(place)
                     .savedPlace(savedPlace)
                     .build();
-            placeSavedPlaceRepository.save(placeSavedPlace);
-            return true;
-        }
+
+        placeSavedPlaceRepository.save(placeSavedPlace);
+        return true;
     }
 
     @Override
-    public List<Place> searchNearbyPlaces(BigDecimal lat, BigDecimal lon,
-                                          Double distance,
-                                          List<Long> categories,
-                                          List<Long> magazines) {
-
-        NearbyPlaceSearchCondition condition = new NearbyPlaceSearchCondition(lat, lon, distance, categories, magazines);
-
+    public List<Place> searchNearbyPlaces(NearbyPlaceSearchRequest request) {
+        NearbyPlaceSearchCondition condition = NearbyPlaceSearchCondition.from(request);
         return placeRepository.searchNearbyPlaces(condition);
     }
 

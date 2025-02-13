@@ -51,13 +51,7 @@ public class PlaceController implements PlaceControllerApi {
     public ApiResponse<List<NearbyPlaceResponse>> searchNearbyPlaces(@RequestBody NearbyPlaceSearchRequest request) {
         return ApiResponse.onSuccess(
                 SuccessStatus.NEARBY_PLACES_RETRIEVED,
-                placeService.searchNearbyPlaces(
-                        request.latitude(),
-                        request.longitude(),
-                        request.distance(),
-                        request.categoryIds(),
-                        request.magazineIds()
-                ).stream()
+                placeService.searchNearbyPlaces(request).stream()
                 .map(NearbyPlaceResponse::from)
                 .toList()
         );
