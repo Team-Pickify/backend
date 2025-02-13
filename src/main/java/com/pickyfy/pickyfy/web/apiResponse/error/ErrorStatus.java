@@ -34,8 +34,9 @@ public enum ErrorStatus implements BaseErrorCode {
     TOKEN_EXPIRATION(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4013), "만료된 토큰입니다."),
 
     PLACE_NOT_FOUND(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4001), "존재하지 않는 플레이스입니다."),
-    ADD_PLACE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4002), "[관리자] 플레이스 등록에 실패했습니다."),
-    EDIT_PLACE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4003), "[관리자] 플레이스 수정에 실패했습니다."),
+    PLACE_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4002), "중복된 이름의 플레이스입니다."),
+    ADD_PLACE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4003), "[관리자] 플레이스 등록에 실패했습니다."),
+    EDIT_PLACE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.USER.getCode(4004), "[관리자] 플레이스 수정에 실패했습니다."),
 
     MAGAZINE_NOT_FOUND(HttpStatus.BAD_REQUEST, StatusCode.MAGAZINE.getCode(4001), "존재하지 않는 매거진입니다."),
     ADD_MAGAZINE_FAIL(HttpStatus.BAD_REQUEST, StatusCode.MAGAZINE.getCode(4002), "[관리자] 매거진 등록에 실패했습니다."),
