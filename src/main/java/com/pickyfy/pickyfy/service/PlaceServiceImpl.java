@@ -1,6 +1,6 @@
 package com.pickyfy.pickyfy.service;
 
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
@@ -38,90 +38,80 @@ public class PlaceServiceImpl implements PlaceService {
     private final S3Service s3Service;
     private final PlaceCategoryRepository placeCategoryRepository;
 
-    /**
-     * 특정 유저가 저장한 Place 전체 조회
-     * @param
-     * @return
-     */
     @Override
     public List<PlaceSearchResponse> getUserSavePlace(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-        List<SavedPlace> allPlaceList = savedPlaceRepository.findAllByUserId(user.getId());
-
-        if (allPlaceList.isEmpty()) {
+        User user = findUserByEmail(email);
+        List<SavedPlace> savedPlaces = savedPlaceRepository.findAllByUserId(user.getId());
+        if (savedPlaces.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return allPlaceList.stream()
+        return savedPlaces.stream()
                 .map(savedPlace -> {
-
                     List<PlaceSavedPlace> placeSavedPlaces = placeSavedPlaceRepository.findAllBySavedPlaceId(savedPlace.getId());
-                    Long savedPlaceId = savedPlace.getId();
-                    PlaceSavedPlace mappingPlace = placeSavedPlaceRepository.findBySavedPlaceId(savedPlaceId);
+                    if (placeSavedPlaces.isEmpty()){
+                        return null;
+                    }
+
+                    PlaceSavedPlace mappingPlace = placeSavedPlaces.getFirst();
                     if (mappingPlace == null || mappingPlace.getPlace() == null) {
                         return null;
                     }
 
-                    Place userSavePlace = placeRepository.findById(mappingPlace.getPlace().getId()).orElseThrow(() -> new EntityNotFoundException("Place not found"));
-
-                    // 유저가 저장한 Place 로 Category 조회
-                    PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavePlace.getId());
-                    Optional<Category> savedCategory = categoryRepository.findById(savedPlaceCategory.getCategory().getId());
-
-                    // 유저가 저장한 Place 로 Magazine 조회
-                    PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavePlace.getId());
-                    Optional<Magazine> savedMagazine = magazineRepository.findById(savedPlaceMagazine.getMagazine().getId());
-
-
-                    List<Place> places = placeSavedPlaces.stream()
-                            .map(PlaceSavedPlace::getPlace)
-                            .toList();
-
-
-                    List<String> placeImages = places.stream()
-                            .flatMap(place -> place.getPlaceImages().stream())
-                            .map(PlaceImage::getUrl)
-                            .collect(Collectors.toList());
-
+                    Place userSavedPlace = findPlaceById(mappingPlace.getPlace().getId());
+                    Long userSavedPlaceId = userSavedPlace.getId();
+                    Optional<Category> savedCategory = findCategoryByPlaceId(userSavedPlaceId);
+                    Optional<Magazine> savedMagazine = findMagazineByPlaceId(userSavedPlaceId);
 
                     return PlaceSearchResponse.builder()
-                            .placeId(userSavePlace.getId())
+                            .placeId(userSavedPlace.getId())
                             .name(savedPlace.getName())
                             .shortDescription(savedPlace.getDescription())
-                            .latitude(userSavePlace.getLatitude())
-                            .longitude(userSavePlace.getLongitude())
+                            .latitude(userSavedPlace.getLatitude())
+                            .longitude(userSavedPlace.getLongitude())
                             .createdAt(savedPlace.getCreatedAt())
                             .updatedAt(savedPlace.getUpdatedAt())
-                            .placeImageUrl(placeImages)
-                            .categoryName(savedCategory.get().getName())
-                            .magazineTitle(savedMagazine.get().getTitle())
-                            .instagramLink(userSavePlace.getInstagramLink())
-                            .naverLink(userSavePlace.getNaverplaceLink())
+                            .placeImageUrl(collectPlaceImages(placeSavedPlaces))
+                            .categoryName(savedCategory.map(Category::getName).orElse(null))
+                            .magazineTitle(savedMagazine.map(Magazine::getTitle).orElse(null))
+                            .instagramLink(userSavedPlace.getInstagramLink())
+                            .naverLink(userSavedPlace.getNaverplaceLink())
                             .build();
                 })
                 .collect(Collectors.toList());
     }
 
+    private Optional<Category> findCategoryByPlaceId(Long userSavedPlaceId){
+        PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavedPlaceId);
+        return Optional.ofNullable(savedPlaceCategory)
+                .map(PlaceCategory::getCategory).flatMap(category -> categoryRepository.findById(category.getId()));
+    }
 
-    /**
-     * 특정 플레이스 조회
-     * @param placeId
-     * @return
-     */
+    private Optional<Magazine> findMagazineByPlaceId(Long userSavedPlaceId){
+        PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavedPlaceId);
+        return Optional.ofNullable(savedPlaceMagazine)
+                .map(PlaceMagazine::getMagazine).flatMap(magazine -> magazineRepository.findById(magazine.getId()));
+    }
+
+    private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
+        return placeSavedPlaces.stream()
+                .map(PlaceSavedPlace::getPlace)
+                .flatMap(place -> place.getPlaceImages().stream())
+                .map(PlaceImage::getUrl)
+                .collect(Collectors.toList());
+    }
+
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
-        Place searchPlace = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
+        Place searchPlace = findPlaceById(placeId);
         List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
 
-        //PlaceID 로 category 조회
         PlaceCategory searchPlaceCategory = placeCategoryRepository.findByPlaceId(searchPlace.getId());
         Category searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
 
         String categoryName = searchCategory.getName();
 
-        //PlaceID 로 magazine 조회
         PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(searchPlace.getId());
         Magazine searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));;
@@ -149,21 +139,10 @@ public class PlaceServiceImpl implements PlaceService {
                 .build();
     }
 
-
-    /**
-     * 유저 Place 저장 및 저장취소 (toggle)
-     * @param
-     * @param placeId
-     * @return
-     */
     @Transactional
     public boolean togglePlaceUser(String email,Long placeId) {
-
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
-
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+        User user = findUserByEmail(email);
+        Place place = findPlaceById(placeId);
         String placeName = place.getName();
 
         SavedPlace savedPlace = savedPlaceRepository.findByUserIdAndName(user.getId(), placeName)
@@ -205,12 +184,6 @@ public class PlaceServiceImpl implements PlaceService {
         return placeRepository.searchNearbyPlaces(condition);
     }
 
-    /**
-     * 관리자 기능 (Place 생성)
-     * @param request
-     * @param imageList
-     * @return
-     */
     @Transactional
     public Long createPlace(PlaceCreateRequest request, List<MultipartFile> imageList) {
 
@@ -270,18 +243,10 @@ public class PlaceServiceImpl implements PlaceService {
         return newPlace.getId();
     }
 
-    /**
-     * 관리자 기능(Place 수정)
-     * @param placeId
-     * @param request
-     * @param imageList
-     * @return
-     */
     @Override
     @Transactional
     public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
+        Place place = findPlaceById(placeId);
 
         place.updatePlace(request.name(), request.address(), request.shortDescription(),
                 request.instagramLink(), request.naverPlaceLink(), request.latitude(), request.longitude() );
@@ -306,31 +271,16 @@ public class PlaceServiceImpl implements PlaceService {
         return place.getId();
     }
 
-
-    /**
-     * Place 삭제
-     * @param placeId
-     */
     @Override
     @Transactional
     public void deletePlace(Long placeId) {
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
-
+        Place place = findPlaceById(placeId);
         for (PlaceImage image : place.getPlaceImages()) {
             s3Service.removeFile(image.getUrl());
         }
-
-        // 6. Place 삭제
         placeRepository.delete(place);
     }
 
-
-
-    /**
-     * PlaceImage 삭제
-     * @param placeImageId
-     */
     @Override
     @Transactional
     public void deletePlaceImages(Long placeImageId) {
@@ -363,7 +313,7 @@ public class PlaceServiceImpl implements PlaceService {
                             .map(PlaceImage::getUrl)
                             .collect(Collectors.toList());
 
-                    List<Long >  placeImagesIdList = place.getPlaceImages().stream()
+                    List<Long> placeImagesIdList = place.getPlaceImages().stream()
                             .map(PlaceImage::getId)
                             .toList();
 
@@ -397,5 +347,8 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 
-
+    private Place findPlaceById(Long placeId){
+        return placeRepository.findById(placeId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
+    }
 }
