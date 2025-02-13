@@ -60,8 +60,8 @@ public class PlaceServiceImpl implements PlaceService {
 
                     Place userSavedPlace = findPlaceById(mappingPlace.getPlace().getId());
                     Long userSavedPlaceId = userSavedPlace.getId();
-                    Optional<Category> savedCategory = findCategoryByPlaceId(userSavedPlaceId);
-                    Optional<Magazine> savedMagazine = findMagazineByPlaceId(userSavedPlaceId);
+                    Category savedCategory = findCategoryByPlaceId(userSavedPlaceId);
+                    Magazine savedMagazine = findMagazineByPlaceId(userSavedPlaceId);
 
                     return PlaceSearchResponse.builder()
                             .placeId(userSavedPlace.getId())
@@ -72,8 +72,8 @@ public class PlaceServiceImpl implements PlaceService {
                             .createdAt(savedPlace.getCreatedAt())
                             .updatedAt(savedPlace.getUpdatedAt())
                             .placeImageUrl(collectPlaceImages(placeSavedPlaces))
-                            .categoryName(savedCategory.map(Category::getName).orElse(null))
-                            .magazineTitle(savedMagazine.map(Magazine::getTitle).orElse(null))
+                            .categoryName(savedCategory.getName())
+                            .magazineTitle(savedMagazine.getTitle())
                             .instagramLink(userSavedPlace.getInstagramLink())
                             .naverLink(userSavedPlace.getNaverplaceLink())
                             .build();
@@ -83,38 +83,29 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
-        Place searchPlace = findPlaceById(placeId);
+        Place place = findPlaceById(placeId);
         List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
 
-        PlaceCategory searchPlaceCategory = placeCategoryRepository.findByPlaceId(searchPlace.getId());
-        Category searchCategory = categoryRepository.findById(searchPlaceCategory.getCategory().getId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+        Category category = findCategoryByPlaceId(placeId);
+        Magazine magazine = findMagazineByPlaceId(placeId);
 
-        String categoryName = searchCategory.getName();
-
-        PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(searchPlace.getId());
-        Magazine searchMagazine = magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
-        String searchMagazineTitle = searchMagazine.getTitle();
-
-        List<Long> placeImagesIdList = searchPlace.getPlaceImages().stream()
+        List<Long> placeImagesIdList = place.getPlaceImages().stream()
                 .map(PlaceImage::getId)
                 .toList();
-
 
         return PlaceSearchResponse.builder()
                 .placeId(placeId)
                 .placeImageUrl(searchPlaceImageUrl)
-                .shortDescription(searchPlace.getShortDescription())
-                .name(searchPlace.getName())
-                .createdAt(searchPlace.getCreatedAt())
-                .updatedAt(searchPlace.getUpdatedAt())
-                .longitude(searchPlace.getLongitude())
-                .latitude(searchPlace.getLatitude())
-                .categoryName(categoryName)
-                .magazineTitle(searchMagazineTitle)
-                .instagramLink(searchPlace.getInstagramLink())
-                .naverLink(searchPlace.getNaverplaceLink())
+                .shortDescription(place.getShortDescription())
+                .name(place.getName())
+                .createdAt(place.getCreatedAt())
+                .updatedAt(place.getUpdatedAt())
+                .longitude(place.getLongitude())
+                .latitude(place.getLatitude())
+                .categoryName(category.getName())
+                .magazineTitle(magazine.getTitle())
+                .instagramLink(place.getInstagramLink())
+                .naverLink(place.getNaverplaceLink())
                 .placeImageId(placeImagesIdList)
                 .build();
     }
@@ -265,16 +256,23 @@ public class PlaceServiceImpl implements PlaceService {
                 .collect(Collectors.toList());
     }
 
-    private Optional<Category> findCategoryByPlaceId(Long userSavedPlaceId){
-        PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(userSavedPlaceId);
-        return Optional.ofNullable(savedPlaceCategory)
-                .map(PlaceCategory::getCategory).flatMap(category -> categoryRepository.findById(category.getId()));
+    private Category findCategoryByPlaceId(Long placeId){
+        PlaceCategory savedPlaceCategory = placeCategoryRepository.findByPlaceId(placeId);
+        if (savedPlaceCategory == null || savedPlaceCategory.getCategory() == null) {
+            throw new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage());
+        }
+        Category category = savedPlaceCategory.getCategory();
+        return categoryRepository.findById(category.getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
     }
 
-    private Optional<Magazine> findMagazineByPlaceId(Long userSavedPlaceId){
-        PlaceMagazine savedPlaceMagazine = placeMagazineRepository.findByPlaceId(userSavedPlaceId);
-        return Optional.ofNullable(savedPlaceMagazine)
-                .map(PlaceMagazine::getMagazine).flatMap(magazine -> magazineRepository.findById(magazine.getId()));
+    private Magazine findMagazineByPlaceId(Long placeId){
+        PlaceMagazine searchPlaceMagazine = placeMagazineRepository.findByPlaceId(placeId);
+        if (searchPlaceMagazine == null || searchPlaceMagazine.getMagazine() == null) {
+            throw new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage());
+        }
+        return magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
     }
 
     private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
@@ -342,4 +340,5 @@ public class PlaceServiceImpl implements PlaceService {
             place.updateImages(imageList, s3Service);
         }
     }
+
 }
