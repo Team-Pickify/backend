@@ -56,7 +56,7 @@ jobs:
 
       - name: Move jar file to home directory
         run: |
-          find build/libs -name '*.jar' ! -name '*plain.jar' -exec mv {} /home/ubuntu/pickify-spring.jar \;
+          find build/libs -name '*.jar' ! -name '*plain.jar' -exec mv {} /home/${{ secrets.EC2_HOST }}/pickify-spring.jar \;
             
 
   deploy:
@@ -64,12 +64,11 @@ jobs:
     runs-on: pickify  # self-hosted runner에서 실행
 
     steps:
-      - uses:
       - name: Stop Existing Application  # 기존 Java 프로세스 종료
-      - run: |
-          pkill -f "pickify-spring.jar" || echo "No running Java process found."
+        run: |
+          pgrep java | xargs -r kill -15
           sleep 4
 
       - name: Start Application  # 새로운 JAR 실행
-      - run: |
-          nohup java -jar /home/ubuntu/pickify-spring.jar > /home/ubuntu/app.log 2>&1 & disown
+        run: |
+          nohup java -jar /home/ubuntu/pickify-spring.jar > /home/ubuntu/logs/app.log 2>&1 & disown
