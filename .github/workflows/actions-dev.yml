@@ -62,10 +62,14 @@ jobs:
     steps:
       - name: Stop Existing Application  # 기존 Java 프로세스 종료
         run: |
-          pgrep java | xargs -r kill -15
-          sleep 4
+          tmux kill-session -t pickify || true
 
       - name: Start Application  # 새로운 JAR 실행
         run: |
-          jar_file=$(find ~/actions-runner/_work/backend/backend/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          nohup java -jar "$jar_file" > app.log 2>&1 & disown
+          jar_file=$(find /home/ubuntu/actions-runner/_work/backend/backend/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          if [ -z "$jar_file" ]; then
+            echo "No valid JAR file found!"
+            exit 1
+          fi
+          echo "Starting application with JAR: $jar_file"
+          tmux new-session -d -s pickify "java -jar $jar_file > /home/ubuntu/app.log 2>&1"
