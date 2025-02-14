@@ -22,7 +22,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private static final String REDIRECT_URL = "http://localhost:5173/ ";
+    private static final String REDIRECT_URL = "http://localhost:5173/";
 
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
@@ -36,22 +36,23 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.createRefreshToken(email, "USER");
 
         redisUtil.setDataExpire("refresh:" + email, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
-        response.setHeader("Authorization", "Bearer " + accessToken);
 
-        ResponseCookie cookie = createCookie(refreshToken);
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        ResponseCookie accessCookie = createCookie("accessToken", accessToken, Constant.ACCESS_TOKEN_EXPIRATION_TIME, "/");
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        ResponseCookie refreshCookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME, "/auth");
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
         response.sendRedirect(REDIRECT_URL);
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
-    private ResponseCookie createCookie(String refreshToken) {
-        return ResponseCookie.from("refreshToken", refreshToken)
+    private ResponseCookie createCookie(String name, String token, long expirationTime, String path) {
+        return ResponseCookie.from(name, token)
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
-                .path("/")
-                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
+                .path(path)
+                .maxAge(Duration.ofMillis(expirationTime).getSeconds())
                 .build();
     }
 }
