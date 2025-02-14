@@ -76,10 +76,12 @@ jobs:
           fi
 
       - name: Stop Existing Application  # 기존 Java 애플리케이션 종료
+        if: env.skip-deployment != 'true'  # skip-deployment가 false일 때만 실행
         run: |
           sudo systemctl stop pickify || true
 
       - name: Start Application  # 새로운 JAR 실행
+        if: env.skip-deployment != 'true'  # skip-deployment가 false일 때만 실행
         run: |
           sudo systemctl daemon-reload
           sudo systemctl restart pickify
