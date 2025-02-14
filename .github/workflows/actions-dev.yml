@@ -53,10 +53,6 @@ jobs:
           DB_HOST_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
-
-      - name: Move jar file to home directory
-        run: |
-          find build/libs -name '*.jar' ! -name '*plain.jar' -exec mv {} /home/${{ secrets.EC2_HOST }}/pickify-spring.jar \;
             
 
   deploy:
@@ -72,4 +68,4 @@ jobs:
       - name: Start Application  # 새로운 JAR 실행
         run: |
           jar_file=$(find ~/actions-runner/_work/backend/backend/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          nohup java -jar "$jar_file" > app.log 2>&1 &
+          nohup java -jar "$jar_file" > app.log 2>&1 & disown
