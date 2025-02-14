@@ -22,7 +22,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private static final String REDIRECT_URL = "http://localhost:5173/ ";
+    private static final String REDIRECT_URL = "http://localhost:5173/";
 
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;

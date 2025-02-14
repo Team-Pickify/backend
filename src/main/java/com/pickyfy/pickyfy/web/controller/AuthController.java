@@ -21,6 +21,7 @@ import java.time.Duration;
 public class AuthController implements AuthControllerApi {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private final AuthService authService;
 
     @Override
@@ -63,7 +64,7 @@ public class AuthController implements AuthControllerApi {
     }
 
     private void clearCookie(HttpServletResponse response) {
-        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+        ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)
                 .secure(false)
                 .sameSite("Lax")
@@ -71,6 +72,15 @@ public class AuthController implements AuthControllerApi {
                 .maxAge(0)
                 .build();
 
-        response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+        ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/auth")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredAccessToken.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshToken.toString());
     }
 }
