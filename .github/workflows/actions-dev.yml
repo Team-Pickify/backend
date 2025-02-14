@@ -65,11 +65,10 @@ jobs:
 
     steps:
       - name: Stop Existing Application  # 기존 Java 프로세스 종료
-        run: |
-          pgrep java | xargs -r kill -15
+      - run: |
+          pkill -f "pickify-spring.jar" || echo "No running Java process found."
           sleep 4
 
       - name: Start Application  # 새로운 JAR 실행
-        run: |
-
-          nohup java -jar /home/ubuntu/pickify-spring.jar > app.log 2>&1 &
+      - run: |
+          nohup java -jar /home/ubuntu/pickify-spring.jar > /home/ubuntu/app.log 2>&1 & disown
