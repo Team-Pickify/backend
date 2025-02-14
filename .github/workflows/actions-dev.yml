@@ -127,7 +127,7 @@ on:
 
 jobs:
   build-and-deploy:
-    runs-on: self-hosted
+    runs-on: pickify
 
     steps:
       - name: Checkout repository
