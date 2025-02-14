@@ -60,11 +60,6 @@ jobs:
           mv /home/ubuntu/actions-runner/_work/backend/backend/build/libs/pickyfy-0.0.1-SNAPSHOT.jar /home/ubuntu/pickify-spring.jar
         shell: bash
 
-      - name: Delete backend directory
-        run: |
-          rm -rf /home/ubuntu/actions-runner/_work/backend/
-        shell: bash
-
             
 
   deploy:
