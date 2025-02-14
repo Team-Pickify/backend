@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.domain;
 
 import com.pickyfy.pickyfy.service.S3Service;
+import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,11 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -51,18 +48,17 @@ public class Place extends BaseTimeEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    // 연관된 Place image 삭제 하기 위해 추가
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceImage> placeImages = new ArrayList<>();
+    private final List<PlaceImage> placeImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
+    private final List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceCategory> placeCategories = new ArrayList<>();
+    private final  List<PlaceCategory> placeCategories = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceMagazine> placeMagazines = new ArrayList<>();
+    private final List<PlaceMagazine> placeMagazines = new ArrayList<>();
 
     @Builder
     public Place(String shortDescription, String name, String address, String instagramLink,
@@ -74,34 +70,42 @@ public class Place extends BaseTimeEntity {
         this.naverplaceLink = naverplaceLink;
         this.latitude = latitude;
         this.longitude = longitude;
+        addImages(images, s3Service);
+    }
 
-        if (images != null && !images.isEmpty()) {
-            int index = 0;
-            for (MultipartFile image : images) {
-                String imageUrl = s3Service.upload(image);
-                this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(index++).build());
-            }
+    private void addImages(List<MultipartFile> images, S3Service s3Service){
+        if (images == null || images.isEmpty()) {
+            return;
+        }
+
+        for (int i=0; i<images.size(); i++){
+            String imageUrl = s3Service.upload(images.get(i));
+            this.placeImages.add(PlaceImage.builder()
+                    .place(this)
+                    .url(imageUrl)
+                    .sequence(i)
+                    .build());
         }
     }
 
-    public void updatePlace(String name, String address, String shortDescription,
-                            String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
-        if (name != null) this.name = name;
-        if (address != null) this.address = address;
-        if (shortDescription != null) this.shortDescription = shortDescription;
-        if (instagramLink != null) this.instagramLink = instagramLink;
-        if (naverplaceLink != null) this.naverplaceLink = naverplaceLink;
-        if (latitude != null) this.latitude = latitude;
-        if (longitude != null) this.longitude = longitude;
-
+    public void updatePlace(PlaceCreateRequest request) {
+        Optional.ofNullable(request.name()).ifPresent(value -> this.name = value);
+        Optional.ofNullable(request.address()).ifPresent(value -> this.address = value);
+        Optional.ofNullable(request.shortDescription()).ifPresent(value -> this.shortDescription = value);
+        Optional.ofNullable(request.instagramLink()).ifPresent(value -> this.instagramLink = value);
+        Optional.ofNullable(request.naverPlaceLink()).ifPresent(value -> this.naverplaceLink = value);
+        Optional.ofNullable(request.latitude()).ifPresent(value -> this.latitude = value);
+        Optional.ofNullable(request.longitude()).ifPresent(value -> this.longitude = value);
     }
 
     public void updateImages(List<MultipartFile> newImages, S3Service s3Service) {
-
-
         for (int i = 0; i < newImages.size(); i++) {
             String imageUrl = s3Service.upload(newImages.get(i));
-            this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(i).build());
+            this.placeImages.add(PlaceImage.builder()
+                    .place(this)
+                    .url(imageUrl)
+                    .sequence(i)
+                    .build());
         }
     }
 }

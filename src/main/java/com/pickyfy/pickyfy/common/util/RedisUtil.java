@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
