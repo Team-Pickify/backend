@@ -53,6 +53,13 @@ jobs:
           DB_HOST_PASSWORD: ${{ secrets.DB_HOST_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
+
+      - name: Move JAR file to EC2 directory
+        run: |
+          mkdir -p /home/ubuntu/
+          mv /home/ubuntu/actions-runner/_work/backend/backend/build/libs/pickyfy-0.0.1-SNAPSHOT.jar /home/ubuntu/pickify-spring.jar
+        shell: bash
+
             
 
   deploy:
