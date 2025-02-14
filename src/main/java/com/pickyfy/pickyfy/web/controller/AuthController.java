@@ -51,6 +51,14 @@ public class AuthController implements AuthControllerApi {
         return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
+    @Override
+    public ApiResponse<Boolean> isAuthenticated(
+            @Parameter(hidden = true) @CookieValue(name = "accessToken", required = false) String accessToken
+    ) {
+        boolean isAuthenticated = authService.isAuthenticated(accessToken);
+        return ApiResponse.onSuccess(isAuthenticated);
+    }
+
     private void createCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(true)

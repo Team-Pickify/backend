@@ -32,6 +32,11 @@ public class AuthServiceImpl implements AuthService{
         return AuthResponse.from(accessToken, refreshToken);
     }
 
+    @Override
+    public boolean isAuthenticated(String accessToken) {
+        return jwtUtil.validateToken(accessToken);
+    }
+
     public void validateRefreshToken(String token){
         jwtUtil.validateToken(token);
         String getToken = redisUtil.getData("refresh:" + jwtUtil.getPrincipal(token));
