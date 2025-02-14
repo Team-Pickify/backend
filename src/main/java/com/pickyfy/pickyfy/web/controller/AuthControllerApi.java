@@ -28,4 +28,13 @@ public interface AuthControllerApi {
     })
     @PostMapping("/reissue")
     ApiResponse<Void> reIssue(@CookieValue(value = "refreshToken", required = false) String refreshToken, HttpServletResponse response);
+
+    @Operation(summary = "로그인 상태 검증 API", description = """
+        - 로그인 상태를 검증하는 API입니다.
+        - 쿠키로 저장된 엑세스토큰을 기반으로 검증합니다.""")
+    @ApiResponses({
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
+    })
+    @PostMapping("/me")
+    ApiResponse<Boolean> isAuthenticated(@CookieValue(value = "accessToken", required = false) String accessToken);
 }

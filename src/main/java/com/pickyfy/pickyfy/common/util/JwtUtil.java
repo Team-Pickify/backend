@@ -72,7 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) { // 예외처리 추가
         try {
             Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
             return true;
