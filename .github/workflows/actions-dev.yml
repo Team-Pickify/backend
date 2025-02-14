@@ -64,6 +64,7 @@ jobs:
     runs-on: pickify  # self-hosted runner에서 실행
 
     steps:
+      - uses:
       - name: Stop Existing Application  # 기존 Java 프로세스 종료
       - run: |
           pkill -f "pickify-spring.jar" || echo "No running Java process found."
