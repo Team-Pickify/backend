@@ -61,6 +61,20 @@ jobs:
     runs-on: pickify  # self-hosted runner에서 실행
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 전체 Git 기록 가져오기
+
+      - name: Check for merge commit  # Merge commit 확인
+        id: check-merge
+        run: |
+          if [[ "$(git log -1 --pretty=%B)" != *"Merge pull request"* ]]; then
+            echo "Not a merge commit. Skipping deployment."
+            echo "skip-deployment=true" >> $GITHUB_ENV
+          else
+            echo "skip-deployment=false" >> $GITHUB_ENV
+          fi
+
       - name: Stop Existing Application  # 기존 Java 애플리케이션 종료
         run: |
           sudo systemctl stop pickify || true
