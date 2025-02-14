@@ -71,4 +71,5 @@ jobs:
 
       - name: Start Application  # 새로운 JAR 실행
         run: |
-          nohup java -jar /home/ubuntu/pickify-spring.jar > /home/ubuntu/app.log 2>&1 & disown
+          jar_file=$(find ~/actions-runner/_work/backend/backend/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
+          nohup java -jar "$jar_file" > app.log 2>&1 &
