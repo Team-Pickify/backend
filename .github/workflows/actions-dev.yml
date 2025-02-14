@@ -56,20 +56,16 @@ jobs:
             
 
   deploy:
+
     needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: pickify  # self-hosted runner에서 실행
 
     steps:
-      - name: Stop Existing Application  # 기존 Java 프로세스 종료
+      - name: Stop Existing Application  # 기존 Java 애플리케이션 종료
         run: |
-          tmux kill-session -t pickify || true
+          sudo systemctl stop pickify || true
 
       - name: Start Application  # 새로운 JAR 실행
         run: |
-          jar_file=$(find /home/ubuntu/actions-runner/_work/backend/backend/build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          if [ -z "$jar_file" ]; then
-            echo "No valid JAR file found!"
-            exit 1
-          fi
-          echo "Starting application with JAR: $jar_file"
-          tmux new-session -d -s pickify "java -jar $jar_file > /home/ubuntu/app.log 2>&1"
+          sudo systemctl daemon-reload
+          sudo systemctl restart pickify
