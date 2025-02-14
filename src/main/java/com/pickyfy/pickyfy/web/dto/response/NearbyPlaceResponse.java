@@ -1,7 +1,9 @@
 package com.pickyfy.pickyfy.web.dto.response;
 
+import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
+import com.pickyfy.pickyfy.web.dto.MagazineInfo;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,7 +18,7 @@ public record NearbyPlaceResponse(
         String naverLink,
         List<String> imageUrls,
         List<String> categories,
-        List<String> magazines
+        List<MagazineInfo> magazineInfo
 ) {
     public static NearbyPlaceResponse from(Place place) {
         // 이미지 URL 추출
@@ -30,9 +32,10 @@ public record NearbyPlaceResponse(
                 .toList();
 
         // 매거진 이름들을 추출하고 불변 리스트로 만듭니다.
-        List<String> magazineNames = place.getPlaceMagazines().stream()
+        List<MagazineInfo> magazineInfos = place.getPlaceMagazines().stream()
                 .map(pm -> {
-                    return pm.getMagazine().getTitle();
+                    Magazine magazine = pm.getMagazine();
+                    return new MagazineInfo(magazine.getTitle(), magazine.getIconUrl());
                 })
                 .toList();
 
@@ -48,7 +51,7 @@ public record NearbyPlaceResponse(
                 place.getNaverplaceLink(),
                 images,
                 categoryNames,
-                magazineNames
+                magazineInfos
         );
     }
 }
