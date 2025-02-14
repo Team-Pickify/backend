@@ -4,6 +4,7 @@ import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.auth.details.CustomUserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -18,8 +19,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private static final String ACCESS_TOKEN_HEADER = "Authorization";
-    private static final String BEARER = "Bearer ";
+    private static final String ACCESS_TOKEN = "accessToken";
 
     private final CustomUserDetailsServiceImpl customUserDetailsServiceImpl;
     private final JwtUtil jwtUtil;
@@ -28,24 +28,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
-        String authorizationHeader = request.getHeader(ACCESS_TOKEN_HEADER);
+        String token = getAccessTokenFromCookies(request);
 
-        if (requestURI.equals("/auth/reissue") && (authorizationHeader != null && authorizationHeader.startsWith(BEARER))) {
+        if (requestURI.equals("/auth/reissue") && (token != null)) {
             request.setAttribute("errorMessage", "Authorization이 포함되어있습니다.");
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
             }
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER)) {
+        if (token == null || !jwtUtil.validateToken(token)) {
             filterChain.doFilter(request, response);
             return;
         }
-        String token = authorizationHeader.substring(7);
 
-        if (!jwtUtil.validateToken(token)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         String principal = jwtUtil.getPrincipal(token);
         String role = jwtUtil.getRole(token);
         UserDetails userDetails;
@@ -65,5 +60,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private String getAccessTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (ACCESS_TOKEN.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }
