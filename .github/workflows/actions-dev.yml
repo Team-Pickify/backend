@@ -54,27 +54,15 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pickify-spring
-          path: build/libs/*.jar
-
   deploy:
     needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: pickify  # self-hosted runner에서 실행
 
     steps:
-      - name: Download build artifact  # 빌드 결과 다운로드
-        uses: actions/download-artifact@v4
-        with:
-          name: pickify-spring
-          path: build/libs/
-
       - name: Stop Existing Application  # 기존 Java 프로세스 종료
         run: |
           pgrep java | xargs -r kill -15
-          sleep 10
+          sleep 4
 
       - name: Start Application  # 새로운 JAR 실행
         run: |
