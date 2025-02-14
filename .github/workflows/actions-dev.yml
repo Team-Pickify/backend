@@ -54,6 +54,11 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           JWT_EXPIRATION_TIME: ${{ secrets.JWT_EXPIRATION_TIME }}
 
+      - name: Move jar file to home directory
+        run: |
+          find build/libs -name '*.jar' ! -name '*plain.jar' -exec mv {} /home/ubuntu/pickify-spring.jar \;
+            
+
   deploy:
     needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: pickify  # self-hosted runner에서 실행
@@ -66,5 +71,5 @@ jobs:
 
       - name: Start Application  # 새로운 JAR 실행
         run: |
-          jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
-          nohup java -jar "$jar_file" > app.log 2>&1 &
+
+          nohup java -jar /home/ubuntu/pickify-spring.jar > app.log 2>&1 &
