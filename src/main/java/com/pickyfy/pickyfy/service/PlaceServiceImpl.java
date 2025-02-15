@@ -4,13 +4,13 @@ import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
+import com.pickyfy.pickyfy.web.dto.PlaceSearchResponseParams;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,14 +34,10 @@ public class PlaceServiceImpl implements PlaceService {
     private final CategoryRepository categoryRepository;
     private final MagazineRepository magazineRepository;
     private final PlaceMagazineRepository placeMagazineRepository;
-    private final S3Service s3Service;
     private final PlaceCategoryRepository placeCategoryRepository;
 
-    /**
-     * 특정 유저가 저장한 Place 전체 조회
-     * @param
-     * @return
-     */
+    private final S3Service s3Service;
+
     /**
      * 특정 유저가 저장한 Place 전체 조회
      *
@@ -77,32 +73,22 @@ public class PlaceServiceImpl implements PlaceService {
                     // 유저가 저장한 Place의 이미지 조회
                     List<String> placeImagesUrl = placeImageRepository.findAllByPlaceId(place.getId());
 
-                    return PlaceSearchResponse.builder()
-                            .placeId(place.getId())
-                            .name(place.getName())
-                            .shortDescription(place.getShortDescription())
-                            .latitude(place.getLatitude())
-                            .longitude(place.getLongitude())
-                            .createdAt(place.getCreatedAt())
-                            .updatedAt(place.getUpdatedAt())
-                            .placeImageUrl(placeImagesUrl)
-                            .categoryName(savedCategory.map(Category::getName).orElse(null))
-                            .magazineTitle(savedMagazine.map(Magazine::getTitle).orElse(null))
-                            .instagramLink(place.getInstagramLink())
-                            .naverLink(place.getNaverplaceLink())
-                            .iconUrl(savedMagazine.map(Magazine::getIconUrl).orElse(null))
-                            .build();
+                    return PlaceSearchResponse.from(new PlaceSearchResponseParams(
+                                    place,
+                                    placeImagesUrl,
+                                    savedCategory.map(Category::getName).orElse(null),
+                                    savedMagazine.map(Magazine::getTitle).orElse(null),
+                                    savedMagazine.map(Magazine::getIconUrl).orElse(null))
+                    );
                 })
                 .collect(Collectors.toList());
     }
-
 
     /**
      * 특정 플레이스 조회
      * @param placeId
      * @return
      */
-
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
         Place place = findPlaceById(placeId);
@@ -111,28 +97,14 @@ public class PlaceServiceImpl implements PlaceService {
         Category category = findCategoryByPlaceId(placeId);
         Magazine magazine = findMagazineByPlaceId(placeId);
 
-        List<Long> placeImagesIdList = place.getPlaceImages().stream()
-                .map(PlaceImage::getId)
-                .toList();
-
-        return PlaceSearchResponse.builder()
-                .placeId(placeId)
-                .placeImageUrl(searchPlaceImageUrl)
-                .shortDescription(place.getShortDescription())
-                .name(place.getName())
-                .createdAt(place.getCreatedAt())
-                .updatedAt(place.getUpdatedAt())
-                .longitude(place.getLongitude())
-                .latitude(place.getLatitude())
-                .categoryName(category.getName())
-                .magazineTitle(magazine.getTitle())
-                .instagramLink(place.getInstagramLink())
-                .naverLink(place.getNaverplaceLink())
-                .placeImageId(placeImagesIdList)
-                .iconUrl(magazine.getIconUrl())
-                .build();
+        return PlaceSearchResponse.from( new PlaceSearchResponseParams(
+                place,
+                searchPlaceImageUrl,
+                category.getName(),
+                magazine.getTitle(),
+                magazine.getIconUrl())
+        );
     }
-
 
     /**
      * 유저 Place 저장 및 저장취소 (toggle)
@@ -162,9 +134,6 @@ public class PlaceServiceImpl implements PlaceService {
             return true;
         }
     }
-
-
-
 
     @Override
     public List<Place> searchNearbyPlaces(NearbyPlaceSearchRequest request) {
@@ -210,7 +179,6 @@ public class PlaceServiceImpl implements PlaceService {
 
         newPlace.getPlaceImages().addAll(placeImages);
         placeRepository.save(newPlace);
-
         return newPlace.getId();
     }
 
@@ -242,7 +210,6 @@ public class PlaceServiceImpl implements PlaceService {
 
         return allPlaceList.stream()
                 .map(place -> {
-
                     PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(place.getId());
                     String categoryName = (placeCategory != null) ?
                             placeCategory.getCategory().getName() : "카테고리 없음";
@@ -255,26 +222,13 @@ public class PlaceServiceImpl implements PlaceService {
                             .map(PlaceImage::getUrl)
                             .collect(Collectors.toList());
 
-                    List<Long> placeImagesIdList = place.getPlaceImages().stream()
-                            .map(PlaceImage::getId)
-                            .toList();
-
-                    return PlaceSearchResponse.builder()
-                            .placeId(place.getId())
-                            .name(place.getName())
-                            .shortDescription(place.getShortDescription())
-                            .latitude(place.getLatitude())
-                            .longitude(place.getLongitude())
-                            .createdAt(place.getCreatedAt())
-                            .updatedAt(place.getUpdatedAt())
-                            .placeImageUrl(placeImages)
-                            .categoryName(categoryName)
-                            .magazineTitle(magazineTitle)
-                            .instagramLink(place.getInstagramLink())
-                            .naverLink(place.getNaverplaceLink())
-                            .placeImageId(placeImagesIdList)
-                            .iconUrl(placeMagazine.getMagazine().getIconUrl())
-                            .build();
+                    return PlaceSearchResponse.from(new PlaceSearchResponseParams(
+                            place,
+                            placeImages,
+                            categoryName,
+                            magazineTitle,
+                            placeMagazine.getMagazine().getIconUrl())
+                    );
                 })
                 .collect(Collectors.toList());
     }

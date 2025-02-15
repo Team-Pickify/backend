@@ -37,9 +37,7 @@ public class S3Service {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(multipartFile.getContentType());
         metadata.setContentLength(multipartFile.getSize());
-        String uploadImageUrl = putS3(multipartFile, fileName, metadata);
-
-        return uploadImageUrl;      // 업로드된 파일의 S3 URL 주소 반환
+        return putS3(multipartFile, fileName, metadata);     // 업로드된 파일의 S3 URL 주소 반환
     }
 
     private String putS3(MultipartFile multipartFile, String fileName, ObjectMetadata metadata) {
