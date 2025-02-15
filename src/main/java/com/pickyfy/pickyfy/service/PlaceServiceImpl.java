@@ -10,6 +10,7 @@ import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
 import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,60 +27,81 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlaceServiceImpl implements PlaceService {
 
-    private final SavedPlaceRepository savedPlaceRepository;
     private final PlaceRepository placeRepository;
-    private final PlaceSavedPlaceRepository placeSavedPlaceRepository;
+    private final UserSavedPlaceRepository userSavedPlaceRepository;
     private final PlaceImageRepository placeImageRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final MagazineRepository magazineRepository;
     private final PlaceMagazineRepository placeMagazineRepository;
+    private final S3Service s3Service;
     private final PlaceCategoryRepository placeCategoryRepository;
 
-    private final S3Service s3Service;
-
+    /**
+     * 특정 유저가 저장한 Place 전체 조회
+     * @param
+     * @return
+     */
+    /**
+     * 특정 유저가 저장한 Place 전체 조회
+     *
+     * @param email
+     * @return List<PlaceSearchResponse>
+     */
     @Override
     public List<PlaceSearchResponse> getUserSavePlace(String email) {
-        User user = findUserByEmail(email);
-        List<SavedPlace> savedPlaces = savedPlaceRepository.findAllByUserId(user.getId());
-        if (savedPlaces.isEmpty()) {
+        // 유저 조회
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+
+        List<UserSavedPlace> allUserSavedPlaceList = userSavedPlaceRepository.findAllByUserId(user.getId());
+
+        if (allUserSavedPlaceList.isEmpty()) {
             return Collections.emptyList();
         }
 
-        return savedPlaces.stream()
-                .map(savedPlace -> {
-                    List<PlaceSavedPlace> placeSavedPlaces = placeSavedPlaceRepository.findAllBySavedPlaceId(savedPlace.getId());
-                    if (placeSavedPlaces.isEmpty()){
-                        return null;
-                    }
+        List<Place> allPlaceList = allUserSavedPlaceList.stream()
+                .map(UserSavedPlace::getPlace)
+                .toList();
 
-                    PlaceSavedPlace mappingPlace = placeSavedPlaces.getFirst();
-                    if (mappingPlace == null || mappingPlace.getPlace() == null) {
-                        return null;
-                    }
+        return allPlaceList.stream()
+                .map(place -> {
+                    // 유저가 저장한 Place의 카테고리 조회
+                    Optional<PlaceCategory> savedPlaceCategory = Optional.ofNullable(placeCategoryRepository.findByPlaceId(place.getId()));
+                    Optional<Category> savedCategory = savedPlaceCategory.flatMap(pc -> categoryRepository.findById(pc.getCategory().getId()));
 
-                    Place userSavedPlace = findPlaceById(mappingPlace.getPlace().getId());
-                    Long userSavedPlaceId = userSavedPlace.getId();
-                    Category savedCategory = findCategoryByPlaceId(userSavedPlaceId);
-                    Magazine savedMagazine = findMagazineByPlaceId(userSavedPlaceId);
+                    // 유저가 저장한 Place의 매거진 조회
+                    Optional<PlaceMagazine> savedPlaceMagazine = Optional.ofNullable(placeMagazineRepository.findByPlaceId(place.getId()));
+                    Optional<Magazine> savedMagazine = savedPlaceMagazine.flatMap(pm -> magazineRepository.findById(pm.getMagazine().getId()));
+
+                    // 유저가 저장한 Place의 이미지 조회
+                    List<String> placeImagesUrl = placeImageRepository.findAllByPlaceId(place.getId());
 
                     return PlaceSearchResponse.builder()
-                            .placeId(userSavedPlace.getId())
-                            .name(savedPlace.getName())
-                            .shortDescription(savedPlace.getDescription())
-                            .latitude(userSavedPlace.getLatitude())
-                            .longitude(userSavedPlace.getLongitude())
-                            .createdAt(savedPlace.getCreatedAt())
-                            .updatedAt(savedPlace.getUpdatedAt())
-                            .placeImageUrl(collectPlaceImages(placeSavedPlaces))
-                            .categoryName(savedCategory.getName())
-                            .magazineTitle(savedMagazine.getTitle())
-                            .instagramLink(userSavedPlace.getInstagramLink())
-                            .naverLink(userSavedPlace.getNaverplaceLink())
+                            .placeId(place.getId())
+                            .name(place.getName())
+                            .shortDescription(place.getShortDescription())
+                            .latitude(place.getLatitude())
+                            .longitude(place.getLongitude())
+                            .createdAt(place.getCreatedAt())
+                            .updatedAt(place.getUpdatedAt())
+                            .placeImageUrl(placeImagesUrl)
+                            .categoryName(savedCategory.map(Category::getName).orElse(null))
+                            .magazineTitle(savedMagazine.map(Magazine::getTitle).orElse(null))
+                            .instagramLink(place.getInstagramLink())
+                            .naverLink(place.getNaverplaceLink())
+                            .iconUrl(savedMagazine.map(Magazine::getIconUrl).orElse(null))
                             .build();
                 })
                 .collect(Collectors.toList());
     }
+
+
+    /**
+     * 특정 플레이스 조회
+     * @param placeId
+     * @return
+     */
 
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
@@ -107,42 +129,42 @@ public class PlaceServiceImpl implements PlaceService {
                 .instagramLink(place.getInstagramLink())
                 .naverLink(place.getNaverplaceLink())
                 .placeImageId(placeImagesIdList)
+                .iconUrl(magazine.getIconUrl())
                 .build();
     }
 
+
+    /**
+     * 유저 Place 저장 및 저장취소 (toggle)
+     * @param
+     * @param placeId
+     * @return
+     */
     @Transactional
-    public boolean togglePlaceUser(String email,Long placeId) {
-        User user = findUserByEmail(email);
-        Place place = findPlaceById(placeId);
-        String placeName = place.getName();
+    public boolean togglePlaceUser(String email, Long placeId) {
 
-        SavedPlace savedPlace = savedPlaceRepository.findByUserIdAndName(user.getId(), placeName)
-                .orElseGet(() -> {
-                    SavedPlace newSavedPlace = SavedPlace.builder()
-                            .name(place.getName())
-                            .description(place.getShortDescription())
-                            .isPublic(true)
-                            .user(user)
-                            .build();
-                    return savedPlaceRepository.save(newSavedPlace);
-                });
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
 
-        Optional<PlaceSavedPlace> existingRelation = placeSavedPlaceRepository.findByPlaceAndSavedPlace(place, savedPlace);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
 
-        if (existingRelation.isPresent()) {
-            placeSavedPlaceRepository.delete(existingRelation.get());
-            savedPlaceRepository.delete(savedPlace);
+        Optional<UserSavedPlace> userSavedPlace = userSavedPlaceRepository.findByUserIdAndPlaceId(user.getId(), place.getId());
+
+        if (userSavedPlace.isPresent()) {
+            // 저장 취소
+            userSavedPlaceRepository.delete(userSavedPlace.get());
             return false;
+        } else {
+            // 저장
+            UserSavedPlace newUserSavedPlace = new UserSavedPlace(user, place);
+            userSavedPlaceRepository.save(newUserSavedPlace);
+            return true;
         }
-
-        PlaceSavedPlace placeSavedPlace = PlaceSavedPlace.builder()
-                    .place(place)
-                    .savedPlace(savedPlace)
-                    .build();
-
-        placeSavedPlaceRepository.save(placeSavedPlace);
-        return true;
     }
+
+
+
 
     @Override
     public List<Place> searchNearbyPlaces(NearbyPlaceSearchRequest request) {
@@ -251,6 +273,7 @@ public class PlaceServiceImpl implements PlaceService {
                             .instagramLink(place.getInstagramLink())
                             .naverLink(place.getNaverplaceLink())
                             .placeImageId(placeImagesIdList)
+                            .iconUrl(placeMagazine.getMagazine().getIconUrl())
                             .build();
                 })
                 .collect(Collectors.toList());
@@ -275,13 +298,6 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
     }
 
-    private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
-        return placeSavedPlaces.stream()
-                .map(PlaceSavedPlace::getPlace)
-                .flatMap(place -> place.getPlaceImages().stream())
-                .map(PlaceImage::getUrl)
-                .collect(Collectors.toList());
-    }
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)

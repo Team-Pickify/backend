@@ -11,7 +11,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.math.BigDecimal;
 import java.util.*;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -49,10 +48,10 @@ public class Place extends BaseTimeEntity {
     private BigDecimal longitude;
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private final List<PlaceImage> placeImages = new ArrayList<>();
+    private List<UserSavedPlace> userSavedPlaces = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private final List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
+    private final List<PlaceImage> placeImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private final  List<PlaceCategory> placeCategories = new ArrayList<>();
