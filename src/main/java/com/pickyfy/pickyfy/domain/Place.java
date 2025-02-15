@@ -1,19 +1,11 @@
 package com.pickyfy.pickyfy.domain;
 
 import com.pickyfy.pickyfy.service.S3Service;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -51,12 +43,11 @@ public class Place extends BaseTimeEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
-    // 연관된 Place image 삭제 하기 위해 추가
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceImage> placeImages = new ArrayList<>();
+    private List<UserSavedPlace> userSavedPlaces = new ArrayList<>();  // 추가
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<PlaceSavedPlace> placeSavedPlaces = new ArrayList<>();
+    private List<PlaceImage> placeImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceCategory> placeCategories = new ArrayList<>();
@@ -66,7 +57,7 @@ public class Place extends BaseTimeEntity {
 
     @Builder
     public Place(String shortDescription, String name, String address, String instagramLink,
-                 String naverplaceLink, BigDecimal latitude, BigDecimal longitude, List<MultipartFile> images, S3Service s3Service) {
+                 String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {
         this.shortDescription = shortDescription;
         this.name = name;
         this.address = address;
@@ -74,15 +65,8 @@ public class Place extends BaseTimeEntity {
         this.naverplaceLink = naverplaceLink;
         this.latitude = latitude;
         this.longitude = longitude;
-
-        if (images != null && !images.isEmpty()) {
-            int index = 0;
-            for (MultipartFile image : images) {
-                String imageUrl = s3Service.upload(image);
-                this.placeImages.add(PlaceImage.builder().place(this).url(imageUrl).sequence(index++).build());
-            }
-        }
     }
+
 
     public void updatePlace(String name, String address, String shortDescription,
                             String instagramLink, String naverplaceLink, BigDecimal latitude, BigDecimal longitude) {

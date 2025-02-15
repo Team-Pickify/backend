@@ -22,6 +22,7 @@ public record PlaceSearchResponse(
         List<Long> placeImageId,
         String categoryName,
         String magazineTitle,
-        String naverLink
+        String naverLink,
+        String iconUrl
 ) {
 }

@@ -2,24 +2,14 @@ package com.pickyfy.pickyfy.service;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import com.pickyfy.pickyfy.domain.Category;
-import com.pickyfy.pickyfy.domain.CategoryType;
-import com.pickyfy.pickyfy.domain.Magazine;
-import com.pickyfy.pickyfy.domain.Place;
-import com.pickyfy.pickyfy.domain.PlaceCategory;
-import com.pickyfy.pickyfy.domain.PlaceImage;
-import com.pickyfy.pickyfy.domain.PlaceMagazine;
-import com.pickyfy.pickyfy.domain.PlaceSavedPlace;
-import com.pickyfy.pickyfy.domain.Provider;
-import com.pickyfy.pickyfy.domain.SavedPlace;
-import com.pickyfy.pickyfy.domain.User;
+import com.pickyfy.pickyfy.domain.*;
+import com.pickyfy.pickyfy.domain.UserSavedPlace;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.repository.PlaceCategoryRepository;
 import com.pickyfy.pickyfy.repository.PlaceMagazineRepository;
 import com.pickyfy.pickyfy.repository.PlaceRepository;
-import com.pickyfy.pickyfy.repository.PlaceSavedPlaceRepository;
-import com.pickyfy.pickyfy.repository.SavedPlaceRepository;
+import com.pickyfy.pickyfy.repository.UserSavedPlaceRepository;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import java.math.BigDecimal;
@@ -59,7 +49,7 @@ class PlaceServiceImplTest {
     private PlaceMagazineRepository placeMagazineRepository;
 
     @Autowired
-    private PlaceSavedPlaceRepository placeSavedPlaceRepository;
+    private UserSavedPlaceRepository userSavedPlaceRepository;
 
     @Test
     @DisplayName("유저가 저장한 장소 목록을 성공적으로 조회한다")
@@ -268,12 +258,12 @@ class PlaceServiceImplTest {
         return savedPlaceRepository.save(savedPlace);
     }
 
-    private PlaceSavedPlace createPlaceSavedPlace(Place place, SavedPlace savedPlace) {
-        PlaceSavedPlace placeSavedPlace = PlaceSavedPlace.builder()
+    private UserSavedPlace createPlaceSavedPlace(Place place, SavedPlace savedPlace) {
+        UserSavedPlace userSavedPlace = UserSavedPlace.builder()
                 .place(place)
                 .savedPlace(savedPlace)
                 .build();
-        return placeSavedPlaceRepository.save(placeSavedPlace);
+        return userSavedPlaceRepository.save(userSavedPlace);
     }
 
     private PlaceImage createPlaceImage(Place place, String url) {
