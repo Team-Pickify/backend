@@ -97,7 +97,6 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
 
-
     /**
      * 특정 플레이스 조회
      * @param placeId
@@ -174,8 +173,6 @@ public class PlaceServiceImpl implements PlaceService {
             return true;
         }
     }
-
-
 
 
     @Override
@@ -289,7 +286,6 @@ public class PlaceServiceImpl implements PlaceService {
         return place.getId();
     }
 
-
     /**
      * Place 삭제
      * @param placeId
@@ -304,11 +300,8 @@ public class PlaceServiceImpl implements PlaceService {
             s3Service.removeFile(image.getUrl());
         }
 
-        // 6. Place 삭제
         placeRepository.delete(place);
     }
-
-
 
     /**
      * PlaceImage 삭제

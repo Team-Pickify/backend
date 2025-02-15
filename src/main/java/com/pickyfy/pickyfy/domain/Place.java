@@ -44,7 +44,7 @@ public class Place extends BaseTimeEntity {
     private BigDecimal longitude;
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
-    private List<UserSavedPlace> userSavedPlaces = new ArrayList<>();  // 추가
+    private List<UserSavedPlace> userSavedPlaces = new ArrayList<>();
 
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<PlaceImage> placeImages = new ArrayList<>();
