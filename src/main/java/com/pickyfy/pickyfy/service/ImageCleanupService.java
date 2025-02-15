@@ -4,9 +4,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
-import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.repository.PlaceImageRepository;
-import com.pickyfy.pickyfy.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,6 @@ public class ImageCleanupService {
 
     private final AmazonS3Client amazonS3Client;
     private final PlaceImageRepository placeImageRepository;
-    private final UserRepository userRepository;
-    private final MagazineRepository magazineRepository;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
