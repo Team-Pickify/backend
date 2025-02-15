@@ -11,15 +11,14 @@ import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import com.pickyfy.pickyfy.repository.*;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
-import java.util.Collections;
+
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,16 +39,11 @@ public class PlaceServiceImpl implements PlaceService {
 
     /**
      * 특정 유저가 저장한 Place 전체 조회
-     *
-     * @param email
-     * @return List<PlaceSearchResponse>
      */
     @Override
     public List<PlaceSearchResponse> getUserSavePlace(String email) {
         // 유저 조회
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
-
+        User user = findUserByEmail(email);
         List<UserSavedPlace> allUserSavedPlaceList = userSavedPlaceRepository.findAllByUserId(user.getId());
 
         if (allUserSavedPlaceList.isEmpty()) {
@@ -86,8 +80,6 @@ public class PlaceServiceImpl implements PlaceService {
 
     /**
      * 특정 플레이스 조회
-     * @param placeId
-     * @return
      */
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
@@ -108,31 +100,21 @@ public class PlaceServiceImpl implements PlaceService {
 
     /**
      * 유저 Place 저장 및 저장취소 (toggle)
-     * @param
-     * @param placeId
-     * @return
      */
     @Transactional
     public boolean togglePlaceUser(String email, Long placeId) {
-
-        Place place = placeRepository.findById(placeId)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.PLACE_NOT_FOUND.getMessage()));
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.USER_NOT_FOUND.getMessage()));
+        Place place = findPlaceById(placeId);
+        User user = findUserByEmail(email);
 
         Optional<UserSavedPlace> userSavedPlace = userSavedPlaceRepository.findByUserIdAndPlaceId(user.getId(), place.getId());
 
-        if (userSavedPlace.isPresent()) {
-            // 저장 취소
-            userSavedPlaceRepository.delete(userSavedPlace.get());
+        return userSavedPlace.map(savedPlace -> {
+            userSavedPlaceRepository.delete(savedPlace);
             return false;
-        } else {
-            // 저장
-            UserSavedPlace newUserSavedPlace = new UserSavedPlace(user, place);
-            userSavedPlaceRepository.save(newUserSavedPlace);
+        }).orElseGet(() -> {
+            userSavedPlaceRepository.save(new UserSavedPlace(user, place));
             return true;
-        }
+        });
     }
 
     @Override
@@ -156,7 +138,7 @@ public class PlaceServiceImpl implements PlaceService {
 
         // 1. Place 먼저 저장
         Place newPlace = buildPlace(request);
-        newPlace = placeRepository.save(newPlace);
+        placeRepository.save(newPlace);
 
         PlaceCategory newPlaceCategory = buildPlaceCategory(category, newPlace);
         placeCategoryRepository.save(newPlaceCategory);
@@ -178,7 +160,6 @@ public class PlaceServiceImpl implements PlaceService {
         }
 
         newPlace.getPlaceImages().addAll(placeImages);
-        placeRepository.save(newPlace);
         return newPlace.getId();
     }
 
@@ -211,17 +192,16 @@ public class PlaceServiceImpl implements PlaceService {
         return allPlaceList.stream()
                 .map(place -> {
                     PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(place.getId());
-                    String categoryName = (placeCategory != null) ?
-                            placeCategory.getCategory().getName() : "카테고리 없음";
+                    String categoryName = (placeCategory != null) ? placeCategory.getCategory().getName() : "카테고리 없음";
 
                     PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(place.getId());
-                    String magazineTitle = (placeMagazine != null) ?
-                            placeMagazine.getMagazine().getTitle() : "매거진 없음";
+                    String magazineTitle = (placeMagazine != null) ? placeMagazine.getMagazine().getTitle() : "매거진 없음";
 
                     List<String> placeImages = place.getPlaceImages().stream()
                             .map(PlaceImage::getUrl)
                             .collect(Collectors.toList());
 
+                    Objects.requireNonNull(placeMagazine, "Place Magazine is Null");
                     return PlaceSearchResponse.from(new PlaceSearchResponseParams(
                             place,
                             placeImages,
@@ -251,7 +231,6 @@ public class PlaceServiceImpl implements PlaceService {
         return magazineRepository.findById(searchPlaceMagazine.getMagazine().getId())
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
     }
-
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
