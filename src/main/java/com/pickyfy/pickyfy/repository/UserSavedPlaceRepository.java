@@ -10,10 +10,6 @@ import java.util.Optional;
 
 
 public interface UserSavedPlaceRepository extends JpaRepository<UserSavedPlace, Long> {
-//    List<UserSavedPlace> findAllBySavedPlaceId(Long savedPlaceId);
-//    Optional<UserSavedPlace> findByPlaceAndSavedPlace(Place place, UserSavedPlace userSavedPlace);
-//    UserSavedPlace findBySavedPlaceId(Long savedPlaceId);
-//    UserSavedPlace findByPlaceId(Long placeId);
     List<UserSavedPlace> findAllByUserId(Long id);
     UserSavedPlace findByUserId(Long userId);
 

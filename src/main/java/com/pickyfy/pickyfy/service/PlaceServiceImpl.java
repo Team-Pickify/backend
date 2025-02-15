@@ -129,7 +129,7 @@ public class PlaceServiceImpl implements PlaceService {
                 .instagramLink(place.getInstagramLink())
                 .naverLink(place.getNaverplaceLink())
                 .placeImageId(placeImagesIdList)
-                .iconUrl(searchMagazine.getIconUrl())
+                .iconUrl(magazine.getIconUrl())
                 .build();
     }
 
@@ -298,13 +298,6 @@ public class PlaceServiceImpl implements PlaceService {
                 .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.MAGAZINE_NOT_FOUND.getMessage()));
     }
 
-    private List<String> collectPlaceImages(List<PlaceSavedPlace> placeSavedPlaces){
-        return placeSavedPlaces.stream()
-                .map(PlaceSavedPlace::getPlace)
-                .flatMap(place -> place.getPlaceImages().stream())
-                .map(PlaceImage::getUrl)
-                .collect(Collectors.toList());
-    }
 
     private User findUserByEmail(String email) {
         return userRepository.findByEmail(email)
