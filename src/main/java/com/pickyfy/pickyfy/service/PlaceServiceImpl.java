@@ -5,6 +5,7 @@ import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
 import com.pickyfy.pickyfy.web.dto.MagazineInfo;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
+import com.pickyfy.pickyfy.web.dto.PlaceSearchResponseParams;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
@@ -56,27 +57,20 @@ public class PlaceServiceImpl implements PlaceService {
 
         return allPlaceList.stream()
                 .map(place -> {
+                    Long placeId = place.getId();
+
                     // 유저가 저장한 Place의 카테고리 조회
-                    Category savedCategory = Optional.ofNullable(placeCategoryRepository.findByPlaceId(place.getId()))
+                    Category savedCategory = Optional.ofNullable(placeCategoryRepository.findByPlaceId(placeId))
                             .map(PlaceCategory::getCategory)
                             .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
 
-
                     // 유저가 저장한 Place의 매거진 조회
-                    Magazine savedMagazine = Optional.ofNullable(placeMagazineRepository.findByPlaceId(place.getId()))
+                    Magazine savedMagazine = Optional.ofNullable(placeMagazineRepository.findByPlaceId(placeId))
                             .map(PlaceMagazine::getMagazine)
                             .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
 
                     // 유저가 저장한 Place의 이미지 조회
-                    List<String> placeImagesUrl = placeImageRepository.findAllByPlaceId(place.getId());
-
-                    return PlaceSearchResponse.from(
-                                    place,
-                                    placeImagesUrl,
-                                    savedCategory.getName(),
-                                    new MagazineInfo(savedMagazine.getTitle(),
-                                            savedMagazine.getIconUrl())
-                    );
+                    return PlaceSearchResponse.from(createPlaceSearchResponseParams(place, savedCategory, savedMagazine));
                 })
                 .collect(Collectors.toList());
     }
@@ -86,18 +80,10 @@ public class PlaceServiceImpl implements PlaceService {
      */
     @Override
     public PlaceSearchResponse getPlace(Long placeId) {
-        Place place = findPlaceById(placeId);
-        List<String> searchPlaceImageUrl = placeImageRepository.findAllByPlaceId(placeId);
-
-        Category category = findCategoryByPlaceId(placeId);
-        Magazine magazine = findMagazineByPlaceId(placeId);
-
-        return PlaceSearchResponse.from(
-                place,
-                searchPlaceImageUrl,
-                category.getName(),
-                new MagazineInfo(magazine.getTitle(), magazine.getIconUrl())
-        );
+        return PlaceSearchResponse.from(createPlaceSearchResponseParams(
+                findPlaceById(placeId),
+                findCategoryByPlaceId(placeId),
+                findMagazineByPlaceId(placeId)));
     }
 
     /**
@@ -162,6 +148,7 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional
     public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
         Place place = findPlaceById(placeId);
+
         place.updatePlace(request);
         updatePlaceCategory(request.categoryId(), placeId, place);
         updatePlaceMagazine(request.magazineId(), placeId, place);
@@ -185,24 +172,24 @@ public class PlaceServiceImpl implements PlaceService {
         List<Place> allPlaceList = placeRepository.findAll();
         return allPlaceList.stream()
                 .map(place -> {
-                    PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(place.getId());
-                    String categoryName = placeCategory.getCategory().getName();
-
-                    PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(place.getId());
-                    String magazineTitle = placeMagazine.getMagazine().getTitle();
-
-                    List<String> placeImages = place.getPlaceImages().stream()
-                            .map(PlaceImage::getUrl)
-                            .collect(Collectors.toList());
-
+                    Long placeId = place.getId();
                     return PlaceSearchResponse.from(
-                            place,
-                            placeImages,
-                            categoryName,
-                            new MagazineInfo(magazineTitle, placeMagazine.getMagazine().getIconUrl())
+                            createPlaceSearchResponseParams(
+                                    place,
+                                    placeCategoryRepository.findByPlaceId(placeId).getCategory(),
+                                    placeMagazineRepository.findByPlaceId(placeId).getMagazine())
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    private PlaceSearchResponseParams createPlaceSearchResponseParams(Place place, Category category, Magazine magazine){
+        return new PlaceSearchResponseParams(
+                place,
+                placeImageRepository.findAllByPlaceId(place.getId()),
+                category.getName(),
+                new MagazineInfo(magazine.getTitle(), magazine.getIconUrl())
+        );
     }
 
     private Category findCategoryByPlaceId(Long placeId){

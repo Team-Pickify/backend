@@ -3,6 +3,7 @@ package com.pickyfy.pickyfy.web.dto.response;
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
 import com.pickyfy.pickyfy.web.dto.MagazineInfo;
+import com.pickyfy.pickyfy.web.dto.PlaceSearchResponseParams;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -28,25 +29,22 @@ public class PlaceSearchResponse{
     private String naverLink;
     private String magazineIconUrl;
 
-    public static PlaceSearchResponse from(Place place,
-                                           List<String> placeImageUrls,
-                                           String categoryName,
-                                           MagazineInfo magazineInfo){
+    public static PlaceSearchResponse from(PlaceSearchResponseParams params){
         return PlaceSearchResponse.builder()
-                .placeId(place.getId())
-                .name(place.getName())
-                .shortDescription(place.getShortDescription())
-                .latitude(place.getLatitude())
-                .longitude(place.getLongitude())
-                .createdAt(place.getCreatedAt())
-                .updatedAt(place.getUpdatedAt())
-                .placeImageUrl(placeImageUrls)
-                .categoryName(categoryName)
-                .magazineTitle(magazineInfo.title())
-                .instagramLink(place.getInstagramLink())
-                .naverLink(place.getNaverplaceLink())
-                .magazineIconUrl(magazineInfo.iconUrl())
-                .placeImageId(place.getPlaceImages().stream().map(PlaceImage::getId).toList())
+                .placeId(params.place().getId())
+                .name(params.place().getName())
+                .shortDescription(params.place().getShortDescription())
+                .latitude(params.place().getLatitude())
+                .longitude(params.place().getLongitude())
+                .createdAt(params.place().getCreatedAt())
+                .updatedAt(params.place().getUpdatedAt())
+                .placeImageUrl(params.placeImageUrls())
+                .categoryName(params.categoryName())
+                .magazineTitle(params.magazineInfo().title())
+                .instagramLink(params.place().getInstagramLink())
+                .naverLink(params.place().getNaverplaceLink())
+                .magazineIconUrl(params.magazineInfo().iconUrl())
+                .placeImageId(params.place().getPlaceImages().stream().map(PlaceImage::getId).toList())
                 .build();
     }
 }
