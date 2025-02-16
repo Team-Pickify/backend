@@ -1,5 +1,6 @@
 package com.pickyfy.pickyfy.common;
 
+import com.pickyfy.pickyfy.common.util.AllFieldsNotNullValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,7 +11,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = {})
+@Constraint(validatedBy = {AllFieldsNotNullValidator.class})
 @NotNull
 public @interface AllFieldsNotNull {
     String message() default "모든 필드는 Null이 될 수 없습니다.";
