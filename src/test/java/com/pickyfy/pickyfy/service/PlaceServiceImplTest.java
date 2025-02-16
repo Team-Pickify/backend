@@ -79,6 +79,7 @@ class PlaceServiceImplTest {
                     assertThat(r.getShortDescription()).isEqualTo("테스트 설명");
                     assertThat(r.getCategoryName()).isEqualTo("음식점");
                     assertThat(r.getMagazineTitle()).isEqualTo("테스트 매거진");
+                    assertThat(r.getLikeCount()).isEqualTo(0);
                     assertThat(r.getPlaceImageUrl()).containsExactly("test-image-url.jpg");
                     assertThat(r.getInstagramLink()).isEqualTo("instagram.com");
                     assertThat(r.getNaverLink()).isEqualTo("naver.com");
@@ -145,9 +146,11 @@ class PlaceServiceImplTest {
         // Then
         assertThat(firstToggle).isTrue();
         assertThat(userSavedPlaceRepository.findByUserIdAndPlaceId(user.getId(), place.getId())).isPresent();
+        assertThat(place.getLikeCount()).isEqualTo(1);
 
         // When - 두 번째 토글 (저장 취소)
         boolean secondToggle = placeService.togglePlaceUser(user.getEmail(), place.getId());
+        assertThat(place.getLikeCount()).isEqualTo(0);
 
         // Then
         assertThat(secondToggle).isFalse();

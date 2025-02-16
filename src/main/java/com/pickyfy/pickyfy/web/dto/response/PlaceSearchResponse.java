@@ -20,6 +20,7 @@ public class PlaceSearchResponse{
     private String instagramLink;
     private BigDecimal latitude;
     private BigDecimal longitude;
+    private Integer likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> placeImageUrl;
@@ -36,6 +37,7 @@ public class PlaceSearchResponse{
                 .shortDescription(params.place().getShortDescription())
                 .latitude(params.place().getLatitude())
                 .longitude(params.place().getLongitude())
+                .likeCount(params.place().getLikeCount())
                 .createdAt(params.place().getCreatedAt())
                 .updatedAt(params.place().getUpdatedAt())
                 .placeImageUrl(params.placeImageUrls())
