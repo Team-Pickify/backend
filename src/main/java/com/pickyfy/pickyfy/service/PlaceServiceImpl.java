@@ -3,8 +3,8 @@ package com.pickyfy.pickyfy.service;
 import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.*;
+import com.pickyfy.pickyfy.web.dto.MagazineInfo;
 import com.pickyfy.pickyfy.web.dto.NearbyPlaceSearchCondition;
-import com.pickyfy.pickyfy.web.dto.PlaceSearchResponseParams;
 import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.request.PlaceCreateRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
@@ -57,22 +57,25 @@ public class PlaceServiceImpl implements PlaceService {
         return allPlaceList.stream()
                 .map(place -> {
                     // 유저가 저장한 Place의 카테고리 조회
-                    Optional<PlaceCategory> savedPlaceCategory = Optional.ofNullable(placeCategoryRepository.findByPlaceId(place.getId()));
-                    Optional<Category> savedCategory = savedPlaceCategory.flatMap(pc -> categoryRepository.findById(pc.getCategory().getId()));
+                    Category savedCategory = Optional.ofNullable(placeCategoryRepository.findByPlaceId(place.getId()))
+                            .map(PlaceCategory::getCategory)
+                            .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
+
 
                     // 유저가 저장한 Place의 매거진 조회
-                    Optional<PlaceMagazine> savedPlaceMagazine = Optional.ofNullable(placeMagazineRepository.findByPlaceId(place.getId()));
-                    Optional<Magazine> savedMagazine = savedPlaceMagazine.flatMap(pm -> magazineRepository.findById(pm.getMagazine().getId()));
+                    Magazine savedMagazine = Optional.ofNullable(placeMagazineRepository.findByPlaceId(place.getId()))
+                            .map(PlaceMagazine::getMagazine)
+                            .orElseThrow(() -> new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
 
                     // 유저가 저장한 Place의 이미지 조회
                     List<String> placeImagesUrl = placeImageRepository.findAllByPlaceId(place.getId());
 
-                    return PlaceSearchResponse.from(new PlaceSearchResponseParams(
+                    return PlaceSearchResponse.from(
                                     place,
                                     placeImagesUrl,
-                                    savedCategory.map(Category::getName).orElse(null),
-                                    savedMagazine.map(Magazine::getTitle).orElse(null),
-                                    savedMagazine.map(Magazine::getIconUrl).orElse(null))
+                                    savedCategory.getName(),
+                                    new MagazineInfo(savedMagazine.getTitle(),
+                                            savedMagazine.getIconUrl())
                     );
                 })
                 .collect(Collectors.toList());
@@ -89,12 +92,11 @@ public class PlaceServiceImpl implements PlaceService {
         Category category = findCategoryByPlaceId(placeId);
         Magazine magazine = findMagazineByPlaceId(placeId);
 
-        return PlaceSearchResponse.from( new PlaceSearchResponseParams(
+        return PlaceSearchResponse.from(
                 place,
                 searchPlaceImageUrl,
                 category.getName(),
-                magazine.getTitle(),
-                magazine.getIconUrl())
+                new MagazineInfo(magazine.getTitle(), magazine.getIconUrl())
         );
     }
 
@@ -125,7 +127,6 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Transactional
     public Long createPlace(PlaceCreateRequest request, List<MultipartFile> imageList) {
-
         if (placeRepository.existsPlaceByName(request.name())) {
             throw new EntityExistsException(ErrorStatus.PLACE_NAME_DUPLICATED.getMessage());
         }
@@ -139,17 +140,11 @@ public class PlaceServiceImpl implements PlaceService {
         // 1. Place 먼저 저장
         Place newPlace = buildPlace(request);
         placeRepository.save(newPlace);
-
-        PlaceCategory newPlaceCategory = buildPlaceCategory(category, newPlace);
-        placeCategoryRepository.save(newPlaceCategory);
-
-        PlaceMagazine newPlaceMagazine = buildPlaceMagazine(magazine, newPlace);
-        placeMagazineRepository.save(newPlaceMagazine);
+        placeCategoryRepository.save(buildPlaceCategory(category, newPlace));
+        placeMagazineRepository.save(buildPlaceMagazine(magazine, newPlace));
 
         List<PlaceImage> placeImages = new ArrayList<>();
-        int maxImages = Math.min(imageList.size(), 5);
-
-        for (int i = 0; i < maxImages; i++) {
+        for (int i = 0; i < Math.min(imageList.size(), 5); i++) {
             String imageUrl = s3Service.upload(imageList.get(i));
             PlaceImage newPlaceImage = PlaceImage.builder()
                     .place(newPlace)
@@ -188,26 +183,23 @@ public class PlaceServiceImpl implements PlaceService {
     @Transactional(readOnly = true)
     public List<PlaceSearchResponse> getAllPlaces() {
         List<Place> allPlaceList = placeRepository.findAll();
-
         return allPlaceList.stream()
                 .map(place -> {
                     PlaceCategory placeCategory = placeCategoryRepository.findByPlaceId(place.getId());
-                    String categoryName = (placeCategory != null) ? placeCategory.getCategory().getName() : "카테고리 없음";
+                    String categoryName = placeCategory.getCategory().getName();
 
                     PlaceMagazine placeMagazine = placeMagazineRepository.findByPlaceId(place.getId());
-                    String magazineTitle = (placeMagazine != null) ? placeMagazine.getMagazine().getTitle() : "매거진 없음";
+                    String magazineTitle = placeMagazine.getMagazine().getTitle();
 
                     List<String> placeImages = place.getPlaceImages().stream()
                             .map(PlaceImage::getUrl)
                             .collect(Collectors.toList());
 
-                    Objects.requireNonNull(placeMagazine, "Place Magazine is Null");
-                    return PlaceSearchResponse.from(new PlaceSearchResponseParams(
+                    return PlaceSearchResponse.from(
                             place,
                             placeImages,
                             categoryName,
-                            magazineTitle,
-                            placeMagazine.getMagazine().getIconUrl())
+                            new MagazineInfo(magazineTitle, placeMagazine.getMagazine().getIconUrl())
                     );
                 })
                 .collect(Collectors.toList());
@@ -289,5 +281,4 @@ public class PlaceServiceImpl implements PlaceService {
             place.updateImages(imageList, s3Service);
         }
     }
-
 }

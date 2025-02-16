@@ -6,8 +6,6 @@ import com.pickyfy.pickyfy.web.dto.response.EmailVerificationSendResponse;
 import com.pickyfy.pickyfy.web.dto.response.EmailVerificationVerifyResponse;
 
 public interface EmailService {
-
     EmailVerificationSendResponse sendAuthCode(EmailVerificationSendRequest request);
-
     EmailVerificationVerifyResponse verifyAuthCode(EmailVerificationVerifyRequest emailVerificationVerifyRequest);
 }

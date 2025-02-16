@@ -2,7 +2,7 @@ package com.pickyfy.pickyfy.web.dto.response;
 
 import com.pickyfy.pickyfy.domain.Place;
 import com.pickyfy.pickyfy.domain.PlaceImage;
-import com.pickyfy.pickyfy.web.dto.PlaceSearchResponseParams;
+import com.pickyfy.pickyfy.web.dto.MagazineInfo;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -26,10 +26,12 @@ public class PlaceSearchResponse{
     private String categoryName;
     private String magazineTitle;
     private String naverLink;
-    private String iconUrl;
+    private String magazineIconUrl;
 
-    public static PlaceSearchResponse from(PlaceSearchResponseParams params){
-        Place place = params.place();
+    public static PlaceSearchResponse from(Place place,
+                                           List<String> placeImageUrls,
+                                           String categoryName,
+                                           MagazineInfo magazineInfo){
         return PlaceSearchResponse.builder()
                 .placeId(place.getId())
                 .name(place.getName())
@@ -38,12 +40,12 @@ public class PlaceSearchResponse{
                 .longitude(place.getLongitude())
                 .createdAt(place.getCreatedAt())
                 .updatedAt(place.getUpdatedAt())
-                .placeImageUrl(params.placeImageUrls())
-                .categoryName(params.categoryName())
-                .magazineTitle(params.magazineTitle())
+                .placeImageUrl(placeImageUrls)
+                .categoryName(categoryName)
+                .magazineTitle(magazineInfo.title())
                 .instagramLink(place.getInstagramLink())
                 .naverLink(place.getNaverplaceLink())
-                .iconUrl(params.iconUrl())
+                .magazineIconUrl(magazineInfo.iconUrl())
                 .placeImageId(place.getPlaceImages().stream().map(PlaceImage::getId).toList())
                 .build();
     }

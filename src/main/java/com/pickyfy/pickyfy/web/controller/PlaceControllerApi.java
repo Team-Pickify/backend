@@ -78,8 +78,8 @@ public interface PlaceControllerApi {
     })
     @PostMapping(("/admin/places"))
     ApiResponse<Long> createPlace(
-            @RequestPart(value = "image", required = false) List<MultipartFile> images,
-            @RequestPart PlaceCreateRequest request);
+            @Valid @RequestPart PlaceCreateRequest request,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images);
 
 
     @Operation(summary = "Place 수정", description = "Place 를 수정하고 5장의 PlaceImage 를 수정하여 업로드합니다.")
@@ -89,7 +89,7 @@ public interface PlaceControllerApi {
     @PatchMapping(value = "/admin/places/{placeId}")
     ApiResponse<Long> updatePlace(
             @PathVariable Long placeId,
-            @RequestPart("request") @Valid PlaceCreateRequest request,
+            @Valid @RequestPart("request") PlaceCreateRequest request,
             @RequestPart(value = "image", required = false) List<MultipartFile> images);
 
 
