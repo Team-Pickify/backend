@@ -98,9 +98,11 @@ public class PlaceServiceImpl implements PlaceService {
 
         return userSavedPlace.map(savedPlace -> {
             userSavedPlaceRepository.delete(savedPlace);
+            place.decreaseLikeCount();
             return false;
         }).orElseGet(() -> {
             userSavedPlaceRepository.save(new UserSavedPlace(user, place));
+            place.increaseLikeCount();
             return true;
         });
     }
@@ -129,6 +131,7 @@ public class PlaceServiceImpl implements PlaceService {
         placeRepository.save(newPlace);
         placeCategoryRepository.save(buildPlaceCategory(category, newPlace));
         placeMagazineRepository.save(buildPlaceMagazine(magazine, newPlace));
+
 
         List<PlaceImage> placeImages = new ArrayList<>();
         for (int i = 0; i < Math.min(imageList.size(), 5); i++) {

@@ -47,6 +47,9 @@ public class Place extends BaseTimeEntity {
     @Column(nullable = false, precision = 11, scale = 8)
     private BigDecimal longitude;
 
+    @Column
+    private Integer likeCount = 0;
+
     @OneToMany(mappedBy = "place", cascade = CascadeType.ALL)
     private List<UserSavedPlace> userSavedPlaces = new ArrayList<>();
 
@@ -106,5 +109,13 @@ public class Place extends BaseTimeEntity {
                     .sequence(i)
                     .build());
         }
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
     }
 }
