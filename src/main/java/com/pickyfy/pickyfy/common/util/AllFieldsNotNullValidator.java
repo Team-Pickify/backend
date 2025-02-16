@@ -14,7 +14,7 @@ public class AllFieldsNotNullValidator implements ConstraintValidator<AllFieldsN
             return false; // 클래스 자체가 null이면 false 반환
         }
 
-        // 클래스에 선언된 모든 필드 가져와서 순회하고 Null 검사함
+        // 클래스에 선언된 모든 필드 가져와서 순회하고 null 검사
         for (Field field : object.getClass().getDeclaredFields()) {
             field.setAccessible(true); // private, protected 접근자 붙었더라도 필드에 강제 접근 가능
             try {

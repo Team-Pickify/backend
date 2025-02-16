@@ -16,6 +16,6 @@ import java.lang.annotation.Target;
 @NotNull
 public @interface AllFieldsNotNull {
     String message() default "모든 필드는 not Null";
-    Class<?>[] groups() default {};  // 🚨 groups 추가 (필수)
-    Class<? extends Payload>[] payload() default {};  // 🚨 payload 추가 (필수)
+    Class<?>[] groups() default {};
+    Class<? extends Payload>[] payload() default {};
 }
