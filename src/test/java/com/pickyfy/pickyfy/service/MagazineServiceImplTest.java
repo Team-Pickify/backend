@@ -9,8 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
-import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.MagazineRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
@@ -68,7 +67,7 @@ class MagazineServiceImplTest {
                 "test".getBytes()     // 간단한 테스트 데이터
         );
 
-        MagazineCreateRequest request = new MagazineCreateRequest(
+        MagazineRequest request = new MagazineRequest(
                 "테스트 매거진",
                 mockFile
         );
@@ -87,7 +86,7 @@ class MagazineServiceImplTest {
     void updateMagazine_SuccessWithJustTitle() {
         // Given
         Magazine existingMagazine = new Magazine("기존 매거진", "test-icon.png");
-        MagazineUpdateRequest request = new MagazineUpdateRequest(
+        MagazineRequest request = new MagazineRequest(
                 "수정된 매거진",
                 null
         );

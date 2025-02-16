@@ -3,8 +3,7 @@ package com.pickyfy.pickyfy.web.controller;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.CategoryService;
 import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
-import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.CategoryUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.CategoryTypeRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -25,7 +24,7 @@ public class CategoryController implements CategoryControllerApi{
     private final CategoryService categoryService;
 
     @PostMapping("/admin/category")
-    public ApiResponse<Long> createCategory(@Valid @RequestBody CategoryCreateRequest request) {
+    public ApiResponse<Long> createCategory(@Valid @RequestBody CategoryTypeRequest request) {
         Long categoryId = categoryService.createCategory(request);
         return ApiResponse.onSuccess(SuccessStatus.ADD_CATEGORY_SUCCESS, categoryId);
     }
@@ -45,7 +44,7 @@ public class CategoryController implements CategoryControllerApi{
     @PutMapping("/admin/category/{id}")
     public ApiResponse<Long> updateCategory(
             @PathVariable Long id,
-            @Valid @RequestBody CategoryUpdateRequest request) {
+            @Valid @RequestBody CategoryTypeRequest request) {
         categoryService.updateCategory(id, request);
         return ApiResponse.onSuccess(SuccessStatus.EDIT_CATEGORY_SUCCESS, id);
     }

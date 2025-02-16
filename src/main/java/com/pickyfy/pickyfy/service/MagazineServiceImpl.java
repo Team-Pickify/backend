@@ -4,8 +4,7 @@ import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.domain.Magazine;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
-import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.MagazineRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
@@ -24,7 +23,7 @@ public class MagazineServiceImpl implements MagazineService {
 
     @Override
     @Transactional
-    public Long createMagazine(MagazineCreateRequest request) {
+    public Long createMagazine(MagazineRequest request) {
         validateDuplicateTitle(request.title());
         Magazine magazine = Magazine.builder()
                 .title(request.title())
@@ -49,7 +48,7 @@ public class MagazineServiceImpl implements MagazineService {
 
     @Override
     @Transactional
-    public void updateMagazine(Long id, MagazineUpdateRequest request) {
+    public void updateMagazine(Long id, MagazineRequest request) {
         Magazine magazine = findMagazineById(id);
         if (request.iconFile() == null){
             magazine.update(request.title());

@@ -59,8 +59,8 @@ public class PlaceController implements PlaceControllerApi {
 
     @PostMapping(value = "/admin/places", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> createPlace(
-            @RequestPart(value = "image", required = false) List<MultipartFile> images,
-            @RequestPart PlaceCreateRequest request) {
+            @Valid @RequestPart PlaceCreateRequest request,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) {
         Long id = placeService.createPlace(request, images);
         return ApiResponse.onSuccess(SuccessStatus.ADD_PLACE_SUCCESS, id);
     }
@@ -68,7 +68,7 @@ public class PlaceController implements PlaceControllerApi {
     @PatchMapping(value = "/admin/places/{placeId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updatePlace(
             @PathVariable Long placeId,
-            @RequestPart("request") @Valid PlaceCreateRequest request,
+            @Valid @RequestPart("request") PlaceCreateRequest request,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
         Long id = placeService.updatePlace(placeId, request, images);
         return ApiResponse.onSuccess(SuccessStatus.EDIT_PLACE_SUCCESS, id);
