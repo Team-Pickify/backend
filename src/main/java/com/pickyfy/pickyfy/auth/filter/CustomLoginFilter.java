@@ -87,8 +87,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     private ResponseCookie createCookie(String name, String token, long expirationTime, String path) {
         return ResponseCookie.from(name, token)
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path(path)
                 .maxAge(Duration.ofMillis(expirationTime).getSeconds())
                 .build();

@@ -22,7 +22,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private static final String REDIRECT_URL = "http://localhost:5173/";
+    private static final String REDIRECT_URL = "https://api.team-pickify.store/";
 
     private final JwtUtil jwtUtil;
     private final RedisUtil redisUtil;
@@ -49,8 +49,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private ResponseCookie createCookie(String name, String token, long expirationTime, String path) {
         return ResponseCookie.from(name, token)
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path(path)
                 .maxAge(Duration.ofMillis(expirationTime).getSeconds())
                 .build();
