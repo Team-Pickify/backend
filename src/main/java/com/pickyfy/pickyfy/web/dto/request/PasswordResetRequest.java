@@ -1,9 +1,11 @@
 package com.pickyfy.pickyfy.web.dto.request;
 
+import com.pickyfy.pickyfy.common.AllFieldsNotNull;
 import com.pickyfy.pickyfy.common.Constant;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 
+@AllFieldsNotNull
 public record PasswordResetRequest(
         @Email
         String email,

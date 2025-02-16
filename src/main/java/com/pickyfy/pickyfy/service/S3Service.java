@@ -26,6 +26,8 @@ public class S3Service {
     @Value("${cloud.aws.s3.path.image}")
     private String imageFolder;
 
+    // TODO: @Async 비동기 처리
+    // TODO: 비동기 처리에 따른 반환값을 CompletableFuture<String>로 수정
     public String upload(MultipartFile multipartFile) {
         String fileName = imageFolder + multipartFile.getOriginalFilename();
 
@@ -40,6 +42,8 @@ public class S3Service {
         return putS3(multipartFile, fileName, metadata);     // 업로드된 파일의 S3 URL 주소 반환
     }
 
+    // TODO: @Async 비동기 처리
+    // TODO: 비동기 처리에 따른 반환값을 CompletableFuture<String>로 수정
     private String putS3(MultipartFile multipartFile, String fileName, ObjectMetadata metadata) {
         try (InputStream inputStream = multipartFile.getInputStream()) {
             amazonS3Client.putObject(

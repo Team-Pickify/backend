@@ -117,6 +117,7 @@ public class PlaceServiceImpl implements PlaceService {
             throw new EntityExistsException(ErrorStatus.PLACE_NAME_DUPLICATED.getMessage());
         }
 
+        // TODO: N+1 문제 해결
         Category category = categoryRepository.findById(request.categoryId()).orElseThrow(() ->
                 new EntityNotFoundException(ErrorStatus.CATEGORY_NOT_FOUND.getMessage()));
 
