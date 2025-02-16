@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.common;
 
 import com.pickyfy.pickyfy.common.util.AllFieldsNotNullValidator;
 import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 import jakarta.validation.constraints.NotNull;
 
 import java.lang.annotation.ElementType;
@@ -14,5 +15,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = {AllFieldsNotNullValidator.class})
 @NotNull
 public @interface AllFieldsNotNull {
-    String message() default "모든 필드는 Null이 될 수 없습니다.";
+    String message() default "모든 필드는 not Null";
+    Class<?>[] groups() default {};  // 🚨 groups 추가 (필수)
+    Class<? extends Payload>[] payload() default {};  // 🚨 payload 추가 (필수)
 }
