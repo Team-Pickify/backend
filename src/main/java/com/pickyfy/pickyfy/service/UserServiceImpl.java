@@ -84,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void invalidateTokens(String userEmail){
-        redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + userEmail);
+        redisUtil.deleteData(Constant.REDIS_KEY_PREFIX + userEmail);
     }
 
     private void validateEmailToken(String email, String token){

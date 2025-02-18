@@ -35,7 +35,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String accessToken = jwtUtil.createAccessToken(email, "USER");
         String refreshToken = jwtUtil.createRefreshToken(email, "USER");
 
-        redisUtil.setDataExpire("refresh:" + email, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + email, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
 
         ResponseCookie accessCookie = createCookie("accessToken", accessToken, Constant.ACCESS_TOKEN_EXPIRATION_TIME, "/");
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());

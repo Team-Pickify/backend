@@ -68,7 +68,7 @@ public class EmailServiceImpl implements EmailService {
             throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
         }
 
-        redisUtil.setDataExpire("email:" + email, code, Constant.EMAIL_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("email:" + email, code, Constant.EMAIL_TOKEN_EXPIRATION_TIME);
     }
 
     private MimeMessage createMimeMessage(String code, String email) throws MessagingException {
