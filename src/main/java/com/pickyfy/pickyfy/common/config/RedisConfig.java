@@ -7,7 +7,6 @@ import com.pickyfy.pickyfy.common.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -53,6 +52,7 @@ public class RedisConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        cacheConfigurations.put("place", defaultConfig.entryTtl(Duration.ofMillis(Constant.PLACE_EXPIRATION_TIME)));
         cacheConfigurations.put("places", defaultConfig.entryTtl(Duration.ofMillis(Constant.PLACES_EXPIRATION_TIME)));
         cacheConfigurations.put("magazines", defaultConfig.entryTtl(Duration.ofMillis(Constant.MAGAZINES_EXPIRATION_TIME)));
         cacheConfigurations.put("categories", defaultConfig.entryTtl(Duration.ofMillis(Constant.CATEGORIES_EXPIRATION_TIME)));

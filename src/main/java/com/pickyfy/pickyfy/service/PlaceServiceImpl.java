@@ -44,6 +44,7 @@ public class PlaceServiceImpl implements PlaceService {
      * 특정 유저가 저장한 Place 전체 조회
      */
     @Override
+    @Cacheable(value = "place", key = "#email", unless = "#result.isEmpty()")
     public List<PlaceSearchResponse> getUserSavePlace(String email) {
         // 유저 조회
         User user = findUserByEmail(email);
@@ -93,6 +94,7 @@ public class PlaceServiceImpl implements PlaceService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "place", key = "#email")
     public boolean togglePlaceUser(String email, Long placeId) {
         Place place = findPlaceById(placeId);
         User user = findUserByEmail(email);
