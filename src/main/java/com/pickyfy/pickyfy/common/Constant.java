@@ -9,5 +9,9 @@ public class Constant {
     public static final long ACCESS_TOKEN_EXPIRATION_TIME = 30 * 60 * 1000;
     public static final long REFRESH_TOKEN_EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000;
 
+    public static final long CATEGORIES_EXPIRATION_TIME = 24 * 60 * 60 * 1000;
+    public static final long MAGAZINES_EXPIRATION_TIME = 60 * 60 * 1000;
+    public static final long PLACES_EXPIRATION_TIME = 30 * 60 * 1000;
+
     public static final String REDIS_KEY_PREFIX = "refresh:";
 }
