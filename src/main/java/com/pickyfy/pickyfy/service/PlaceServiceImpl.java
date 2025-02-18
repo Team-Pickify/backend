@@ -16,6 +16,8 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -89,6 +91,7 @@ public class PlaceServiceImpl implements PlaceService {
     /**
      * 유저 Place 저장 및 저장취소 (toggle)
      */
+    @Override
     @Transactional
     public boolean togglePlaceUser(String email, Long placeId) {
         Place place = findPlaceById(placeId);
@@ -114,6 +117,7 @@ public class PlaceServiceImpl implements PlaceService {
     }
 
     @Transactional
+    @CacheEvict(value = "places", key = "'all'")
     public Long createPlace(PlaceCreateRequest request, List<MultipartFile> imageList) {
         if (placeRepository.existsPlaceByName(request.name())) {
             throw new EntityExistsException(ErrorStatus.PLACE_NAME_DUPLICATED.getMessage());
@@ -150,6 +154,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "places", key = "'all'")
     public Long updatePlace(Long placeId, PlaceCreateRequest request, List<MultipartFile> imageList) {
         Place place = findPlaceById(placeId);
 
@@ -162,6 +167,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "places", key = "'all'")
     public void deletePlace(Long placeId) {
         Place place = findPlaceById(placeId);
         for (PlaceImage image : place.getPlaceImages()) {
@@ -172,6 +178,7 @@ public class PlaceServiceImpl implements PlaceService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "places", key = "'all'", unless = "#result.isEmpty()")
     public List<PlaceSearchResponse> getAllPlaces() {
         List<Place> allPlaceList = placeRepository.findAll();
         return allPlaceList.stream()
