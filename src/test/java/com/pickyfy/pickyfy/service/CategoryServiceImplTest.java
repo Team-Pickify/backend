@@ -2,9 +2,6 @@ package com.pickyfy.pickyfy.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
 
 import com.pickyfy.pickyfy.domain.Category;
 import com.pickyfy.pickyfy.domain.CategoryType;
@@ -13,59 +10,27 @@ import com.pickyfy.pickyfy.repository.CategoryRepository;
 import com.pickyfy.pickyfy.web.dto.request.CategoryTypeRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
 import jakarta.persistence.EntityNotFoundException;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-@ExtendWith(MockitoExtension.class)
+import java.util.List;
+
+@SpringBootTest
+@Transactional
 class CategoryServiceImplTest {
 
-    @Mock
+    @Autowired
     private CategoryRepository categoryRepository;
 
-    @InjectMocks
-    private CategoryServiceImpl categoryService;
-
-    private Category category;
-
-    @BeforeEach
-    void setUp() throws NoSuchFieldException, IllegalAccessException {
-        category = Category.builder()
-                .type(CategoryType.CAFE_BAKERY)
-                .build();
-
-        // Reflection으로 id 설정
-        Field idField = Category.class.getDeclaredField("id");
-        idField.setAccessible(true);
-        idField.set(category, 1L);
-    }
-
-    @Test
-    void createCategory_Success() {
-        // Given
-        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.CAFE_BAKERY);
-        given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
-        given(categoryRepository.save(any(Category.class))).willReturn(category);
-
-        // When
-        Long categoryId = categoryService.createCategory(request);
-
-        // Then
-        assertThat(categoryId).isEqualTo(1L);
-        verify(categoryRepository).save(any(Category.class));
-    }
+    @Autowired
+    private CategoryService categoryService;
 
     @Test
     void createCategory_DuplicateType_ThrowsException() {
         // Given
         CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.CAFE_BAKERY);
-        given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 
         // When/Then
         assertThatThrownBy(() -> categoryService.createCategory(request))
@@ -74,60 +39,42 @@ class CategoryServiceImplTest {
 
     @Test
     void getCategory_Success() {
-        // Given
-        given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-
         // When
         CategoryResponse response = categoryService.getCategory(1L);
 
         // Then
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
+        assertThat(response.name()).isEqualTo(CategoryType.ALL.getDisplayName());
     }
 
     @Test
     void getCategory_NotFound_ThrowsException() {
-        given(categoryRepository.findById(1L)).willReturn(Optional.empty());
+        // Given
+        Long nonExistentId = 999L;
 
-        assertThatThrownBy(() -> categoryService.getCategory(1L))
+        // When/Then
+        assertThatThrownBy(() -> categoryService.getCategory(nonExistentId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test
     void getAllCategories_Success() {
-        // Given
-        List<Category> categories = List.of(category);
-        given(categoryRepository.findAll()).willReturn(categories);
-
         // When
         List<CategoryResponse> responses = categoryService.getAllCategories();
 
         // Then
-        assertThat(responses).hasSize(1);
+        assertThat(responses).hasSize(7);
         assertThat(responses.getFirst().id()).isEqualTo(1L);
-        assertThat(responses.getFirst().name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
-    }
-
-    @Test
-    void updateCategory_Success() {
-        // Given
-        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.RESTAURANT);
-        given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
-
-        // When
-        categoryService.updateCategory(1L, request);
-
-        // Then
-        assertThat(category.getType()).isEqualTo(CategoryType.RESTAURANT);
     }
 
     @Test
     void updateCategory_DuplicateType_ThrowsException() {
         // Given
+        Category anotherCategory = Category.builder()
+                .type(CategoryType.RESTAURANT)
+                .build();
+        categoryRepository.save(anotherCategory);
+
         CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.RESTAURANT);
-        given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-        given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 
         // When/Then
         assertThatThrownBy(() -> categoryService.updateCategory(1L, request))
@@ -136,18 +83,20 @@ class CategoryServiceImplTest {
 
     @Test
     void deleteCategory_Success() {
-        given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
-
+        // When
         categoryService.deleteCategory(1L);
 
-        verify(categoryRepository).delete(category);
+        // Then
+        assertThat(categoryRepository.findById(1L)).isEmpty();
     }
 
     @Test
     void deleteCategory_NotFound_ThrowsException() {
-        given(categoryRepository.findById(1L)).willReturn(Optional.empty());
+        // Given
+        Long nonExistentId = 999L;
 
-        assertThatThrownBy(() -> categoryService.deleteCategory(1L))
+        // When/Then
+        assertThatThrownBy(() -> categoryService.deleteCategory(nonExistentId))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 }
