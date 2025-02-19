@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.auth.details.CustomUserDetails;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.UserService;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
@@ -18,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,12 +64,11 @@ public class UserController implements UserControllerApi{
     }
 
     private String getUserEmail(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null){
-            throw new ExceptionHandler(ErrorStatus.USER_NOT_FOUND);
-        }
-
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        return userDetails.getUsername();
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .map(Authentication::getPrincipal)
+                .filter(CustomUserDetails.class::isInstance)
+                .map(CustomUserDetails.class::cast)
+                .map(CustomUserDetails::getUsername)
+                .orElseThrow(() -> new ExceptionHandler(ErrorStatus.USER_NOT_FOUND));
     }
 }

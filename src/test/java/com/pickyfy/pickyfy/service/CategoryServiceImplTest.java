@@ -10,8 +10,7 @@ import com.pickyfy.pickyfy.domain.Category;
 import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
-import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.CategoryUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.CategoryTypeRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.lang.reflect.Field;
@@ -50,7 +49,7 @@ class CategoryServiceImplTest {
     @Test
     void createCategory_Success() {
         // Given
-        CategoryCreateRequest request = new CategoryCreateRequest(CategoryType.CAFE_BAKERY);
+        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.CAFE_BAKERY);
         given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
         given(categoryRepository.save(any(Category.class))).willReturn(category);
 
@@ -65,7 +64,7 @@ class CategoryServiceImplTest {
     @Test
     void createCategory_DuplicateType_ThrowsException() {
         // Given
-        CategoryCreateRequest request = new CategoryCreateRequest(CategoryType.CAFE_BAKERY);
+        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.CAFE_BAKERY);
         given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 
         // When/Then
@@ -105,14 +104,14 @@ class CategoryServiceImplTest {
 
         // Then
         assertThat(responses).hasSize(1);
-        assertThat(responses.get(0).id()).isEqualTo(1L);
-        assertThat(responses.get(0).name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
+        assertThat(responses.getFirst().id()).isEqualTo(1L);
+        assertThat(responses.getFirst().name()).isEqualTo(CategoryType.CAFE_BAKERY.getDisplayName());
     }
 
     @Test
     void updateCategory_Success() {
         // Given
-        CategoryUpdateRequest request = new CategoryUpdateRequest(CategoryType.RESTAURANT);
+        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.RESTAURANT);
         given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
         given(categoryRepository.existsByType(request.categoryType())).willReturn(false);
 
@@ -126,7 +125,7 @@ class CategoryServiceImplTest {
     @Test
     void updateCategory_DuplicateType_ThrowsException() {
         // Given
-        CategoryUpdateRequest request = new CategoryUpdateRequest(CategoryType.RESTAURANT);
+        CategoryTypeRequest request = new CategoryTypeRequest(CategoryType.RESTAURANT);
         given(categoryRepository.findById(1L)).willReturn(Optional.of(category));
         given(categoryRepository.existsByType(request.categoryType())).willReturn(true);
 

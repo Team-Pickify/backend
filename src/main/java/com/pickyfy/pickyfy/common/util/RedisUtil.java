@@ -1,7 +1,7 @@
 package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -16,26 +16,24 @@ public class RedisUtil {
 
     private final StringRedisTemplate stringRedisTemplate;
 
-    public void setDataExpire(String key, String value, long duration) {
-        try {
-            ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
-            Duration expireDuration = Duration.ofMillis(duration);
-            valueOperations.set(key, value, expireDuration);
-        }catch(DataAccessException e){
-            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    public String getData(String key){
+    public String getData(String key) {
         try {
             ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
             return valueOperations.get(key);
-        } catch(DataAccessException e){
+        } catch (DataAccessException e) {
             throw new ExceptionHandler(ErrorStatus.KEY_NOT_FOUNT);
         }
     }
 
-    public void deleteRefreshToken(String redisKey) {
+    public void setData(String key, String value, long duration) {
+        try {
+            ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
+            valueOperations.set(key, value, Duration.ofMillis(duration));
+        } catch (DataAccessException e) {
+            throw new ExceptionHandler(ErrorStatus._INTERNAL_SERVER_ERROR);
+        }
+    }
+    public void deleteData(String redisKey) {
         try {
             stringRedisTemplate.delete(redisKey);
         } catch (DataAccessException e) {

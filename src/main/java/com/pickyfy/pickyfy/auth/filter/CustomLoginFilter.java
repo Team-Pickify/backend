@@ -59,12 +59,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = jwtUtil.createAccessToken(principal, role);
         String refreshToken = jwtUtil.createRefreshToken(principal, role);
-        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
 
         setBody(role, response);
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        ResponseCookie cookie = createCookie(refreshToken);
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        ResponseCookie accessCookie = createCookie("accessToken", accessToken, Constant.ACCESS_TOKEN_EXPIRATION_TIME, "/");
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        ResponseCookie refreshCookie = createCookie("refreshToken", refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME, "/auth");
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
     }
 
     @Override
@@ -83,13 +84,13 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
                  """, role));
     }
 
-    private ResponseCookie createCookie(String value) {
-        return ResponseCookie.from("refreshToken", value)
+    private ResponseCookie createCookie(String name, String token, long expirationTime, String path) {
+        return ResponseCookie.from(name, token)
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
+                .secure(true)
+                .sameSite("None")
+                .path(path)
+                .maxAge(Duration.ofMillis(expirationTime).getSeconds())
                 .build();
     }
 }

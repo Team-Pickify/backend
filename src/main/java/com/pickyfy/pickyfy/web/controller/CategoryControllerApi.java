@@ -1,8 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
-import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.CategoryUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.CategoryTypeRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -19,7 +18,7 @@ public interface CategoryControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PostMapping("/admin/category")
-    ApiResponse<Long> createCategory(@Valid @RequestBody CategoryCreateRequest request);
+    ApiResponse<Long> createCategory(@Valid @RequestBody CategoryTypeRequest request);
 
     @Operation(summary = "카테고리 조회 API", description = "특정 카테고리를 조회하는 API입니다.")
     @ApiResponses({
@@ -40,7 +39,7 @@ public interface CategoryControllerApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COMMON200", description = "OK, 성공")
     })
     @PutMapping("/admin/category/{id}")
-    ApiResponse<Long> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryUpdateRequest request);
+    ApiResponse<Long> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryTypeRequest request);
 
     @Operation(summary = "카테고리 삭제 API", description = "관리자용 카테고리 삭제 API입니다.")
     @ApiResponses({

@@ -1,8 +1,7 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
-import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.MagazineRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +34,7 @@ public interface MagazineControllerApi {
     @PostMapping("/admin/magazines")
     ApiResponse<Long> createMagazine(
             @Parameter(description = "매거진 생성 정보", required = true)
-            @Valid @RequestBody MagazineCreateRequest request
+            @Valid @RequestBody MagazineRequest request
     );
 
     @Operation(
@@ -97,7 +96,7 @@ public interface MagazineControllerApi {
             @Parameter(description = "매거진 ID", required = true)
             @PathVariable Long id,
             @Parameter(description = "매거진 수정 정보", required = true)
-            @Valid @RequestBody MagazineUpdateRequest request
+            @Valid @RequestBody MagazineRequest request
     );
 
     @Operation(

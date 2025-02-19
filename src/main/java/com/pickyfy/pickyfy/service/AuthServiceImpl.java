@@ -3,7 +3,7 @@ package com.pickyfy.pickyfy.service;
 import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.dto.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public void logout(String refreshToken){
-        redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + jwtUtil.getPrincipal(refreshToken));
+        redisUtil.deleteData(Constant.REDIS_KEY_PREFIX + jwtUtil.getPrincipal(refreshToken));
     }
 
     @Override
@@ -28,8 +28,13 @@ public class AuthServiceImpl implements AuthService{
         String accessToken = jwtUtil.createAccessToken(principal, jwtUtil.getRole(token));
         String refreshToken = jwtUtil.createRefreshToken(principal, jwtUtil.getRole(token));
 
-        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         return AuthResponse.from(accessToken, refreshToken);
+    }
+
+    @Override
+    public boolean isAuthenticated(String accessToken) {
+        return jwtUtil.validateToken(accessToken);
     }
 
     public void validateRefreshToken(String token){

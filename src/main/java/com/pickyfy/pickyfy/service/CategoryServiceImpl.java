@@ -5,13 +5,13 @@ import com.pickyfy.pickyfy.domain.Category;
 import com.pickyfy.pickyfy.domain.CategoryType;
 import com.pickyfy.pickyfy.exception.DuplicateResourceException;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
-import com.pickyfy.pickyfy.web.dto.request.CategoryCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.CategoryUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.CategoryTypeRequest;
 import com.pickyfy.pickyfy.web.dto.response.CategoryResponse;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +24,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public Long createCategory(CategoryCreateRequest categoryCreateRequest) {
+    public Long createCategory(CategoryTypeRequest categoryCreateRequest) {
         validateDuplicateType(categoryCreateRequest.categoryType());
 
         Category category = Category.builder()
@@ -41,21 +41,21 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "categories", key = "'all'", unless = "#result.isEmpty()")
     public List<CategoryResponse> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(CategoryResponse::from)
                 .collect(Collectors.toList());
     }
 
+
     @Override
     @Transactional
-    public void updateCategory(Long id, CategoryUpdateRequest request) {
+    public void updateCategory(Long id, CategoryTypeRequest request) {
         Category category = findCategoryById(id);
-
         if (category.getType() != request.categoryType()) {
             validateDuplicateType(request.categoryType());
         }
-
         category.update(request.categoryType());
     }
 

@@ -1,6 +1,7 @@
 package com.pickyfy.pickyfy.domain;
 
 public enum CategoryType {
+
     ALL("전체"),
     RESTAURANT("음식점"),
     CAFE_BAKERY("카페/베이커리"),

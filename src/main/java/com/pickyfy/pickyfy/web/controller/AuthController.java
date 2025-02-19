@@ -21,6 +21,7 @@ import java.time.Duration;
 public class AuthController implements AuthControllerApi {
 
     private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
+    private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
     private final AuthService authService;
 
     @Override
@@ -50,11 +51,19 @@ public class AuthController implements AuthControllerApi {
         return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
+    @Override
+    public ApiResponse<Boolean> isAuthenticated(
+            @Parameter(hidden = true) @CookieValue(name = "accessToken", required = false) String accessToken
+    ) {
+        boolean isAuthenticated = authService.isAuthenticated(accessToken);
+        return ApiResponse.onSuccess(isAuthenticated);
+    }
+
     private void createCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
                 .build();
@@ -63,14 +72,23 @@ public class AuthController implements AuthControllerApi {
     }
 
     private void clearCookie(HttpServletResponse response) {
-        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+        ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(0)
                 .build();
 
-        response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+        ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/auth")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredAccessToken.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshToken.toString());
     }
 }

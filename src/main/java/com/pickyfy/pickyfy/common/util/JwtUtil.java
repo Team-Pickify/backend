@@ -2,7 +2,7 @@ package com.pickyfy.pickyfy.common.util;
 
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.common.Constant;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -72,7 +72,7 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token) { // 예외처리 추가
         try {
             Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
             return true;

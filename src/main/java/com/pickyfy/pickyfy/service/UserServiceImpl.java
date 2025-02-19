@@ -10,7 +10,7 @@ import com.pickyfy.pickyfy.web.dto.request.PasswordResetRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserCreateRequest;
 import com.pickyfy.pickyfy.web.dto.request.UserUpdateRequest;
 import com.pickyfy.pickyfy.web.dto.response.UserCreateResponse;
-import com.pickyfy.pickyfy.exception.handler.ExceptionHandler;
+import com.pickyfy.pickyfy.exception.ExceptionHandler;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import com.pickyfy.pickyfy.web.dto.response.UserInfoResponse;
 import jakarta.transaction.Transactional;
@@ -83,13 +83,8 @@ public class UserServiceImpl implements UserService {
         findUserByEmail(email);
     }
 
-//    private User getAuthenticatedUser(String accessToken){
-//        String userEmail = jwtUtil.getPrincipal(accessToken);
-//        return findUserByEmail(userEmail);
-//    }
-
     private void invalidateTokens(String userEmail){
-        redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + userEmail);
+        redisUtil.deleteData(Constant.REDIS_KEY_PREFIX + userEmail);
     }
 
     private void validateEmailToken(String email, String token){

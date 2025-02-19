@@ -3,8 +3,7 @@ package com.pickyfy.pickyfy.web.controller;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.service.MagazineService;
 import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
-import com.pickyfy.pickyfy.web.dto.request.MagazineCreateRequest;
-import com.pickyfy.pickyfy.web.dto.request.MagazineUpdateRequest;
+import com.pickyfy.pickyfy.web.dto.request.MagazineRequest;
 import com.pickyfy.pickyfy.web.dto.response.MagazineResponse;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -27,7 +26,7 @@ public class MagazineController implements MagazineControllerApi {
     private final MagazineService magazineService;
 
     @PostMapping(value = "/admin/magazines", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<Long> createMagazine(@Valid @ModelAttribute MagazineCreateRequest request) {
+    public ApiResponse<Long> createMagazine(@Valid @ModelAttribute MagazineRequest request) {
         Long magazineId = magazineService.createMagazine(request);
         return ApiResponse.onSuccess(SuccessStatus.ADD_MAGAZINE_SUCCESS, magazineId);
     }
@@ -47,7 +46,7 @@ public class MagazineController implements MagazineControllerApi {
     @PutMapping(value = "/admin/magazines/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<Long> updateMagazine(
             @PathVariable Long id,
-            @Valid @ModelAttribute MagazineUpdateRequest request) {
+            @Valid @ModelAttribute MagazineRequest request) {
         magazineService.updateMagazine(id, request);
         return ApiResponse.onSuccess(SuccessStatus.EDIT_MAGAZINE_SUCCESS, id);
     }

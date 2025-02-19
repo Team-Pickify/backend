@@ -23,6 +23,7 @@ import org.springframework.security.web.FilterChainProxy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
 
+import java.util.LinkedHashMap;
 import java.util.Optional;
 
 @Configuration
@@ -96,16 +97,18 @@ public class SwaggerConfig {
                     apiResponses.addApiResponse(String.valueOf(HttpStatus.OK.value()),
                             new ApiResponse()
                                     .description(HttpStatus.OK.getReasonPhrase())
-                                    .addHeaderObject("Authorization", new Header()
-                                            .description("Access token")
-                                            .schema(new StringSchema()
-                                                    ._default("Bearer jwt-access-token")))
-                                    .addHeaderObject("Set-Cookie", new Header()
-                                            .description("Refresh token")
-                                            .schema(new StringSchema()
-                                                    ._default("refreshToken=abcd1234; Path=/; HttpOnly; Secure; SameSite=Strict")))
-                    );
+                                    .headers(new LinkedHashMap<>() {{
+                                        put("Set-Cookie-AccessToken", new Header()
+                                                .description("Access token (HttpOnly)")
+                                                .schema(new StringSchema()
+                                                        ._default("accessToken=jwt-access-token; Path=/; HttpOnly; Secure; SameSite=Strict")));
 
+                                        put("Set-Cookie-RefreshToken", new Header()
+                                                .description("Refresh token (HttpOnly)")
+                                                .schema(new StringSchema()
+                                                        ._default("refreshToken=abcd1234; Path=/; HttpOnly; Secure; SameSite=Strict")));
+                                    }})
+                    );
                     apiResponses.addApiResponse(String.valueOf(HttpStatus.UNAUTHORIZED.value()),
                             new ApiResponse().description(HttpStatus.UNAUTHORIZED.getReasonPhrase())
                                     .content(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
@@ -138,7 +141,7 @@ public class SwaggerConfig {
                       기본 페이지 이동으로 처리하지 않습니다.
                     - 테스트를 위해 브라우저에서 엔드포인트 URL을 직접 입력하여
                       카카오 로그인 화면으로 이동해야 합니다.
-                    - 로그인 성공 시 서버는 엑세스토큰을 Authorization 헤더에 리프레시토큰을 httpOnly 쿠키로 반환합니다.
+                    - 로그인 성공 시 서버는 엑세스토큰과 리프레시토큰을 httpOnly 쿠키로 반환합니다.
                     """);
 
             PathItem authPathItem = new PathItem().get(authOperation);

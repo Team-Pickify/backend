@@ -13,4 +13,15 @@ public interface PlaceImageRepository extends JpaRepository<PlaceImage, Long> {
     List<String> findAllByPlaceId(@Param("placeId") Long placeId);
 
     List<PlaceImage> findALlByPlace(Place place);
+
+    @Query("""
+        SELECT url FROM (
+            SELECT pi.url as url FROM PlaceImage pi
+            UNION
+            SELECT u.profileImage as url FROM User u WHERE u.profileImage IS NOT NULL
+            UNION
+            SELECT m.iconUrl as url FROM Magazine m WHERE m.iconUrl IS NOT NULL
+        ) urls
+    """)
+    List<String> findAllImageUrls();
 }

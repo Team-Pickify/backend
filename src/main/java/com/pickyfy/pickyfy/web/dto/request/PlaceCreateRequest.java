@@ -1,14 +1,10 @@
 package com.pickyfy.pickyfy.web.dto.request;
 
-import com.pickyfy.pickyfy.domain.Category;
-import com.pickyfy.pickyfy.domain.CategoryType;
-import com.pickyfy.pickyfy.domain.Magazine;
-import com.pickyfy.pickyfy.domain.PlaceImage;
-import lombok.Setter;
+import com.pickyfy.pickyfy.common.AllFieldsNotNull;
 
 import java.math.BigDecimal;
-import java.util.List;
 
+@AllFieldsNotNull
 public record PlaceCreateRequest (
   String name,
   String shortDescription,

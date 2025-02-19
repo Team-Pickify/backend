@@ -2,25 +2,16 @@ package com.pickyfy.pickyfy.service;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-import com.pickyfy.pickyfy.domain.Category;
-import com.pickyfy.pickyfy.domain.CategoryType;
-import com.pickyfy.pickyfy.domain.Magazine;
-import com.pickyfy.pickyfy.domain.Place;
-import com.pickyfy.pickyfy.domain.PlaceCategory;
-import com.pickyfy.pickyfy.domain.PlaceImage;
-import com.pickyfy.pickyfy.domain.PlaceMagazine;
-import com.pickyfy.pickyfy.domain.PlaceSavedPlace;
-import com.pickyfy.pickyfy.domain.Provider;
-import com.pickyfy.pickyfy.domain.SavedPlace;
-import com.pickyfy.pickyfy.domain.User;
+import com.pickyfy.pickyfy.domain.*;
+import com.pickyfy.pickyfy.domain.UserSavedPlace;
 import com.pickyfy.pickyfy.repository.CategoryRepository;
 import com.pickyfy.pickyfy.repository.MagazineRepository;
 import com.pickyfy.pickyfy.repository.PlaceCategoryRepository;
 import com.pickyfy.pickyfy.repository.PlaceMagazineRepository;
 import com.pickyfy.pickyfy.repository.PlaceRepository;
-import com.pickyfy.pickyfy.repository.PlaceSavedPlaceRepository;
-import com.pickyfy.pickyfy.repository.SavedPlaceRepository;
+import com.pickyfy.pickyfy.repository.UserSavedPlaceRepository;
 import com.pickyfy.pickyfy.repository.UserRepository;
+import com.pickyfy.pickyfy.web.dto.request.NearbyPlaceSearchRequest;
 import com.pickyfy.pickyfy.web.dto.response.PlaceSearchResponse;
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,18 +21,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-//@SpringBootTest
-//@Transactional
-class PlaceServiceImplTest {/*
+@SpringBootTest
+@Transactional
+class PlaceServiceImplTest {
 
     @Autowired
     private PlaceService placeService;
 
     @Autowired
     private PlaceRepository placeRepository;
-
-    @Autowired
-    private SavedPlaceRepository savedPlaceRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -59,96 +47,42 @@ class PlaceServiceImplTest {/*
     private PlaceMagazineRepository placeMagazineRepository;
 
     @Autowired
-    private PlaceSavedPlaceRepository placeSavedPlaceRepository;
+    private UserSavedPlaceRepository userSavedPlaceRepository;
 
     @Test
     @DisplayName("유저가 저장한 장소 목록을 성공적으로 조회한다")
     void getUserSavePlace_Success() {
         // Given
-        // 1. 먼저 필요한 기본 데이터들을 생성합니다
-        User user = User.builder()
-                .email("test@example.com")
-                .provider(Provider.EMAIL)
-                .nickname("테스터")
-                .build();
-        userRepository.save(user);
+        Category category = createCategory(CategoryType.RESTAURANT);
+        Magazine magazine = createMagazine("테스트 매거진");
+        User user = createUser();
+        Place place = createPlaceWithRelations(
+                "테스트 장소",
+                BigDecimal.valueOf(37.5665),
+                BigDecimal.valueOf(126.9780),
+                category,
+                magazine
+        );
 
-        Category category = Category.builder()
-                .type(CategoryType.ALL)
-                .build();
-        categoryRepository.save(category);
-
-        Magazine magazine = Magazine.builder()
-                .title("테스트 매거진")
-                .build();
-        magazineRepository.save(magazine);
-
-        // 2. Place 생성 및 저장
-        Place place = Place.builder()
-                .name("테스트 장소")
-                .address("테스트 주소")
-                .shortDescription("테스트 설명")
-                .latitude(BigDecimal.valueOf(37.5665))
-                .longitude(BigDecimal.valueOf(126.9780))
-                .instagramLink("instagram.com")
-                .naverplaceLink("naver.com")
-                .build();
-        placeRepository.save(place);
-
-        // 3. Place와 Category, Magazine 연결
-        PlaceCategory placeCategory = PlaceCategory.builder()
-                .place(place)
-                .category(category)
-                .build();
-        placeCategoryRepository.save(placeCategory);
-
-        PlaceMagazine placeMagazine = PlaceMagazine.builder()
-                .place(place)
-                .magazine(magazine)
-                .build();
-        placeMagazineRepository.save(placeMagazine);
-
-        // 4. SavedPlace 생성 및 Place와 연결
-        SavedPlace savedPlace = SavedPlace.builder()
-                .name(place.getName())
-                .description(place.getShortDescription())
-                .isPublic(true)
-                .user(user)
-                .build();
-        savedPlaceRepository.save(savedPlace);
-
-        PlaceSavedPlace placeSavedPlace = PlaceSavedPlace.builder()
-                .place(place)
-                .savedPlace(savedPlace)
-                .build();
-        placeSavedPlaceRepository.save(placeSavedPlace);
-
-        // 5. Place에 이미지 추가
-        PlaceImage placeImage = PlaceImage.builder()
-                .place(place)
-                .url("test-image-url.jpg")
-                .sequence(1)
-                .build();
-        place.getPlaceImages().add(placeImage);
-        placeRepository.save(place);
+        createPlaceSavedPlace(place, user);
 
         // When
-        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getId());
+        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getEmail());
 
         // Then
         assertThat(result).hasSize(1);
-
         PlaceSearchResponse response = result.get(0);
         assertThat(response)
                 .satisfies(r -> {
-                    assertThat(r.placeId()).isEqualTo(place.getId());
-                    assertThat(r.name()).isEqualTo("테스트 장소");
-                    assertThat(r.shortDescription()).isEqualTo("테스트 설명");
-                    assertThat(r.categoryName()).isEqualTo("전체");
-                    assertThat(r.magazineTitle()).isEqualTo("테스트 매거진");
-                    assertThat(r.placeImageUrl()).containsExactly("test-image-url.jpg");
-                    assertThat(r.instagramLink()).isEqualTo("instagram.com");
-                    assertThat(r.naverLink()).isEqualTo("naver.com");
+                    assertThat(r.getPlaceId()).isEqualTo(place.getId());
+                    assertThat(r.getName()).isEqualTo("테스트 장소");
+                    assertThat(r.getShortDescription()).isEqualTo("테스트 설명");
+                    assertThat(r.getCategoryName()).isEqualTo("음식점");
+                    assertThat(r.getMagazineTitle()).isEqualTo("테스트 매거진");
+                    assertThat(r.getLikeCount()).isEqualTo(0);
+                    assertThat(r.getPlaceImageUrl()).containsExactly("test-image-url.jpg");
+                    assertThat(r.getInstagramLink()).isEqualTo("instagram.com");
+                    assertThat(r.getNaverLink()).isEqualTo("naver.com");
                 });
     }
 
@@ -156,20 +90,201 @@ class PlaceServiceImplTest {/*
     @DisplayName("유저가 저장한 장소가 없는 경우 빈 리스트를 반환한다")
     void getUserSavePlace_EmptyList() {
         // Given
-        User user = User.builder()
-                .provider(Provider.EMAIL)
-                .email("test@example.com")
-                .nickname("테스터")
-                .build();
-        userRepository.save(user);
+        User user = createUser();
 
         // When
-        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getId());
+        List<PlaceSearchResponse> result = placeService.getUserSavePlace(user.getEmail());
 
         // Then
         assertThat(result).isEmpty();
     }
 
- */
+    @Test
+    @DisplayName("특정 플레이스를 성공적으로 조회한다")
+    void getPlace_Success() {
+        // Given
+        Category category = createCategory(CategoryType.RESTAURANT);
+        Magazine magazine = createMagazine("테스트 매거진");
+
+        Place place = createPlaceWithRelations(
+                "테스트 장소",
+                BigDecimal.valueOf(37.5665),
+                BigDecimal.valueOf(126.9780),
+                category,
+                magazine
+        );
+
+        // When
+        PlaceSearchResponse result = placeService.getPlace(place.getId());
+
+        // Then
+        assertThat(result)
+                .satisfies(r -> {
+                    assertThat(r.getPlaceId()).isEqualTo(place.getId());
+                    assertThat(r.getName()).isEqualTo("테스트 장소");
+                    assertThat(r.getShortDescription()).isEqualTo("테스트 설명");
+                    assertThat(r.getCategoryName()).isEqualTo("음식점");
+                    assertThat(r.getMagazineTitle()).isEqualTo("테스트 매거진");
+                    assertThat(r.getPlaceImageUrl()).containsExactly("test-image-url.jpg");
+                    assertThat(r.getInstagramLink()).isEqualTo("instagram.com");
+                    assertThat(r.getNaverLink()).isEqualTo("naver.com");
+                });
+    }
+
+    @Test
+    @DisplayName("장소 저장 및 저장 취소를 성공적으로 토글한다")
+    void togglePlaceUser_Success() {
+        // Given
+        User user = createUser();
+        Place place = createPlace("테스트 장소",
+                BigDecimal.valueOf(37.5665),
+                BigDecimal.valueOf(126.9780));
+
+        // When
+        boolean firstToggle = placeService.togglePlaceUser(user.getEmail(), place.getId());
+
+        // Then
+        assertThat(firstToggle).isTrue();
+        assertThat(userSavedPlaceRepository.findByUserIdAndPlaceId(user.getId(), place.getId())).isPresent();
+        assertThat(place.getLikeCount()).isEqualTo(1);
+
+        // When - 두 번째 토글 (저장 취소)
+        boolean secondToggle = placeService.togglePlaceUser(user.getEmail(), place.getId());
+        assertThat(place.getLikeCount()).isEqualTo(0);
+
+        // Then
+        assertThat(secondToggle).isFalse();
+        assertThat(userSavedPlaceRepository.findByUserIdAndPlaceId(user.getId(), place.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("근처 장소를 성공적으로 검색한다")
+    void searchNearbyPlaces_Success() {
+        // Given
+        Category category = createCategory(CategoryType.RESTAURANT);
+        Magazine magazine = createMagazine("테스트 매거진");
+
+        // 가까운 장소와 먼 장소 생성
+        Place nearPlace = createPlaceWithRelations(
+                "가까운 장소",
+                BigDecimal.valueOf(12.3456789),
+                BigDecimal.valueOf(98.7654321),
+                category,
+                magazine
+        );
+
+        Place farPlace = createPlaceWithRelations(
+                "먼 장소",
+                BigDecimal.valueOf(12.3556789),
+                BigDecimal.valueOf(98.7754321),
+                category,
+                magazine
+        );
+
+        // When - 가까운 장소의 위경도를 기준으로 500m 반경 검색
+        NearbyPlaceSearchRequest request = new NearbyPlaceSearchRequest(BigDecimal.valueOf(12.3456789),
+                BigDecimal.valueOf(98.7654321),
+                500.0,  // 500m 반경
+                List.of(category.getId()),
+                List.of(magazine.getId()));
+
+        List<Place> result = placeService.searchNearbyPlaces(request);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getName()).isEqualTo("가까운 장소");
+    }
+
+    // 테스트 데이터 생성 헬퍼 메서드들
+    private User createUser() {
+        User user = User.builder()
+                .email("test@example.com")
+                .provider(Provider.EMAIL)
+                .nickname("테스터")
+                .build();
+        return userRepository.save(user);
+    }
+
+    private Category createCategory(CategoryType type) {
+        Category category = Category.builder()
+                .type(type)
+                .build();
+        return categoryRepository.save(category);
+    }
+
+    private Magazine createMagazine(String title) {
+        Magazine magazine = Magazine.builder()
+                .title(title)
+                .build();
+        return magazineRepository.save(magazine);
+    }
+
+    private Place createPlace(String name, BigDecimal latitude, BigDecimal longitude) {
+        Place place = Place.builder()
+                .name(name)
+                .address("테스트 주소")
+                .shortDescription("테스트 설명")
+                .latitude(latitude)
+                .longitude(longitude)
+                .instagramLink("instagram.com")
+                .naverplaceLink("naver.com")
+                .build();
+        return placeRepository.save(place);
+    }
+
+    private PlaceCategory createPlaceCategory(Place place, Category category) {
+        PlaceCategory placeCategory = PlaceCategory.builder()
+                .place(place)
+                .category(category)
+                .build();
+        return placeCategoryRepository.save(placeCategory);
+    }
+
+    private PlaceMagazine createPlaceMagazine(Place place, Magazine magazine) {
+        PlaceMagazine placeMagazine = PlaceMagazine.builder()
+                .place(place)
+                .magazine(magazine)
+                .build();
+        return placeMagazineRepository.save(placeMagazine);
+    }
+
+    private UserSavedPlace createSavedPlace(Place place, User user) {
+        UserSavedPlace savedPlace = UserSavedPlace.builder()
+                .user(user)
+                .place(place)
+                .build();
+
+        return userSavedPlaceRepository.save(savedPlace);
+    }
+
+    private UserSavedPlace createPlaceSavedPlace(Place place, User user) {
+        UserSavedPlace userSavedPlace = UserSavedPlace.builder()
+                .place(place)
+                .user(user)
+                .build();
+        return userSavedPlaceRepository.save(userSavedPlace);
+    }
+
+    private PlaceImage createPlaceImage(Place place, String url) {
+        PlaceImage placeImage = PlaceImage.builder()
+                .place(place)
+                .url(url)
+                .sequence(1)
+                .build();
+        place.getPlaceImages().add(placeImage);
+        return placeRepository.save(place).getPlaceImages().get(0);
+    }
+
+    // 복합 생성 헬퍼 메서드
+    private Place createPlaceWithRelations(String name, BigDecimal latitude, BigDecimal longitude,
+                                           Category category, Magazine magazine) {
+        Place place = createPlace(name, latitude, longitude);
+
+        createPlaceCategory(place, category);
+        createPlaceMagazine(place, magazine);
+        createPlaceImage(place, "test-image-url.jpg");
+
+        return place;
+    }
 }
 

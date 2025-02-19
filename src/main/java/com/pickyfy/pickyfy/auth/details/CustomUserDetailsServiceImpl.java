@@ -3,8 +3,8 @@ package com.pickyfy.pickyfy.auth.details;
 import com.pickyfy.pickyfy.domain.Admin;
 import com.pickyfy.pickyfy.domain.User;
 import com.pickyfy.pickyfy.repository.AdminRepository;
-import com.pickyfy.pickyfy.web.dto.CustomAdminInfoDto;
-import com.pickyfy.pickyfy.web.dto.CustomUserInfoDto;
+import com.pickyfy.pickyfy.web.dto.CustomAdminInfo;
+import com.pickyfy.pickyfy.web.dto.CustomUserInfo;
 import com.pickyfy.pickyfy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +26,7 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
     public UserDetails loadUserByUsername(String nickname) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByName(nickname)
                 .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER));
-        CustomAdminInfoDto customAdminInfoDto = CustomAdminInfoDto.from(admin);
+        CustomAdminInfo customAdminInfoDto = CustomAdminInfo.from(admin);
 
         return new CustomAdminDetails(customAdminInfoDto);
     }
@@ -34,7 +34,7 @@ public class CustomUserDetailsServiceImpl implements CustomUserDetailsService {
     public UserDetails loadUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(NOT_FOUND_USER));
-        CustomUserInfoDto customUserInfoDto = CustomUserInfoDto.from(user);
+        CustomUserInfo customUserInfoDto = CustomUserInfo.from(user);
 
         return new CustomUserDetails(customUserInfoDto);
     }

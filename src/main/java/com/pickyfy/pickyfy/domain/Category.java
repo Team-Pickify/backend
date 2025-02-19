@@ -30,16 +30,13 @@ public class Category extends BaseTimeEntity {
     private CategoryType type;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PlaceCategory> placeCategories = new ArrayList<>();
+    private final List<PlaceCategory> placeCategories = new ArrayList<>();
 
     @Builder
     public Category(CategoryType type) {
         this.type = type;
     }
 
-    /**
-     * 비즈니스 메소드
-     */
     public void update(CategoryType newType) {
         this.type = newType;
     }
