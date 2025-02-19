@@ -55,7 +55,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "/auth/reissue", "/users/verify-by-email", "/users/reset-password").permitAll()
                         .requestMatchers("/auth/oauth2/**", "/oauth2/callback", "/auth/me").permitAll()
-                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/actuator/**", "/actuator/prometheus").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
