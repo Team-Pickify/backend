@@ -7,8 +7,6 @@ import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.response.AuthResponse;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,20 +46,10 @@ public class AuthController implements AuthControllerApi {
         if (refreshToken == null) {
             throw new InvalidRefreshTokenException(ErrorStatus.TOKEN_INVALID);
         }
-        try {
-            AuthResponse authResponse = authService.reIssue(refreshToken);
-            response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
-            createCookie(response, authResponse.refreshToken());
-            return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
-        } catch (ExpiredJwtException e) {
-            // 리프레시 토큰이 만료된 경우
-            clearCookie(response);  // 만료된 토큰 쿠키 제거
-            throw new InvalidRefreshTokenException(ErrorStatus.TOKEN_EXPIRATION);
-        } catch (JwtException e) {
-            // 리프레시 토큰이 유효하지 않은 경우
-            clearCookie(response);  // 유효하지 않은 토큰 쿠키 제거
-            throw new InvalidRefreshTokenException(ErrorStatus.TOKEN_INVALID);
-        }
+        AuthResponse authResponse = authService.reIssue(refreshToken); // 서비스 메서드 호출
+        response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
+        createCookie(response, authResponse.refreshToken());
+        return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
     @Override

@@ -1,9 +1,9 @@
 package com.pickyfy.pickyfy.exception;
 
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
-import com.pickyfy.pickyfy.web.apiResponse.error.ErrorResponse;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<Object> handleConstraintViolation(ConstraintViolationException e, WebRequest request){
         String errorMessage = e.getConstraintViolations().stream()
-                .map(constraintViolation -> constraintViolation.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("ConstraintViolationException 추출 도중 에러 발생"));
 
@@ -41,7 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         Map<String, String> errors = new LinkedHashMap<>();
 
-        e.getBindingResult().getFieldErrors().stream()
+        e.getBindingResult().getFieldErrors()
                 .forEach(fieldError -> {
                     String fieldName = fieldError.getField();
                     String errorMessage = Optional.ofNullable(fieldError.getDefaultMessage()).orElse("");
@@ -52,9 +52,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = GeneralException.class)
-    public ResponseEntity handleOnThrowException(GeneralException generalException, HttpServletRequest request) {
-        ErrorResponse errorReasonHttpStatus = generalException.getErrorReason();
-        return buildOnThrowExceptionResponse(generalException,errorReasonHttpStatus,null,request);
+    public ResponseEntity<Object> handleOnThrowException(GeneralException generalException, HttpServletRequest request) {
+        return buildOnThrowExceptionResponse(generalException, generalException.getErrorStatus(),null,request);
     }
 
     @ExceptionHandler
@@ -63,33 +62,34 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildUnexpectedExceptionResponse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
     }
 
-    private ResponseEntity<Object> buildConstraintViolationResponse(Exception e, ErrorStatus errorCommonStatus,
-                                                                     HttpHeaders headers, WebRequest request) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(), errorCommonStatus.getMessage(), null);
+    private ResponseEntity<Object> buildConstraintViolationResponse(Exception e, ErrorStatus errorStatus,
+                                                                    HttpHeaders headers, WebRequest request) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus, null);
         return super.handleExceptionInternal(
                 e,
                 body,
                 headers,
-                errorCommonStatus.getHttpStatus(),
+                errorStatus.getHttpStatus(),
                 request
         );
     }
 
-    private ResponseEntity<Object> buildInvalidMethodArgumentResponse(Exception e, HttpHeaders headers, ErrorStatus errorCommonStatus,
-                                                               WebRequest request, Map<String, String> errorArgs) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorArgs);
+    private ResponseEntity<Object> buildInvalidMethodArgumentResponse(Exception e, HttpHeaders headers, ErrorStatus errorStatus,
+                                                                      WebRequest request, Map<String, String> errorArgs) {
+
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus, errorArgs);
         return super.handleExceptionInternal(
                 e,
                 body,
                 headers,
-                errorCommonStatus.getHttpStatus(),
+                errorStatus.getHttpStatus(),
                 request
         );
     }
 
-    private ResponseEntity<Object> buildUnexpectedExceptionResponse(Exception e, ErrorStatus errorCommonStatus,
-                                                                HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
-        ApiResponse<Object> body = ApiResponse.onFailure(errorCommonStatus.getCode(),errorCommonStatus.getMessage(),errorPoint);
+    private ResponseEntity<Object> buildUnexpectedExceptionResponse(Exception e, ErrorStatus errorStatus,
+                                                                    HttpHeaders headers, HttpStatus status, WebRequest request, String errorPoint) {
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus, errorPoint);
         return super.handleExceptionInternal(
                 e,
                 body,
@@ -99,10 +99,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
     }
 
-    private ResponseEntity<Object> buildOnThrowExceptionResponse(Exception e, ErrorResponse reason,
-                                                           HttpHeaders headers, HttpServletRequest request) {
+    private ResponseEntity<Object> buildOnThrowExceptionResponse(Exception e, ErrorStatus errorStatus,
+                                                                 HttpHeaders headers, HttpServletRequest request) {
 
-        ApiResponse<Object> body = ApiResponse.onFailure(reason.getCode(),reason.getMessage(),null);
+        ApiResponse<Object> body = ApiResponse.onFailure(errorStatus, null);
         WebRequest webRequest = new ServletWebRequest(request);
 
         return super.handleExceptionInternal(

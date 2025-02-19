@@ -1,9 +1,9 @@
 package com.pickyfy.pickyfy.exception;
 
-import com.pickyfy.pickyfy.web.apiResponse.common.BaseErrorCode;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 
 public class InvalidRefreshTokenException extends GeneralException {
-    public InvalidRefreshTokenException(BaseErrorCode baseErrorCode) {
-        super(baseErrorCode);
+    public InvalidRefreshTokenException(ErrorStatus errorStatus) {
+        super(errorStatus);
     }
 }

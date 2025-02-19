@@ -1,9 +1,9 @@
 package com.pickyfy.pickyfy.exception;
 
-import com.pickyfy.pickyfy.web.apiResponse.common.BaseErrorCode;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 
 public class ExceptionHandler extends GeneralException {
-    public ExceptionHandler(BaseErrorCode errorCode){
-        super(errorCode);
+    public ExceptionHandler(ErrorStatus errorStatus){
+        super(errorStatus);
     }
 }

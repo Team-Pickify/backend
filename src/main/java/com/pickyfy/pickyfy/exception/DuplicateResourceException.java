@@ -1,9 +1,9 @@
 package com.pickyfy.pickyfy.exception;
 
-import com.pickyfy.pickyfy.web.apiResponse.common.BaseErrorCode;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 
 public class DuplicateResourceException extends GeneralException {
-    public DuplicateResourceException(BaseErrorCode baseErrorCode) {
-        super(baseErrorCode);
+    public DuplicateResourceException(ErrorStatus errorStatus) {
+        super(errorStatus);
     }
 }
