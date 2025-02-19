@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Objects;
 import java.util.UUID;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +31,7 @@ public class S3Service {
     // TODO: @Async 비동기 처리
     // TODO: 비동기 처리에 따른 반환값을 CompletableFuture<String>로 수정
     public String upload(MultipartFile multipartFile) {
-        String fileName = imageFolder + multipartFile.getOriginalFilename();
+        String fileName = imageFolder + generateUniqueFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()));
 
         if (!(fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(
                 ".gif") || fileName.endsWith(".bmp"))) {
