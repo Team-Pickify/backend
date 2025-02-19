@@ -14,5 +14,7 @@ public class Constant {
     public static final long PLACES_EXPIRATION_TIME = 30 * 60 * 1000;
     public static final long PLACE_EXPIRATION_TIME = 30 * 60 * 1000;
 
+    public static final long COOKIE_EXPIRATION = 4 * 24 * 60 * 60 * 1000;
+
     public static final String REDIS_KEY_PREFIX = "refresh:";
 }
