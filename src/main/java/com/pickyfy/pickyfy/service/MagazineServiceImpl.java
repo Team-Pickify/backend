@@ -10,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,7 @@ public class MagazineServiceImpl implements MagazineService {
     }
 
     @Override
+    @Cacheable(value = "magazines", key = "'all'", unless = "#result.isEmpty()")
     public List<MagazineResponse> getAllMagazines() {
         return magazineRepository.findAll().stream()
                 .map(MagazineResponse::from)

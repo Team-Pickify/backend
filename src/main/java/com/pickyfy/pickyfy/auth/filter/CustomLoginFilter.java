@@ -59,7 +59,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String accessToken = jwtUtil.createAccessToken(principal, role);
         String refreshToken = jwtUtil.createRefreshToken(principal, role);
-        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
 
         setBody(role, response);
         ResponseCookie accessCookie = createCookie("accessToken", accessToken, Constant.ACCESS_TOKEN_EXPIRATION_TIME, "/");

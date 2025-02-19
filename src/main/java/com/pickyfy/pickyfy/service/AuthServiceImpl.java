@@ -18,7 +18,7 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public void logout(String refreshToken){
-        redisUtil.deleteRefreshToken(Constant.REDIS_KEY_PREFIX + jwtUtil.getPrincipal(refreshToken));
+        redisUtil.deleteData(Constant.REDIS_KEY_PREFIX + jwtUtil.getPrincipal(refreshToken));
     }
 
     @Override
@@ -28,7 +28,7 @@ public class AuthServiceImpl implements AuthService{
         String accessToken = jwtUtil.createAccessToken(principal, jwtUtil.getRole(token));
         String refreshToken = jwtUtil.createRefreshToken(principal, jwtUtil.getRole(token));
 
-        redisUtil.setDataExpire("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         return AuthResponse.from(accessToken, refreshToken);
     }
 
