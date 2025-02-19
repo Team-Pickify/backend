@@ -53,7 +53,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity<Object> handleOnThrowException(GeneralException generalException, HttpServletRequest request) {
-        return buildOnThrowExceptionResponse(generalException, generalException.getErrorStatus(),null,request);
+        return buildOnThrowExceptionResponse(generalException, generalException.getErrorStatus(),null, request);
     }
 
     @ExceptionHandler
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 e,
                 body,
                 headers,
-                null,
+                errorStatus.getHttpStatus(),
                 webRequest
         );
     }
