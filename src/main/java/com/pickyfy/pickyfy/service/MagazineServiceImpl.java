@@ -41,7 +41,7 @@ public class MagazineServiceImpl implements MagazineService {
     }
 
     @Override
-    @Cacheable(value = "categories", key = "'all'", unless = "#result.isEmpty()")
+    @Cacheable(value = "magazines", key = "'all'", unless = "#result.isEmpty()")
     public List<MagazineResponse> getAllMagazines() {
         return magazineRepository.findAll().stream()
                 .map(MagazineResponse::from)
