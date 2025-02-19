@@ -48,7 +48,7 @@ public class AuthController implements AuthControllerApi {
         }
         AuthResponse authResponse = authService.reIssue(refreshToken); // 서비스 메서드 호출
         response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
-        createCookie(response, authResponse.refreshToken());
+        createCookie(response, authResponse);
         return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
@@ -60,16 +60,25 @@ public class AuthController implements AuthControllerApi {
         return ApiResponse.onSuccess(isAuthenticated);
     }
 
-    private void createCookie(HttpServletResponse response, String refreshToken) {
-        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+    private void createCookie(HttpServletResponse response, AuthResponse token) {
+        ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, token.accessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
+                .maxAge(Duration.ofMillis(Constant.ACCESS_TOKEN_EXPIRATION_TIME).getSeconds())
+                .build();
+
+        ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, token.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/auth")
                 .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
                 .build();
 
-        response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredAccessToken.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshToken.toString());
     }
 
     private void clearCookie(HttpServletResponse response) {
