@@ -46,8 +46,7 @@ public class AuthController implements AuthControllerApi {
         if (refreshToken == null) {
             throw new InvalidRefreshTokenException(ErrorStatus.TOKEN_INVALID);
         }
-        AuthResponse authResponse = authService.reIssue(refreshToken); // 서비스 메서드 호출
-        response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
+        AuthResponse authResponse = authService.reIssue(refreshToken);
         createCookie(response, authResponse);
         return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
@@ -66,7 +65,7 @@ public class AuthController implements AuthControllerApi {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMillis(Constant.ACCESS_TOKEN_EXPIRATION_TIME).getSeconds())
+                .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, token.refreshToken())
@@ -74,7 +73,7 @@ public class AuthController implements AuthControllerApi {
                 .secure(true)
                 .sameSite("None")
                 .path("/auth")
-                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
+                .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, expiredAccessToken.toString());
