@@ -4,11 +4,8 @@ import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.common.util.RedisUtil;
 import com.pickyfy.pickyfy.exception.ExceptionHandler;
-import com.pickyfy.pickyfy.exception.GeneralException;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.dto.response.AuthResponse;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,29 +23,21 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public AuthResponse reIssue(String token){
-        try {
-            validateRefreshToken(token);
-            String principal = jwtUtil.getPrincipal(token);
-            String accessToken = jwtUtil.createAccessToken(principal, jwtUtil.getRole(token));
-            String refreshToken = jwtUtil.createRefreshToken(principal, jwtUtil.getRole(token));
+        validateRefreshToken(token);
+        String principal = jwtUtil.getPrincipal(token);
+        String accessToken = jwtUtil.createAccessToken(principal, jwtUtil.getRole(token));
+        String refreshToken = jwtUtil.createRefreshToken(principal, jwtUtil.getRole(token));
 
-            redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
-            return AuthResponse.from(accessToken, refreshToken);
-        } catch (ExpiredJwtException e) {
-            // 만료된 리프레시 토큰
-            throw new GeneralException(ErrorStatus.TOKEN_EXPIRATION);
-        } catch (JwtException e) {
-            // 유효하지 않은 리프레시 토큰
-            throw new GeneralException(ErrorStatus.TOKEN_INVALID);
+        redisUtil.setData("refresh:" + principal, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        return AuthResponse.from(accessToken, refreshToken);
         }
-    }
 
     @Override
     public boolean isAuthenticated(String accessToken) {
-        return jwtUtil.validateToken(accessToken);
+        return jwtUtil.validateTokenWithoutException(accessToken).isValid();
     }
 
-    public void validateRefreshToken(String token){
+    public void validateRefreshToken(String token) {
         jwtUtil.validateToken(token);
         String getToken = redisUtil.getData("refresh:" + jwtUtil.getPrincipal(token));
         if(!token.equals(getToken)){
