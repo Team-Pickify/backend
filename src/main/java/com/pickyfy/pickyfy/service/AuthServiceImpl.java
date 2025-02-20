@@ -28,16 +28,16 @@ public class AuthServiceImpl implements AuthService{
         String accessToken = jwtUtil.createAccessToken(principal, jwtUtil.getRole(token));
         String refreshToken = jwtUtil.createRefreshToken(principal, jwtUtil.getRole(token));
 
-        redisUtil.setData("refresh:" + jwtUtil.getPrincipal(refreshToken), refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
+        redisUtil.setData("refresh:" + principal, refreshToken, Constant.REFRESH_TOKEN_EXPIRATION_TIME);
         return AuthResponse.from(accessToken, refreshToken);
-    }
+        }
 
     @Override
     public boolean isAuthenticated(String accessToken) {
-        return jwtUtil.validateToken(accessToken);
+        return jwtUtil.validateTokenWithoutException(accessToken).isValid();
     }
 
-    public void validateRefreshToken(String token){
+    public void validateRefreshToken(String token) {
         jwtUtil.validateToken(token);
         String getToken = redisUtil.getData("refresh:" + jwtUtil.getPrincipal(token));
         if(!token.equals(getToken)){
