@@ -62,16 +62,16 @@ public class AuthController implements AuthControllerApi {
     private void createCookie(HttpServletResponse response, AuthResponse token) {
         ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, token.accessToken())
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, token.refreshToken())
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/auth")
                 .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
                 .build();
@@ -83,16 +83,16 @@ public class AuthController implements AuthControllerApi {
     private void clearCookie(HttpServletResponse response) {
         ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/")
                 .maxAge(0)
                 .build();
 
         ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, "")
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
+                .secure(false)
+                .sameSite("Lax")
                 .path("/auth")
                 .maxAge(0)
                 .build();
