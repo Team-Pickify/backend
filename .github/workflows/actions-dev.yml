@@ -60,10 +60,9 @@ jobs:
           mv /home/ec2-user/actions-runner/_work/backend/backend/build/libs/pickyfy-0.0.1-SNAPSHOT.jar /home/ec2-user/pickify-spring.jar
         shell: bash
 
-            
+
 
   deploy:
-
     needs: build  # build 작업이 성공적으로 완료된 후 실행
     runs-on: pickify  # self-hosted runner에서 실행
 
