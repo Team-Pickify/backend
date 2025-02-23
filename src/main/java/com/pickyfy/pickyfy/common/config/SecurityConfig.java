@@ -52,9 +52,10 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers("/**").permitAll()
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/users/signup", "/auth/login", "/email-auth/**", "/auth/reissue", "/users/verify-by-email", "/users/reset-password").permitAll()
-                        .requestMatchers("/auth/oauth2/**", "/oauth2/callback", "/auth/me").permitAll()
+                        .requestMatchers("/auth/oauth2/**", "/oauth2/callback", "/auth/me", "/auth/logout").permitAll()
                         .requestMatchers("/actuator/**", "/actuator/prometheus").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
                         .anyRequest().authenticated()

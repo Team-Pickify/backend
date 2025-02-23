@@ -2,6 +2,7 @@ package com.pickyfy.pickyfy.auth.filter;
 
 import com.pickyfy.pickyfy.common.util.JwtUtil;
 import com.pickyfy.pickyfy.auth.details.CustomUserDetailsServiceImpl;
+import com.pickyfy.pickyfy.web.dto.response.TokenValidationResult;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -28,7 +29,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String token = getAccessTokenFromCookies(request);
 
-        if (token == null || !jwtUtil.validateToken(token)) {
+        if(token == null){
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        TokenValidationResult result = jwtUtil.validateTokenWithoutException(token);
+        if (!result.isValid()) {
+            request.setAttribute("errorMessage", result.message());
             filterChain.doFilter(request, response);
             return;
         }

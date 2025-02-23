@@ -1,8 +1,10 @@
 package com.pickyfy.pickyfy.web.controller;
 
 import com.pickyfy.pickyfy.common.Constant;
+import com.pickyfy.pickyfy.exception.InvalidRefreshTokenException;
 import com.pickyfy.pickyfy.service.AuthService;
 import com.pickyfy.pickyfy.web.apiResponse.common.ApiResponse;
+import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.web.apiResponse.success.SuccessStatus;
 import com.pickyfy.pickyfy.web.dto.response.AuthResponse;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -42,12 +44,10 @@ public class AuthController implements AuthControllerApi {
             HttpServletResponse response) {
 
         if (refreshToken == null) {
-            return ApiResponse.onFailure("400","리프레시 토큰이 없습니다.", null);
+            throw new InvalidRefreshTokenException(ErrorStatus.TOKEN_INVALID);
         }
         AuthResponse authResponse = authService.reIssue(refreshToken);
-        response.setHeader("Authorization", "Bearer " + authResponse.accessToken());
-        createCookie(response, authResponse.refreshToken());
-
+        createCookie(response, authResponse);
         return ApiResponse.onSuccess(SuccessStatus.REISSUE_TOKEN_SUCCESS, null);
     }
 
@@ -59,16 +59,25 @@ public class AuthController implements AuthControllerApi {
         return ApiResponse.onSuccess(isAuthenticated);
     }
 
-    private void createCookie(HttpServletResponse response, String refreshToken) {
-        ResponseCookie expiredCookie = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, refreshToken)
+    private void createCookie(HttpServletResponse response, AuthResponse token) {
+        ResponseCookie expiredAccessToken = ResponseCookie.from(ACCESS_TOKEN_COOKIE_NAME, token.accessToken())
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMillis(Constant.REFRESH_TOKEN_EXPIRATION_TIME).getSeconds())
+                .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
                 .build();
 
-        response.setHeader(HttpHeaders.SET_COOKIE, expiredCookie.toString());
+        ResponseCookie expiredRefreshToken = ResponseCookie.from(REFRESH_TOKEN_COOKIE_NAME, token.refreshToken())
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .path("/auth")
+                .maxAge(Duration.ofMillis(Constant.COOKIE_EXPIRATION).getSeconds())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredAccessToken.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, expiredRefreshToken.toString());
     }
 
     private void clearCookie(HttpServletResponse response) {

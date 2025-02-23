@@ -7,7 +7,6 @@ import com.pickyfy.pickyfy.common.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.transaction.TransactionAwareCacheManagerProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -49,6 +48,7 @@ public class RedisConfig {
         RedisSerializer<String> stringSerializer = new StringRedisSerializer();
 
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMillis(1))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
@@ -58,11 +58,9 @@ public class RedisConfig {
         cacheConfigurations.put("magazines", defaultConfig.entryTtl(Duration.ofMillis(Constant.MAGAZINES_EXPIRATION_TIME)));
         cacheConfigurations.put("categories", defaultConfig.entryTtl(Duration.ofMillis(Constant.CATEGORIES_EXPIRATION_TIME)));
 
-        RedisCacheManager manager = RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(defaultConfig)
+        return RedisCacheManager.builder(connectionFactory)
                 .withInitialCacheConfigurations(cacheConfigurations)
+                .cacheDefaults(defaultConfig)
                 .build();
-
-        return new TransactionAwareCacheManagerProxy(manager);
     }
 }

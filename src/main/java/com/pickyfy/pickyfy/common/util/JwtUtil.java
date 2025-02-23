@@ -3,6 +3,7 @@ package com.pickyfy.pickyfy.common.util;
 import com.pickyfy.pickyfy.web.apiResponse.error.ErrorStatus;
 import com.pickyfy.pickyfy.common.Constant;
 import com.pickyfy.pickyfy.exception.ExceptionHandler;
+import com.pickyfy.pickyfy.web.dto.response.TokenValidationResult;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -72,21 +75,42 @@ public class JwtUtil {
                 .compact();
     }
 
-    public boolean validateToken(String token) { // 예외처리 추가
+    public void validateToken(String token) {
         try {
             Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("잘못된 서명 혹은 JWT 형식 오류", e);
-        } catch (ExpiredJwtException e) {
-            log.info("토큰 만료", e);
-            throw new ExceptionHandler(ErrorStatus.TOKEN_EXPIRATION);
-        } catch (UnsupportedJwtException e) {
-            log.info("지원하지 않는 서명 알고리즘", e);
-        } catch (IllegalArgumentException e) {
-            log.info("올바르지 않은 값 입력(토큰 문자열 null)", e);
+            TokenValidationResult.success("검증 완료.");
+        } catch (Exception e) {
+            handleJwtException(e, true);
         }
-        return false;
+    }
+
+    public TokenValidationResult validateTokenWithoutException(String token) {
+        try {
+            Jwts.parser().verifyWith((SecretKey) key).build().parseSignedClaims(token);
+            return TokenValidationResult.success("검증 완료.");
+        } catch (Exception e) {
+            return handleJwtException(e, false);
+        }
+    }
+
+    private TokenValidationResult handleJwtException(Exception e, boolean throwException) {
+        Map<Class<? extends Exception>, String> errorMessages = new HashMap<>();
+        errorMessages.put(SecurityException.class, "유효하지 않은 토큰입니다.");
+        errorMessages.put(MalformedJwtException.class, "유효하지 않은 토큰입니다.");
+        errorMessages.put(UnsupportedJwtException.class, "유효하지 않은 토큰입니다.");
+        errorMessages.put(IllegalArgumentException.class, "유효하지 않은 토큰입니다.");
+        errorMessages.put(ExpiredJwtException.class, "토큰 만료");
+
+        String message = errorMessages.getOrDefault(e.getClass(), "알 수 없는 JWT 오류");
+        log.info(message, e);
+
+        if (throwException) {
+            throw new ExceptionHandler(
+                    e instanceof ExpiredJwtException ? ErrorStatus.TOKEN_EXPIRATION : ErrorStatus.TOKEN_INVALID
+            );
+        }
+
+        return TokenValidationResult.failure(message);
     }
 
     public Claims parseClaims(String token) {
@@ -108,5 +132,4 @@ public class JwtUtil {
     public String getRole(String token) {
         return parseClaims(token).get(ROLE, String.class);
     }
-
 }
