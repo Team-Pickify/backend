@@ -56,8 +56,8 @@ jobs:
 
       - name: Move JAR file to EC2 directory
         run: |
-          mkdir -p /home/ubuntu/
-          mv /home/ubuntu/actions-runner/_work/backend/backend/build/libs/pickyfy-0.0.1-SNAPSHOT.jar /home/ubuntu/pickify-spring.jar
+          mkdir -p /home/ec2-user/
+          mv /home/ec2-user/actions-runner/_work/backend/backend/build/libs/pickyfy-0.0.1-SNAPSHOT.jar /home/ec2-user/pickify-spring.jar
         shell: bash
 
             
